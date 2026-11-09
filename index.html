@@ -260,6 +260,14 @@ label.f>span{display:block;font-size:13px;font-weight:650;color:var(--mute);marg
 .exed .acts{display:flex;gap:6px;justify-content:flex-end;margin-top:10px}
 .exed .acts button{width:38px;height:38px;border-radius:12px;background:var(--card2);display:grid;place-items:center;color:var(--mute)}
 .exed .acts .ic{width:18px;height:18px}
+.who{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.who button{background:var(--card);border-radius:20px;padding:10px 4px 10px;border:2px solid transparent;transition:border-color .2s}
+.who button.on{border-color:var(--lime);background:var(--card2)}
+.who .wf{height:104px;display:flex;align-items:flex-end;justify-content:center}
+.who .wf svg{height:100%;width:auto}
+.who button:nth-child(n+3) .wf svg{height:80%}
+.who b{display:block;font-size:13px;font-weight:700;margin-top:6px}
+.who button.on b{color:var(--lime)}
 .seg{display:flex;background:var(--card2);border-radius:999px;padding:4px}
 .seg button{flex:1;height:44px;border-radius:999px;font-weight:650;color:var(--mute)}
 .seg button.on{background:var(--lime);color:var(--ink)}
@@ -288,8 +296,11 @@ label.f>span{display:block;font-size:13px;font-weight:650;color:var(--mute);marg
   background:radial-gradient(40% 30% at 20% 10%,rgba(213,240,74,.05),transparent 70%),radial-gradient(40% 30% at 85% 80%,rgba(124,192,255,.05),transparent 70%);
   animation:drift 26s ease-in-out infinite alternate}
 @keyframes drift{to{transform:translate(4%,-3%) rotate(4deg)}}
-.body .m{transition:fill .4s}
-.body .lit{animation:breathe 2.6s ease-in-out infinite}
+/* anatomy figure: outline lines in cool white, muscles near-black, trained muscles lit */
+.fig{color:rgba(255,255,255,.035);overflow:visible}
+.fig [fill="none"]{stroke:rgba(205,220,255,.38);stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round}
+.fig g.lit{color:var(--lime);animation:breathe 2.6s ease-in-out infinite}
+.fig g.lit [fill="none"]{stroke:rgba(18,20,14,.55)}
 @keyframes breathe{50%{opacity:.6}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
@@ -297,11 +308,12 @@ label.f>span{display:block;font-size:13px;font-weight:650;color:var(--mute);marg
 <body>
 <div class="drift"></div>
 <div id="app"></div>
+<script src="figures.js"></script>
 <script>
 'use strict';
 /* ══════════════ STATE ══════════════ */
 const KEY='built.l1';
-const fresh=()=>({v:1,name:'',unit:'kg',target:3,rest:90,onboarded:false,routines:[],sessions:[],active:null,next:0});
+const fresh=()=>({v:1,name:'',who:'man',unit:'kg',target:3,rest:90,onboarded:false,routines:[],sessions:[],active:null,next:0});
 let S=load();
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===1)return Object.assign(fresh(),s)}catch(e){}return fresh()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -394,64 +406,68 @@ function badge(r,size=64){
 }
 
 /* ══════════════ MUSCLES ══════════════ */
-const MG=['chest','back','shoulders','arms','core','legs','glutes','hams'];
-const MGN={chest:'Chest',back:'Back',shoulders:'Shoulders',arms:'Arms',core:'Core',legs:'Legs',glutes:'Glutes',hams:'Hamstrings'};
+const MGN={chest:'Chest',back:'Back',shoulders:'Shoulders',biceps:'Biceps',triceps:'Triceps',forearms:'Forearms',core:'Core',
+  legs:'Quads',calves:'Calves',glutes:'Glutes',hams:'Hamstrings'};
 const MAP=[
- [/bench|chest|pec|fly|flye|push ?-?up|dip|floor press|incline|decline/,['chest','arms']],
+ [/bench|chest|pec|fly|flye|push ?-?up|dip|floor press|incline|decline/,['chest','triceps'],/\bfly|\bflye/],
+ [/fly|flye/,['chest']],
  [/incline/,['shoulders']],
- [/shoulder|overhead|\bohp\b|military|lateral|delt|face ?pull|arnold|upright|front raise|y raise/,['shoulders']],
- [/\brows?\b|pulldown|pull ?-?down|pull ?-?ups?\b|\bchin|\blats?\b|shrug|back ext|pullover/,['back','arms']],
- [/curl|bicep|hammer/,['arms'],/leg curl|hamstring curl|nordic/],
- [/tricep|pushdown|push ?-?down|skull|extension|kickback|close ?-?grip/,['arms'],/leg ext|back ext|hip ext/],
+ [/shoulder press|overhead|\bohp\b|military|arnold|push press/,['shoulders','triceps']],
+ [/shoulder|lateral|delt|face ?pull|upright|front raise|y raise/,['shoulders']],
+ [/\brows?\b|pulldown|pull ?-?down|pull ?-?ups?\b|\bchin|\blats?\b|pullover/,['back','biceps']],
+ [/shrug|back ext/,['back']],
+ [/curl|bicep/,['biceps','forearms'],/leg curl|hamstring curl|nordic/],
+ [/hammer|wrist|farmer|carry|dead ?hang/,['forearms']],
+ [/tricep|pushdown|push ?-?down|skull|extension|kickback|close ?-?grip/,['triceps'],/leg ext|back ext|hip ext|glute/],
  [/deadlift|rdl|romanian|good ?morning/,['hams','glutes','back']],
  [/squat|leg press|lunge|step ?-?up|leg ext|hack|split|wall sit|sissy/,['legs','glutes']],
  [/leg curl|hamstring|nordic|glute ham/,['hams']],
- [/hip thrust|glute|bridge|abduct|kickback.*glute/,['glutes']],
- [/calf/,['legs']],
+ [/hip thrust|glute|bridge|abduct/,['glutes']],
+ [/calf/,['calves']],
  [/plank|crunch|\babs?\b|hollow|sit ?-?up|knee raise|leg raise|ab wheel|rollout|twist|dead ?bug|core|v ?-?up|mountain/,['core']],
  [/burpee|jumping jack|thruster|clean|snatch|swing/,['legs','shoulders','core']],
 ];
 function musclesOf(name){const k=keyOf(name),out=[];MAP.forEach(([re,g,not])=>{if(re.test(k)&&!(not&&not.test(k)))g.forEach(x=>{if(!out.includes(x))out.push(x)})});return out}
 
-/* hologram body, front and back, trained groups lit */
-function bodySVG(side,lit){
-  const on=g=>lit.includes(g);
-  const M=(g,p)=>`<path class="m${on(g)?' lit':''}" fill="${on(g)?'#D5F04A':'rgba(255,255,255,.07)'}" stroke="${on(g)?'rgba(213,240,74,.9)':'rgba(255,255,255,.16)'}" stroke-width=".8" ${on(g)?'filter="url(#glow)"':''} d="${p}"/>`;
-  const B=(g,p)=>M(g,p)+`<g transform="translate(200,0) scale(-1,1)">${M(g,p)}</g>`;
-  const SIL=`M100,62 C84,62 72,68 64,80 C52,86 44,102 42,124 C40,152 37,180 35,204 C33,230 31,252 33,266 C34,280 44,284 49,274 C53,252 56,228 59,204 C62,176 65,148 70,126 C73,114 76,110 80,108 C77,134 75,158 74,180 C73,198 72,212 74,226 C68,238 63,252 62,272 C59,304 58,338 61,366 C63,388 67,402 69,416 C67,432 65,448 67,460 C68,468 69,472 67,474 L96,474 L96,306 C97,284 98,268 100,256 Z`;
-  const sil=`<path fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.1)" stroke-width="1" d="${SIL}"/><g transform="translate(200,0) scale(-1,1)"><path fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.1)" stroke-width="1" d="${SIL}"/></g>`;
-  const head=`<ellipse cx="100" cy="34" rx="21" ry="25" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.18)"/>`;
-  const defs=`<defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
-  let p;
-  if(side==='front'){
-    const ab=y=>`M100,${y} L87,${y} C84,${y+1} 83,${y+4} 83,${y+8} C83,${y+12} 85,${y+15} 88,${y+16} L100,${y+16} Z`;
-    p=B('back','M100,65 L89,66 C79,71 71,78 67,86 C72,95 80,100 89,102 L100,102 Z')
-     +B('shoulders','M66,82 C53,87 45,103 44,126 C52,135 66,133 73,123 C74,106 75,93 77,85 Z')
-     +B('chest','M100,106 L84,106 C72,110 65,119 63,131 C65,143 74,151 86,154 L100,154 Z')
-     +B('arms','M45,130 C41,154 39,178 38,200 C46,209 58,207 63,197 C65,174 68,152 71,134 C63,139 51,139 45,130 Z')
-     +B('arms','M38,205 C35,230 33,254 35,274 C42,282 53,280 57,270 C58,246 60,222 62,202 C56,209 44,210 38,205 Z')
-     +B('core',ab(160))+B('core',ab(178))+B('core',ab(196))
-     +B('core','M100,162 L88,161 C81,166 78,174 78,184 C79,196 84,205 91,210 L100,210 Z')
-     +B('legs','M99,230 C85,228 73,236 69,252 C64,283 64,318 70,350 C77,366 91,370 99,364 Z')
-     +B('legs','M99,370 C90,369 82,373 80,380 C80,388 85,394 92,395 L99,394 Z')
-     +B('legs','M98,400 C88,398 79,406 77,421 C75,441 78,458 85,468 C91,472 97,470 98,463 Z');
-  }else{
-    p=B('back','M100,63 L88,67 C77,79 71,93 69,109 C75,120 84,126 94,128 L100,128 Z')
-     +B('shoulders','M68,96 C55,101 46,115 45,135 C54,145 68,143 75,132 C75,118 71,105 68,96 Z')
-     +B('back','M100,132 L86,131 C73,140 66,158 66,178 C69,198 80,212 94,218 L100,218 Z')
-     +B('arms','M45,136 C41,160 39,182 38,202 C46,212 58,210 63,199 C65,176 68,154 71,140 C63,146 51,146 45,136 Z')
-     +B('arms','M38,207 C35,232 33,254 35,274 C42,283 53,281 57,270 C58,246 60,222 62,205 C56,212 44,213 38,207 Z')
-     +B('back','M100,222 L88,221 C82,226 79,234 79,243 C80,253 86,260 94,262 L100,261 Z')
-     +B('glutes','M99,266 C86,264 75,273 72,290 C71,308 81,322 94,327 L99,325 Z')
-     +B('hams','M99,332 C87,330 77,340 74,360 C72,385 76,408 83,422 C90,431 97,429 99,421 Z')
-     +B('legs','M98,400 C88,398 79,406 77,421 C75,441 78,458 85,468 C91,472 97,470 98,463 Z');
-  }
-  return `<svg class="body" viewBox="0 0 200 480">${defs}${sil}${head}${p}</svg>`;
+/* anatomy figure (figures.js), trained groups lit.
+   Boy and girl reuse the adult drawing with child proportions: head scaled up, body scaled down, split at the neck. */
+const GROUPS={
+ chest:['upper-pectoralis','mid-lower-pectoralis'],
+ shoulders:['anterior-deltoid','lateral-deltoid','posterior-deltoid'],
+ biceps:['long-head-bicep','short-head-bicep'],
+ triceps:['medial-head-triceps','long-head-triceps','lateral-head-triceps'],
+ forearms:['wrist-flexors','wrist-extensors'],
+ core:['upper-abdominals','lower-abdominals','obliques'],
+ legs:['outer-quadricep','rectus-femoris','inner-quadricep','inner-thigh'],
+ calves:['gastrocnemius','tibialis','soleus'],
+ back:['upper-trapezius','traps-middle','lower-trapezius','lats','lowerback'],
+ glutes:['gluteus-maximus','gluteus-medius'],
+ hams:['medial-hamstrings','lateral-hamstrings'],
+};
+const WHO={man:'Man',woman:'Woman',boy:'Boy',girl:'Girl'};
+const NECK_CUT={male:{front:165,back:144},female:{front:181,back:143}};
+let figN=0;
+function bodySVG(side,lit,who){
+  who=who||S.who||'man';
+  const sex=who==='woman'||who==='girl'?'female':'male',kid=who==='boy'||who==='girl';
+  const ids=lit.flatMap(g=>GROUPS[g]||[]);
+  let inner=window.FIG?FIG[sex][side]:'';
+  if(ids.length)inner=inner.replace(new RegExp('<g data-m="('+ids.join('|')+')"','g'),'$& class="lit"');
+  const id='fg'+(++figN),W=676.49,H=1203.49;
+  const defs=`<defs><filter id="${id}" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><style>#${id}s g.lit{filter:url(#${id})}</style>`;
+  if(!kid)return `<svg class="fig" id="${id}s" viewBox="0 0 ${W} ${H}">${defs}${inner}</svg>`;
+  const c=NECK_CUT[sex][side],hs=1.14,bx=.9,by=.78,top=c-c*hs,bot=c+(H-c)*by,cx=W/2;
+  const at=(sx,sy)=>`translate(${cx} ${c}) scale(${sx} ${sy}) translate(${-cx} ${-c})`;
+  return `<svg class="fig" id="${id}s" viewBox="0 ${top.toFixed(1)} ${W} ${(bot-top).toFixed(1)}">${defs}
+   <clipPath id="${id}h"><rect x="-60" y="-60" width="${W+120}" height="${c+60}"/></clipPath>
+   <clipPath id="${id}b"><rect x="-60" y="${c-1}" width="${W+120}" height="${H}"/></clipPath>
+   <g transform="${at(bx,by)}"><g clip-path="url(#${id}b)">${inner}</g></g>
+   <g transform="${at(hs,hs)}"><g clip-path="url(#${id}h)">${inner}</g></g></svg>`;
 }
 /* show the side that has more of the work on it first */
 function bodies(lit){
-  const backish=['back','glutes','hams'].filter(g=>lit.includes(g)).length;
-  const frontish=['chest','shoulders','core','legs'].filter(g=>lit.includes(g)).length;
+  const backish=['back','glutes','hams','triceps','calves'].filter(g=>lit.includes(g)).length;
+  const frontish=['chest','shoulders','core','legs','biceps'].filter(g=>lit.includes(g)).length;
   const order=backish>frontish?['back','front']:['front','back'];
   return `<div class="bodies">${order.map((s,i)=>`<div class="${i?'bk':''}">${bodySVG(s,lit)}</div>`).join('')}</div>`;
 }
@@ -634,7 +650,8 @@ w1:()=>`<section class="full enter">
 w2:()=>`<section class="full enter">
   <button class="ib" data-a="to" data-v="w1">${ic('back')}</button>
   <div class="mid"><h1 class="h1" style="margin-bottom:22px">Set up your record</h1>
-   <label class="f"><span>Weights in</span><div class="seg">${['kg','lb'].map(u=>`<button class="${S.unit===u?'on':''}" data-a="unit" data-v="${u}">${u}</button>`).join('')}</div></label>
+   ${whoPicker()}
+   <label class="f" style="margin-top:22px"><span>Weights in</span><div class="seg">${['kg','lb'].map(u=>`<button class="${S.unit===u?'on':''}" data-a="unit" data-v="${u}">${u}</button>`).join('')}</div></label>
    <label class="f" style="margin-top:22px"><span>Quests per week you'll commit to</span><div class="seg">${[2,3,4,5,6].map(n=>`<button class="${S.target===n?'on':''}" data-a="target" data-v="${n}">${n}</button>`).join('')}</div></label>
    <p class="sub" style="margin-top:14px;font-size:14px">Hit this every week to keep your streak. Miss a session and nothing locks. You just don't get credit for it.</p>
   </div>
@@ -892,6 +909,7 @@ me:()=>`<section class="v enter">
   <div style="margin-top:16px">${hunterCard()}</div>
   <div class="stack" style="margin-top:18px">
    <label class="f"><span>Name</span><input data-set="name" value="${esc(S.name)}" maxlength="24"></label>
+   ${whoPicker()}
    <label class="f"><span>Weights in</span><div class="seg">${['kg','lb'].map(u=>`<button class="${S.unit===u?'on':''}" data-a="unit" data-v="${u}">${u}</button>`).join('')}</div></label>
    <label class="f"><span>Quests per week</span><div class="seg">${[2,3,4,5,6].map(n=>`<button class="${S.target===n?'on':''}" data-a="target" data-v="${n}">${n}</button>`).join('')}</div></label>
    <label class="f"><span>Default rest for new exercises (seconds)</span><input data-set="rest" inputmode="numeric" value="${S.rest}"></label>
@@ -904,6 +922,10 @@ me:()=>`<section class="v enter">
  </section>${tabs('me')}`,
 };
 
+function whoPicker(){
+  return `<label class="f"><span>Your body on the record</span><div class="who">${Object.keys(WHO).map(w=>`<button class="${S.who===w?'on':''}" data-a="who" data-v="${w}">
+    <div class="wf">${bodySVG('front',[],w)}</div><b>${WHO[w]}</b></button>`).join('')}</div></label>`;
+}
 function sessRow(s){return `<button class="it card tap" style="width:100%;text-align:left" data-a="to" data-v="sess" data-id="${s.id}">
   <span class="ico">${ic('check')}</span><span class="grow"><b>${esc(s.name)}</b><small>${fmtD(s.inAt)} · ${dur(s.outAt-s.inAt)} · ${s.sets} sets</small></span>
   <span class="pill num">+${s.xp}</span></button>`}
@@ -994,6 +1016,7 @@ const ACT={
   w1:()=>go('w1'),
   w2:()=>{const n=$('#nm').value.trim();if(!n){$('#nm').focus();return}S.name=n;save();go('w2')},
   unit:d=>{S.unit=d.v;save();render()},
+  who:d=>{S.who=d.v;save();render()},
   target:d=>{S.target=+d.v;save();render()},
   onbPick:d=>{S.onboarded=true;save();backTo='home';if(d.v==='paste')go('paste');else if(d.v==='starter')go('starters');else ACT.newPlan()},
   quick:()=>{if(S.active)return ACT.resume();const r=nextRoutine();if(r)startSession(r.id);else go('plans')},

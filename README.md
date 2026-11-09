@@ -15,14 +15,17 @@ A single-file web app (PWA). No build step, no account, data stays on the device
 
 ```
 index.html             the whole app
+figures.js             anatomy figures (man, woman; boy and girl derived), built by src-figures/build.js
 manifest.webmanifest   install info
 sw.js                  offline cache
 icon-180/192/512.png   app icons
 ```
 
+Anatomy figures come from [muscle_mapper](https://github.com/suryamolly/muscle_mapper) by Surya Mouly, MIT License (see `src-figures/LICENSE-muscle_mapper.txt`).
+
 ## Put it on your iPhone
 
-1. Create a public GitHub repo and upload the six files above to its root.
+1. Create a public GitHub repo and upload the seven files above to its root.
 2. Go to Settings → Pages → Deploy from a branch → `main` / root.
 3. Open the `https://<user>.github.io/<repo>/` link in **Safari**, tap Share → **Add to Home Screen**.
 4. Always open it from the home-screen icon. Back up from the Hunter tab → Export.
