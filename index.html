@@ -13,7 +13,7 @@
 <link rel="icon" href="icon-192.png">
 <title>BUILT</title>
 <style>
-:root{
+:root{color-scheme:dark;
   --bg:#0B0C0A;--card:#181916;--card2:#222420;--card3:#2B2D28;--line:#30332D;
   --text:#F3F4EE;--mute:#A6A99F;--dim:#6F7269;
   --lime:#D5F04A;--lime-d:#AFC92E;--ink:#12140E;
@@ -290,6 +290,7 @@ label.f>span{display:block;font-size:13px;font-weight:650;color:var(--mute);marg
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 72px);transform:translateX(-50%);z-index:80;max-width:calc(100% - 32px);
   animation:tin .3s cubic-bezier(.2,.8,.2,1)}
 @keyframes tin{from{transform:translate(-50%,-30px);opacity:0}}
+.ask{z-index:70}
 .foot-note{text-align:center;font-size:13px;color:var(--dim);margin-top:16px}
 .full.lime .foot-note{color:rgba(18,20,14,.55)}
 .drift{position:fixed;inset:-20%;z-index:-1;pointer-events:none;
@@ -979,8 +980,12 @@ function finishSession(){
   const A=S.active;
   const open=A.ex.reduce((a,e)=>a+e.log.filter(s=>!s.done).length,0);
   const any=A.ex.some(e=>e.log.some(s=>s.done));
-  if(!any){if(confirm('Nothing logged yet. Abandon this quest? It won\'t be recorded.')){S.active=null;save();go('home')}return}
-  if(open&&!confirm(`${open} set${open>1?'s':''} not logged. Clear the quest anyway?`))return;
+  if(!any){ask('Nothing logged yet. Abandon this quest? It won\'t be recorded.','Abandon quest',true,()=>{S.active=null;save();go('home')});return}
+  if(open)ask(`${open} set${open>1?'s':''} not logged. Clear the quest anyway?`,'Clear quest',false,recordSession);
+  else recordSession();
+}
+function recordSession(){
+  const A=S.active;if(!A)return;
   const now=Date.now();
   const ex=A.ex.map(e=>({key:e.key,name:e.name,sets:e.sets,repMin:e.repMin,repMax:e.repMax,timed:e.timed,felt:e.felt,
     log:e.log.filter(s=>s.done).map(s=>({kg:nkg(s.kg),reps:+s.reps||0,drop:s.drop&&s.drop.done?{kg:nkg(s.drop.kg),reps:+s.drop.reps||0}:null}))})).filter(e=>e.log.length);
@@ -1006,6 +1011,15 @@ let backTo='home';
 function draftFrom(r){return{id:r.id,isNew:!S.routines.some(x=>x.id===r.id),name:r.name,note:r.note||'',warmTxt:(r.warm||[]).join('\n'),
   ex:r.ex.map(e=>({...e,repsTxt:repsLabel(e)}))}}
 function toast(html,ms=2600){const t=document.createElement('div');t.className='toast';t.innerHTML=`<div class="sys" style="background:#12161c">${html}</div>`;document.body.appendChild(t);setTimeout(()=>t.remove(),ms)}
+/* in-app confirm: the Claude viewer and some webviews swallow window.confirm */
+function ask(msg,okLabel,danger,onOk){
+  $$('.ask').forEach(x=>x.remove());
+  const m=document.createElement('div');m.className='rest ask';
+  m.innerHTML=`<div class="in" style="text-align:left"><p style="font-size:17px;font-weight:650;line-height:1.35">${esc(msg)}</p>
+    <div class="two"><button class="btn dark" data-k="no">Cancel</button><button class="btn ${danger?'dark':'lime'}" data-k="ok" style="${danger?'color:var(--warn)':''}">${esc(okLabel)}</button></div></div>`;
+  m.addEventListener('click',ev=>{const k=ev.target.closest('[data-k]');if(ev.target===m||k)m.remove();if(k&&k.dataset.k==='ok')onOk()});
+  document.body.appendChild(m);
+}
 function floatXP(el,txt){const r=el.getBoundingClientRect(),f=document.createElement('div');f.className='xpfloat';f.textContent=txt;f.style.left=(r.left+r.width/2-22)+'px';f.style.top=(r.top-6)+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1000)}
 
 const ACT={
@@ -1054,8 +1068,8 @@ const ACT={
   /* plans */
   newPlan:()=>{backTo=V.view;go('edit',{draft:{id:uid(),isNew:true,name:'',note:'',warmTxt:'',ex:[{...blankEx(),repsTxt:'8-12'}]}})},
   editPlan:d=>{backTo='plan';go('edit',{draft:draftFrom(S.routines.find(r=>r.id===d.id)),prevId:d.id})},
-  delPlan:d=>{const r=S.routines.find(x=>x.id===d.id);if(!confirm(`Delete "${r.name}"? Your logged sessions stay.`))return;
-    S.routines=S.routines.filter(x=>x.id!==d.id);S.next=0;save();go('plans')},
+  delPlan:d=>{const r=S.routines.find(x=>x.id===d.id);ask(`Delete "${r.name}"? Your logged sessions stay.`,'Delete plan',true,()=>{
+    S.routines=S.routines.filter(x=>x.id!==d.id);S.next=0;save();go('plans')})},
   setNext:d=>{S.next=S.routines.findIndex(r=>r.id===d.id);save();toast('<p>Set as your next quest.</p>');go('home')},
   pasteExample:()=>{$('#pt').value=EXAMPLE},
   readPlan:()=>{const t=$('#pt').value;if(!t.trim()){$('#pt').focus();return}
@@ -1083,13 +1097,13 @@ const ACT={
   addStarter:d=>{const p=STARTERS[+d.i];addStarterPlan(p);S.onboarded=true;save();toast(`<p>Added ${esc(p.name)}.</p>`);go('home')},
   addPPL:()=>{[1,2,3].forEach(i=>addStarterPlan(STARTERS[i]));S.onboarded=true;save();toast('<p>Push, Pull and Legs added. They run in that order.</p>');go('home')},
   mon:d=>{const now=new Date();let y=V.y??now.getFullYear(),m=(V.m??now.getMonth())+ +d.v;if(m<0){m=11;y--}if(m>11){m=0;y++}go('history',{y,m})},
-  delSess:d=>{if(!confirm('Delete this session? Its XP goes with it.'))return;S.sessions=S.sessions.filter(s=>s.id!==d.id);save();go('history')},
+  delSess:d=>ask('Delete this session? Its XP goes with it.','Delete session',true,()=>{S.sessions=S.sessions.filter(s=>s.id!==d.id);save();go('history')}),
   export:()=>{
     const name=`built-backup-${new Date().toISOString().slice(0,10)}.json`,blob=new Blob([JSON.stringify(S)],{type:'application/json'});
     try{const f=new File([blob],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'BUILT backup'}).catch(()=>{});return}}catch(e){}
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
   },
-  reset:()=>{if(!confirm('Erase every plan, session and rank on this device? This cannot be undone.'))return;localStorage.removeItem(KEY);S=fresh();go('w0')},
+  reset:()=>ask('Erase every plan, session and rank on this device? This cannot be undone.','Erase everything',true,()=>{try{localStorage.removeItem(KEY)}catch(e){}S=fresh();go('w0')}),
 };
 /* keep the set you're on above the bottom bar */
 function focusCur(){const c=$('.set.cur');if(!c)return;const r=c.getBoundingClientRect();
@@ -1119,8 +1133,8 @@ document.addEventListener('change',ev=>{
   if(t.dataset.x&&V.draft){V.draft.ex[+t.dataset.i][t.dataset.x]=t.value;return}
   if(t.dataset.aFile==='import'&&t.files[0]){
     const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.v!==1||!Array.isArray(d.sessions))throw 0;
-      if(!confirm(`Replace everything on this device with this backup (${d.sessions.length} sessions, ${d.routines.length} plans)?`))return;
-      S=Object.assign(fresh(),d);save();go('home');toast('<p>Backup restored.</p>')}catch(e){toast('<p>That file isn\'t a BUILT backup.</p>')}};
+      ask(`Replace everything on this device with this backup (${d.sessions.length} sessions, ${d.routines.length} plans)?`,'Restore backup',true,()=>{
+      S=Object.assign(fresh(),d);save();go('home');toast('<p>Backup restored.</p>')})}catch(e){toast('<p>That file isn\'t a BUILT backup.</p>')}};
     rd.readAsText(t.files[0]);
   }
 });
