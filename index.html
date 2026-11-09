@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="BUILT">
+<meta name="apple-mobile-web-app-title" content="GATELIFT">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
-<title>BUILT</title>
+<title>GATELIFT</title>
 <style>
 /* Layout: one phone column. Everyday screens are cool white with navy type; the big moments flip to full System blue. */
 :root{color-scheme:light;
@@ -651,8 +651,8 @@ const sysBox=(t,p)=>`<div class="sys"><div class="t">${t}</div><p>${p}</p></div>
 const VIEWS={
 /* ── onboarding ── */
 w0:()=>`<section class="full acc enter">
-  <div class="tag">BUILT</div>
-  <div class="mid"><div class="mega">Arise.<br>Then<br>build.</div>
+  <div class="tag">GATELIFT</div>
+  <div class="mid"><div class="mega">Arise.<br>Then<br>lift.</div>
   <p class="sub" style="margin-top:18px;font-size:17px;max-width:300px">Bring your plan. Log every set. Every rank you hold here is earned from work you actually did.</p></div>
   <button class="btn inv" data-a="w1">Begin</button>
   <p class="foot-note">Free · No account · Nothing leaves your device</p></section>`,
@@ -933,7 +933,7 @@ me:()=>`<section class="v enter">
   <p class="sub" style="font-size:14px;margin:0 4px 12px">Everything lives on this device only. Clearing Safari's website data wipes it, so export a backup now and then.</p>
   <div class="grid2"><button class="btn dark sm" data-a="export">${ic('dl','s')} Export</button><label class="btn dark sm" style="cursor:pointer">Import<input type="file" accept="application/json,.json" data-a-file="import" hidden></label></div>
   <button class="btn ghost" style="margin-top:18px;color:var(--warn)" data-a="reset">Erase everything</button>
-  <p class="foot-note">BUILT · Level one</p>
+  <p class="foot-note">GATELIFT · Level one</p>
  </section>${tabs('me')}`,
 };
 
@@ -1113,8 +1113,8 @@ const ACT={
   mon:d=>{const now=new Date();let y=V.y??now.getFullYear(),m=(V.m??now.getMonth())+ +d.v;if(m<0){m=11;y--}if(m>11){m=0;y++}go('history',{y,m})},
   delSess:d=>ask('Delete this session? Its XP goes with it.','Delete session',true,()=>{S.sessions=S.sessions.filter(s=>s.id!==d.id);save();go('history')}),
   export:()=>{
-    const name=`built-backup-${new Date().toISOString().slice(0,10)}.json`,blob=new Blob([JSON.stringify(S)],{type:'application/json'});
-    try{const f=new File([blob],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'BUILT backup'}).catch(()=>{});return}}catch(e){}
+    const name=`gatelift-backup-${new Date().toISOString().slice(0,10)}.json`,blob=new Blob([JSON.stringify(S)],{type:'application/json'});
+    try{const f=new File([blob],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'GATELIFT backup'}).catch(()=>{});return}}catch(e){}
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
   },
   reset:()=>ask('Erase every plan, session and rank on this device? This cannot be undone.','Erase everything',true,()=>{try{localStorage.removeItem(KEY)}catch(e){}S=fresh();go('w0')}),
@@ -1148,7 +1148,7 @@ document.addEventListener('change',ev=>{
   if(t.dataset.aFile==='import'&&t.files[0]){
     const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.v!==1||!Array.isArray(d.sessions))throw 0;
       ask(`Replace everything on this device with this backup (${d.sessions.length} sessions, ${d.routines.length} plans)?`,'Restore backup',true,()=>{
-      S=Object.assign(fresh(),d);save();go('home');toast('<p>Backup restored.</p>')})}catch(e){toast('<p>That file isn\'t a BUILT backup.</p>')}};
+      S=Object.assign(fresh(),d);save();go('home');toast('<p>Backup restored.</p>')})}catch(e){toast('<p>That file isn\'t a GATELIFT backup.</p>')}};
     rd.readAsText(t.files[0]);
   }
 });
