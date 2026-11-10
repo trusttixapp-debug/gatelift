@@ -102,38 +102,47 @@ function mascot(pose='idle',size=120){
   </svg>`;
 }
 
-/* Shade: a shadow soldier the System lends every Hunter. Black silhouette, rim light, lightning eyes, smoke tail.
-   Poses: idle, smug, hype, angry, sleepy, curious. */
 function shade(pose='idle',size=120){
+  /* Shade: a shadow soldier the System lends every Hunter. Hard silhouette, cel-cut rim light, lightning eyes.
+     Poses change the eyes and the aura only: idle, focus, smug, rage, rest, wary. */
   const id='sh'+(++uid);
-  const head='M100 62C88 52 74 44 58 26C60 50 48 66 42 92C34 128 62 162 100 174C138 162 166 128 158 92C152 66 140 50 142 26C126 44 112 52 100 62Z';
-  const cheeks='M45 106 20 112 47 126ZM155 106l25 6-27 14Z';
-  const tail='M84 164C70 186 100 192 90 210C84 222 96 236 114 232C104 228 100 220 108 214L122 222 116 206C126 190 112 180 118 164Z M96 198 76 204 90 190Z';
-  const hand=(cx,cy,s=1)=>{const k=1.45;cx=+cx;cy=+cy;const S=v=>v*k;return `M${cx-13*s} ${cy+8}Q${cx-17*s} ${cy-8} ${cx-7*s} ${cy-13}L${cx-6*s} ${cy-25}L${cx+1*s} ${cy-14}L${cx+8*s} ${cy-22}L${cx+8*s} ${cy-10}Q${cx+17*s} ${cy-2} ${cx+8*s} ${cy+9}Z`.replace(/(-?[d.]+) (-?[d.]+)/g,(m,x,y)=>((+x-cx)*k+cx).toFixed(1)+' '+((+y-cy)*k+cy).toFixed(1))};
-  const hands={idle:[[38,196,1],[162,196,-1]],smug:[[38,196,1],[166,150,-1]],hype:[[26,84,1],[174,84,-1]],angry:[[44,186,1],[156,186,-1]],sleepy:[[44,204,1],[156,204,-1]],curious:[[34,196,1],[168,126,-1]]}[pose]||[[38,196,1],[162,196,-1]];
-  const mirror=d=>`<path d="${d}" fill="url(#${id}e)"/><path d="${d}" fill="url(#${id}e)" transform="translate(200 0) scale(-1 1)"/>`;
-  const sparks=(o=1)=>`<g stroke="#6FB6FF" stroke-width="1.7" fill="none" stroke-linecap="round" filter="url(#${id}g)" opacity="${o}">
-    <path d="M58 100 46 94 38 98 28 90M60 110l-14 4-6 8"/><path d="M142 100l12-6 8 4 10-8M140 110l14 4 6 8"/></g>`;
+  const head='M110 72C100 62 86 46 64 12C70 44 60 62 50 80C38 104 42 134 62 154L86 178L110 198L134 178L158 154C178 134 182 104 170 80C160 62 150 44 156 12C134 46 120 62 110 72Z';
+  const blades='M50 100 12 90 44 124ZM170 100l38-10-32 34Z';
+  const fangs='M96 186 101 212 108 192ZM124 186l-5 26-7-20Z';
+  const tail='M94 194C74 214 96 224 82 250C98 240 104 228 100 214C108 228 118 240 138 250C122 230 136 214 126 194Z';
+  const silhouette=`<path d="${tail}"/><path d="${blades}"/><path d="${head}"/><path d="${fangs}"/>`;
+  /* cel shading: the right side of the face falls into a slightly lifted navy plane */
+  const plane='M110 72C120 62 134 46 156 12C150 44 160 62 170 80C182 104 178 134 158 154L134 178L110 198Z';
+  const E={
+    idle:'M58 108Q82 106 101 122Q93 135 76 133Q63 127 58 108Z',
+    focus:'M58 112Q84 112 101 125Q90 131 76 130Q63 126 58 112Z',
+    smug:'M63 121 101 124Q92 134 78 133Q66 129 63 121Z',
+    rage:'M56 104Q84 104 102 124Q92 136 75 134Q60 127 56 104Z',
+    wary:'M60 110Q82 110 100 122Q93 134 77 132Q64 127 60 110Z'
+  };
+  const eye=d=>`<path d="${d}" fill="url(#${id}e)"/><path d="${d}" fill="url(#${id}e)" transform="translate(220 0) scale(-1 1)"/>`;
+  const veins=(o,big)=>`<g fill="none" stroke="#5AA2FF" stroke-width="${big?1.8:1.3}" stroke-linecap="round" stroke-linejoin="round" opacity="${o}" filter="url(#${id}g)">
+    <path d="M58 108 48 100 42 103 30 92M60 114 46 116 40 124${big?' M50 100 46 88 38 84':''}"/>
+    <path d="M162 108l10-8 6 3 12-11M160 114l14 2 6 8${big?' M170 100l4-12 8-4':''}"/></g>`;
   let eyes;
-  if(pose==='hype')eyes=`<path d="M60 116Q76 92 94 112M106 112Q124 92 140 116" fill="none" stroke="url(#${id}e)" stroke-width="9" stroke-linecap="round"/>${sparks()}`;
-  else if(pose==='sleepy')eyes=`<path d="M62 112Q78 120 94 110M106 110Q122 120 138 112" fill="none" stroke="#CFE4FF" stroke-width="5" stroke-linecap="round"/>`;
-  else if(pose==='smug')eyes=mirror('M58 110 96 104Q92 122 74 124Q60 121 58 110Z')+sparks(.6);
-  else if(pose==='angry')eyes=mirror('M56 94 97 110Q90 126 74 125Q57 119 56 94Z')+sparks();
-  else if(pose==='curious')eyes=`<path d="M56 104Q70 80 96 96Q96 124 76 128Q56 124 56 104Z" fill="url(#${id}e)"/><path d="M110 104Q122 94 136 100Q136 116 124 118Q110 116 110 104Z" fill="url(#${id}e)"/>`;
-  else eyes=mirror('M58 104Q72 84 96 98Q94 122 75 126Q58 121 58 104Z')+sparks(.75);
-  const extra=pose==='hype'?`<path d="M86 146l7 7 7-7 7 7 7-7" fill="none" stroke="#DDEBFF" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/><g fill="#8FC4FF" filter="url(#${id}g)"><path d="M30 46l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/><path d="M170 40l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></g>`
-    :pose==='sleepy'?`<g font-family="Arial Black,Arial,sans-serif" font-weight="900" fill="#8FB4FF"><text x="150" y="46" font-size="22">z</text><text x="168" y="26" font-size="15">z</text></g>`
-    :pose==='curious'?`<text x="160" y="58" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="34" fill="#8FB4FF">?</text>`
-    :pose==='angry'?`<path d="M150 30l10 10M160 30l-10 10M146 35h18M155 26v18" stroke="#8FB4FF" stroke-width="3.4" stroke-linecap="round" transform="rotate(45 155 35)"/>`:'';
-  const body=`<path d="${tail}"/><path d="${cheeks}"/><path d="${head}"/>${hands.map(h=>`<path d="${hand(...h)}"/>`).join('')}`;
-  return `<svg class="shade" width="${size}" height="${size*1.2}" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shade">
-  <defs><radialGradient id="${id}e" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#E4F1FF"/><stop offset="1" stop-color="#7FBFFF"/></radialGradient>
-    <filter id="${id}g" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    <filter id="${id}r" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter></defs>
-  <g fill="none" stroke="#7FB2FF" stroke-width="9" opacity=".55" filter="url(#${id}r)">${body}</g>
-  <g fill="#060814" stroke="#BFD6FF" stroke-width="2.2" stroke-linejoin="round">${body}</g>
-  <path d="M72 60C84 66 92 70 100 70" fill="none" stroke="#9DBBFF" stroke-opacity=".35" stroke-width="3" stroke-linecap="round"/>
-  <g filter="url(#${id}g)" transform="translate(100 110) scale(1.38) translate(-100 -110)">${eyes}</g>${extra}</svg>`;
+  if(pose==='rest')eyes=`<path d="M64 124Q82 131 99 126M156 124Q138 131 121 126" fill="none" stroke="#CFE4FF" stroke-width="3.2" stroke-linecap="round"/>`;
+  else if(pose==='wary')eyes=`<path d="${E.wary}" fill="url(#${id}e)"/><path d="${E.focus}" fill="url(#${id}e)" transform="translate(220 0) scale(-1 1)"/>${veins(.5)}`;
+  else eyes=eye(E[pose]||E.idle)+veins(pose==='rage'?1:pose==='smug'?.35:.7,pose==='rage');
+  const debris=[[34,52,8,20],[188,48,6,-15],[24,170,7,35],[196,160,9,-30],[176,214,5,12],[44,222,6,-22]]
+    .map(([x,y,s,r])=>`<path d="M${x} ${y}l${s} ${s*.4}-${s*.5} ${s*1.3}z" fill="#0A0F22" stroke="#86B4FF" stroke-opacity=".35" stroke-width=".8" opacity=".7" transform="rotate(${r} ${x} ${y})"/>`).join('');
+  const aura=pose==='rage'?.85:pose==='rest'?.25:.5;
+  return `<svg class="shade" width="${size}" height="${size*260/220}" viewBox="0 0 220 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shade">
+  <defs><radialGradient id="${id}e" cx=".62" cy=".5" r=".7"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#EAF4FF"/><stop offset="1" stop-color="#6CB4FF"/></radialGradient>
+    <linearGradient id="${id}f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0B1124"/><stop offset="1" stop-color="#03050C"/></linearGradient>
+    <filter id="${id}g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="${id}r" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="4"/></filter></defs>
+  ${debris}
+  <g fill="none" stroke="#86B4FF" stroke-width="7" opacity="${aura}" filter="url(#${id}r)">${silhouette}</g>
+  <g fill="#D6E4FF" stroke="#D6E4FF" stroke-width="3.4" stroke-linejoin="round" opacity=".9">${silhouette}</g>
+  <g fill="url(#${id}f)">${silhouette}</g>
+  <path d="${plane}" fill="#16213F" opacity=".55"/>
+  <path d="M64 12C70 44 60 62 50 80C40 100 40 122 50 140" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity=".55"/>
+  <g filter="url(#${id}g)" transform="translate(110 122) scale(1.22) translate(-110 -122)">${eyes}</g></svg>`;
 }
 
 const ART={badge,mascot,shade,TIERS};
