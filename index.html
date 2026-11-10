@@ -38,7 +38,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.45}
 #app{max-width:520px;margin:0 auto;position:relative}
 
 /* ── views ── */
-.v{padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 112px);min-height:100dvh}
+.v{padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 84px);min-height:100dvh}
 .v.flush{padding-bottom:calc(env(safe-area-inset-bottom) + 28px)}
 .enter>*{animation:rise .42s cubic-bezier(.2,.8,.2,1) both}
 .enter>*:nth-child(2){animation-delay:.04s}.enter>*:nth-child(3){animation-delay:.08s}
@@ -82,13 +82,14 @@ textarea{resize:vertical;min-height:84px;line-height:1.45}
 .ic.s{width:18px;height:18px}
 
 /* ── tab bar ── */
-.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 14px);z-index:30;
-  display:flex;align-items:center;gap:6px;padding:6px;border-radius:999px;background:var(--navy);box-shadow:0 14px 34px rgba(7,18,51,.28)}
-.tabs button{height:50px;min-width:50px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:8px;
-  color:rgba(255,255,255,.62);background:rgba(255,255,255,.07);transition:background .25s,color .25s,padding .25s}
-.tabs button .ic{width:21px;height:21px}
-.tabs button span{display:none;font-size:15px;font-weight:700}
-.tabs button.on{background:var(--acc);color:#fff;padding:0 18px 0 15px}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:30;
+  display:flex;align-items:center;gap:2px;padding:4px;border-radius:999px;background:rgba(7,18,51,.94);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 22px rgba(7,18,51,.22)}
+.tabs button{height:38px;min-width:42px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:6px;
+  color:rgba(255,255,255,.55);transition:background .25s,color .25s,padding .25s}
+.tabs button .ic{width:18px;height:18px}
+.tabs button span{display:none;font-size:13px;font-weight:700}
+.tabs button.on{background:var(--acc);color:#fff;padding:0 14px 0 12px}
 .tabs button.on span{display:inline}
 
 /* ── system window: the glow lives on the frame, never the content ── */
@@ -263,6 +264,28 @@ textarea{resize:vertical;min-height:84px;line-height:1.45}
 .levelup .badge{margin:4px auto 10px;display:block;animation:spinin .9s cubic-bezier(.2,1.3,.4,1) both}
 @keyframes spinin{from{transform:rotate(-200deg) scale(.4);opacity:0}}
 
+/* ── home switch ── */
+.hseg{display:flex;background:var(--card);border-radius:999px;padding:4px;margin:16px 0 14px}
+.hseg button{flex:1;height:40px;border-radius:999px;font-weight:650;font-size:14.5px;color:var(--mute);transition:background .2s,color .2s}
+.hseg button.on{background:var(--navy);color:#fff}
+.rec{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.rec:last-child{border-bottom:0}
+.rec b{font-weight:650}
+.rec small{display:block;color:var(--mute);font-size:13px}
+.rec .st{margin-left:auto;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
+.st.hot{background:rgba(229,72,59,.1);color:var(--warn)}
+.st.mid{background:var(--acc-l);color:var(--acc)}
+.st.ok{background:rgba(22,163,106,.1);color:var(--ok)}
+.st.cold{background:var(--card2);color:var(--dim)}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.xpsrc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.xpsrc div{background:var(--chip);border-radius:18px;padding:12px;text-align:center}
+.xpsrc b{display:block;font-size:20px;font-weight:750}
+.xpsrc small{color:var(--mute);font-size:12px;font-weight:600}
+.rankhero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:22px 18px 18px}
+.rankhero .badge{filter:drop-shadow(0 10px 18px rgba(10,22,51,.25))}
+.rankhero .xpbar{width:100%;height:10px;margin-top:14px}
+
 /* ── onboarding ── */
 .ob{min-height:100dvh;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 14px) 20px calc(env(safe-area-inset-bottom) + 20px)}
 .ob .top{display:flex;align-items:center;gap:12px}
@@ -294,7 +317,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.45}
   touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:pointer}
 .hold::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--acc);transform:scale(.0001);transition:transform .25s}
 .hold.on::before{transform:scale(1);transition:transform 1.4s linear}
-.hold .glint{position:relative;pointer-events:none}
+.hold .badge{position:relative;pointer-events:none}
 .calib .r{margin-top:22px}
 .calib .r .row{font-weight:650;font-size:15px;justify-content:space-between}
 .calib .r .row span{color:var(--acc)}
@@ -664,6 +687,10 @@ function streak(){
   while(weekCount(w)>=S.target){n++;w.setDate(w.getDate()-7)}
   return n;
 }
+function muscleLast(){
+  const at={};S.sessions.forEach(s=>s.ex.forEach(e=>musclesOf(e.name).forEach(g=>{if(!at[g]||s.outAt>at[g])at[g]=s.outAt})));return at}
+const recState=h=>h==null?['cold','Not trained']:h<36?['hot','Recovering']:h<72?['mid','Nearly ready']:h<24*8?['ok','Ready']:['cold','Gone cold'];
+const ago=h=>h<1?'just now':h<24?Math.round(h)+' h ago':Math.round(h/24)+(Math.round(h/24)>1?' days':' day')+' ago';
 const nextRoutine=()=>S.routines.length?S.routines[S.next%S.routines.length]:null;
 const estMin=r=>Math.round(r.ex.reduce((a,e)=>a+e.sets*(45+e.rest),0)/60+(r.warm.length?6:0));
 const routineMuscles=r=>{const o=[];r.ex.forEach(e=>musclesOf(e.name).forEach(g=>{if(!o.includes(g))o.push(g)}));return o};
@@ -678,6 +705,83 @@ function render(){
 function tabs(on){
   const t=(v,i,l)=>`<button class="${on===v?'on':''}" data-a="tab" data-v="${v}" aria-label="${l}">${ic(i)}<span>${l}</span></button>`;
   return `<nav class="tabs">${t('home','home','Home')}${t('plans','list','Plans')}${t('history','cal','Record')}${t('me','user','Hunter')}</nav>`;
+}
+function homeQuest(){
+  const A=S.active,r=nextRoutine(),ws=weekStart(Date.now()),wc=weekCount(ws);
+  const vol7=S.sessions.filter(s=>s.inAt>Date.now()-7*864e5).reduce((a,s)=>a+s.vol,0);
+  const recent=S.sessions.slice(-3).reverse();
+  let q;
+  if(A){
+    q=`<div class="quest"><span class="pill acc">Quest in progress</span>
+     <h2 class="h2" style="margin:12px 0 4px">${esc(A.name)}</h2><p class="sub" style="font-size:14px">${A.inAt?'Checked in at '+fmtT(A.inAt):'Not checked in yet'}</p>
+     <button class="btn acc" style="margin-top:16px" data-a="resume">Resume</button></div>`;
+  }else if(r){
+    const sets=r.ex.reduce((a,e)=>a+e.sets,0);
+    q=`<div class="quest"><div class="holo">${bodySVG('front',routineMuscles(r))}</div><div class="body">
+     <span class="pill acc">Next quest</span><h2 class="h2" style="margin:12px 0 4px">${esc(r.name)}</h2>
+     <p class="sub" style="font-size:14px">${r.ex.length} exercises · ${sets} sets · ~${estMin(r)} min</p>
+     <ul>${r.ex.slice(0,4).map(e=>`<li><b>${esc(e.name)}</b> ${e.sets}×${repsLabel(e)}</li>`).join('')}${r.ex.length>4?`<li>+${r.ex.length-4} more</li>`:''}</ul></div>
+     <button class="btn acc" style="margin-top:16px" data-a="start" data-v="${r.id}">Start quest</button>
+     ${S.routines.length>1?`<button class="btn ghost" data-a="tab" data-v="plans">Pick a different one</button>`:''}</div>`;
+  }else{
+    q=`<div class="quest"><span class="pill">No plan yet</span><h2 class="h2" style="margin:12px 0 6px">The gate is closed</h2>
+     <p class="sub" style="font-size:14px">Add a plan and your first quest appears here.</p>
+     <div class="grid2" style="margin-top:16px"><button class="btn dark sm" data-a="to" data-v="paste">Paste plan</button><button class="btn acc sm" data-a="to" data-v="starters">Starter plan</button></div></div>`;
+  }
+  return `${q}
+   <div class="card" style="margin-top:12px"><div class="cardh"><b>This week</b><span class="pill" style="background:var(--chip)">${wc} / ${S.target}</span></div>${weekStrip()}</div>
+   <div class="grid2" style="margin-top:12px">
+    <div class="stat"><small>Weekly streak</small><span class="si">${ic('flame')}</span><b class="num"><span data-count="${streak()}">0</span><em>weeks</em></b></div>
+    <div class="stat"><small>Moved this week</small><span class="si">${ic('dumb')}</span><b class="num"><span data-count="${vol7}">0</span><em>${S.unit}</em></b></div>
+   </div>
+   <h3 class="h3">Quick actions</h3>
+   <div class="list">
+    ${qa('paste','Paste a plan','From a coach, a note or a chat','to','paste')}
+    ${qa('gate','Starter plans','Ready-made gates, home or gym','to','starters')}
+   </div>
+   ${recent.length?`<h3 class="h3">Recent quests</h3><div class="list">${recent.map(sessRow).join('')}</div>`:''}`;
+}
+function homeRank(){
+  const xp=totalXP(),L=levelOf(xp),r=rankOf(L.lv),nr=nextRank(L.lv);
+  const toNext=nr?(()=>{let need=L.need-L.rem;for(let n=L.lv+1;n<nr.lv;n++)need+=lvCost(n);return need})():0;
+  const per=S.sessions.length?Math.round(xp/S.sessions.length):XP_QUEST+16*XP_SET;
+  const w7=S.sessions.filter(x=>x.inAt>Date.now()-7*864e5);
+  const sets7=w7.reduce((a,x)=>a+x.sets,0),prs7=w7.reduce((a,x)=>a+x.prs.length,0);
+  return `<div class="card rankhero">${badge(r,150)}
+    <p class="tag" style="color:var(--acc);margin-top:6px">Level ${L.lv}</p>
+    <h2 class="h2" style="font-size:24px;margin-top:4px">${r.k==='M'?'Shadow Monarch':r.n+' Hunter'}</h2>
+    <div class="xpbar"><i data-w="${L.lv>=100?100:Math.round(L.rem/L.need*100)}"></i></div>
+    <div class="row between" style="width:100%;margin-top:8px;font-size:13px"><span class="dim num">${num(L.rem)} / ${num(L.need)} XP</span><span class="dim">Level ${Math.min(100,L.lv+1)}</span></div></div>
+   ${nr?`<div class="card" style="margin-top:12px"><div class="row">${badge(nr,64)}<div class="grow"><small class="dim" style="font-weight:600">Next rank</small>
+     <b style="display:block;font-size:17px">${nr.n} at level ${nr.lv}</b><small class="sub" style="font-size:13.5px">${num(toNext)} XP to go · about ${Math.max(1,Math.ceil(toNext/per))} quests at your pace</small></div></div></div>`:''}
+   <div class="card" style="margin-top:12px"><div class="cardh" style="margin-bottom:0"><b>Earned in the last 7 days</b></div>
+    <div class="xpsrc"><div><b class="num">${sets7*XP_SET}</b><small>${sets7} set${sets7===1?'':'s'}</small></div><div><b class="num">${w7.length*XP_QUEST}</b><small>${w7.length} quest${w7.length===1?'':'s'}</small></div><div><b class="num">${prs7*XP_PR}</b><small>${prs7} record${prs7===1?'':'s'}</small></div></div>
+    <p class="sub" style="font-size:13px;margin-top:12px">${XP_SET} XP a set · ${XP_QUEST} a quest cleared · ${XP_PR} a record broken.</p></div>
+   <h3 class="h3">The ladder</h3>
+   <div class="card ranks">${RANKS.map(x=>`<div class="r ${L.lv>=x.lv?'':'lock'}">${badge(x,52)}<div class="grow"><b>${x.k==='M'?'Shadow Monarch':x.n+' Hunter'}</b><small>Level ${x.lv}${x===r?' · you are here':''}</small></div>${L.lv>=x.lv?ic('check'):''}</div>`).join('')}</div>`;
+}
+function homeRecovery(){
+  const at=muscleLast(),now=Date.now(),hrs=g=>at[g]?(now-at[g])/36e5:null;
+  const groups=Object.keys(MGN).sort((a,b)=>(hrs(a)??1e9)-(hrs(b)??1e9));
+  const hot=groups.filter(g=>hrs(g)!=null&&hrs(g)<36);
+  const r=nextRoutine(),clash=r?routineMuscles(r).filter(g=>hot.includes(g)):[];
+  const last=S.sessions[S.sessions.length-1],since=last?(now-last.outAt)/36e5:null;
+  const pain=[];S.sessions.filter(x=>x.outAt>now-14*864e5).forEach(x=>x.ex.forEach(e=>{if(e.felt&&e.felt.includes('Pain')&&!pain.includes(e.name))pain.push(e.name)}));
+  const tip=!S.sessions.length?'Clear a quest and the System starts tracking what each muscle needs.'
+    :clash.length?`Your next quest hits ${clash.map(g=>MGN[g]).join(', ')}, trained in the last 36 hours. Go a little lighter, or swap the order of your plans.`
+    :since!=null&&since<20?'You trained today. Eat, sleep, and let it land.'
+    :r?`Your next quest works muscles that have recovered. Good time to go.`:'Everything has recovered.';
+  return `<div class="hero" style="height:230px;margin:0">${bodies(hot)}<div class="scan"></div></div>
+   <div class="tip" style="margin-top:12px">${ic(clash.length?'warn':'spark')}<p>${tip}</p></div>
+   ${pain.length?`<div class="tip warn">${ic('warn')}<p>Pain flagged in the last 2 weeks: ${pain.map(esc).join(', ')}. Go lighter or swap the movement.</p></div>`:''}
+   <div class="grid2" style="margin-top:12px">
+    <div class="stat"><small>Since last quest</small><span class="si">${ic('clock')}</span><b class="num">${since==null?'–':since<24?Math.round(since)+'<em>h</em>':Math.round(since/24)+(Math.round(since/24)===1?'<em>day</em>':'<em>days</em>')}</b></div>
+    <div class="stat"><small>Recovering now</small><span class="si">${ic('flame')}</span><b class="num">${hot.length}<em>${hot.length===1?'group':'groups'}</em></b></div>
+   </div>
+   <h3 class="h3">Muscle status</h3>
+   <div class="card" style="padding:6px 18px">${groups.map(g=>{const h=hrs(g),[c,l]=recState(h);
+     return `<div class="rec"><span class="dot" style="background:${c==='hot'?'var(--warn)':c==='mid'?'var(--acc)':c==='ok'?'var(--ok)':'var(--card3)'}"></span><div><b>${MGN[g]}</b><small>${h==null?'No sets logged yet':'Trained '+ago(h)}</small></div><span class="st ${c}">${l}</span></div>`}).join('')}</div>
+   <p class="sub" style="font-size:13px;margin:12px 4px 0">Rough guide: about 48 to 72 hours between hard sessions for the same muscle. Lit muscles on the scan are still recovering.</p>`;
 }
 function hunterCard(){
   const xp=totalXP(),L=levelOf(xp),r=rankOf(L.lv),nr=nextRank(L.lv);
@@ -708,15 +812,15 @@ function obNext(){const i=(V.step||0)+1;if(i>=OB.length)return;go('ob',{step:i,m
 function obView(){
   const i=V.step||0,k=OB[i],nm=esc(S.name||'Hunter');
   const top=k==='calib'?'':`<div class="top"><button class="ib" data-a="obBack" aria-label="Back">${ic('back')}</button><div class="prog"><i style="width:${Math.round((i+1)/OB.length*100)}%"></i></div></div>`;
-  const say=(t,pose='write')=>`<div class="say">${glint(pose,96)}<div class="bubble">${t}</div></div>`;
+  const say=t=>`<div class="sys" style="margin:18px 0 20px"><div class="t">System</div><p>${t}</p></div>`;
   const next=(ok=true,label='Next')=>`<div class="foot"><button class="btn acc" data-a="obNext" ${ok?'':'disabled style="opacity:.4"'}>${label}</button></div>`;
   const opt=(on,act,v,inner)=>`<button class="qo ${on?'on':''}" data-a="${act}" data-v="${v}">${inner}</button>`;
   const wrap=(inner)=>`<section class="ob enter">${top}${inner}</section>`;
   switch(k){
-  case 'hi':return wrap(`<div class="center">${`<div class="bubble down">I'm Glint. The System sent me to keep your record.</div>`}${glint('wave',170)}</div>${next(true,'Sounds good')}`);
+  case 'hi':return wrap(`<div class="center">${badge(RANKS[0],140)}<div class="sys" style="text-align:left;max-width:340px"><div class="t">Notification</div><p>[You have been chosen by the System.]</p><p class="sub" style="margin-top:8px">It will keep your record: every set, every Gate, every rank. A few questions first.</p></div></div>${next(true,'Accept')}`);
   case 'name':return wrap(`${say('First, what should the System call you?')}<div class="body"><h1 class="h2" style="margin:4px 2px 12px">Your name</h1>
     <input id="nm" value="${esc(S.name)}" placeholder="Hunter name" autocomplete="given-name" maxlength="24"><p class="sub" style="margin:10px 4px;font-size:14px">You can change it later.</p></div>${next()}`);
-  case 'who':return wrap(`${say(`Good to meet you, ${nm}. Which body should I draw on your scans?`)}<div class="body">${whoPicker()}
+  case 'who':return wrap(`${say(`[Hunter registered: ${nm}.] Which body should your scans show?`)}<div class="body">${whoPicker()}
     <p class="sub" style="margin:14px 4px;font-size:14px">It lights up the muscles each exercise works.</p></div>${next()}`);
   case 'exp':return wrap(`${say('How much have you trained before?')}<div class="body">${EXP.map(([v,t,n])=>opt(S.exp===v,'obSet',`exp:${v}`,
     `<span class="bars">${[8,13,18,22].map((h,j)=>`<i class="${j<n?'f':''}" style="height:${h}px"></i>`).join('')}</span>${t}`)).join('')}</div>${next(!!S.exp)}`);
@@ -733,10 +837,10 @@ function obView(){
   case 'unit':return wrap(`${say('Last one. Which weights do you use?')}<div class="body">${['kg','lb'].map(u=>opt(S.unit===u,'obSet',`unit:${u}`,`<span class="ico" style="font-weight:800;font-size:14px">${u}</span>${u==='kg'?'Kilograms':'Pounds'}`)).join('')}</div>${next()}`);
   case 'commit':return wrap(`<div class="center"><div><h1 class="h1">I will clear my Gates.</h1>
     <p class="sub" style="margin-top:10px;max-width:300px">${S.days.length?S.days.map(j=>DAYN[j].slice(0,3)).join(', '):S.target+(S.target>1?' days':' day')+' a week'}, about ${S.len} minutes each. Every set logged, every rank earned.</p></div>
-    <div class="hold" id="hold">${glint('idle',120)}</div><p style="color:var(--acc);font-weight:700">Hold Glint to sign your contract</p></div>`);
+    <div class="hold" id="hold">${badge(RANKS[0],120)}</div><p style="color:var(--acc);font-weight:700">Hold the emblem to sign your contract</p></div>`);
   case 'calib':return wrap(`<div class="body calib" style="padding-top:40px"><h1 class="h1">The System is writing your record</h1>
     ${['Creating your Hunter record','Matching your first Gate','Setting your weekly commitment'].map((t,j)=>`<div class="r"><div class="row"><b>${t}</b><span data-pc="${j}">0%</span></div><div class="bar"><i data-cb="${j}"></i></div></div>`).join('')}
-    <div class="center" style="margin-top:30px">${glint('write',130)}</div></div>`);
+    </div>`);
   case 'ready':{const st=STARTERS[recStarter()],g=GOAL.find(x=>x[0]===S.goal),p=PLACE.find(x=>x[0]===S.place);
     const li=(i,l,v)=>`<div class="li"><span class="ico">${ic(i)}</span><div><small>${l}</small><b>${v}</b></div></div>`;
     return `<section class="ob enter" style="padding-bottom:calc(env(safe-area-inset-bottom) + 28px)">
@@ -766,7 +870,7 @@ const VIEWS={
 /* ── onboarding ── */
 w0:()=>`<section class="full acc enter">
   <div class="tag">GATELIFT</div>
-  <div class="mid"><div style="margin:0 0 18px -8px;filter:drop-shadow(0 0 22px rgba(255,255,255,.45)) drop-shadow(0 10px 18px rgba(4,12,60,.35))">${glint('wave',118)}</div><div class="mega">Arise.<br>Then<br>lift.</div>
+  <div class="mid"><div class="mega">Arise.<br>Then<br>lift.</div>
   <p class="sub" style="margin-top:18px;font-size:17px;max-width:300px">Bring your plan. Log every set. Every rank you hold here is earned from work you actually did.</p></div>
   <button class="btn inv" data-a="ob" data-v="0">Begin</button>
   <p class="foot-note">Free · No account · Nothing leaves your device</p></section>`,
@@ -774,48 +878,15 @@ ob:()=>obView(),
 
 /* ── home ── */
 home:()=>{
-  const A=S.active,r=nextRoutine(),ws=weekStart(Date.now()),wc=weekCount(ws);
-  const vol7=S.sessions.filter(s=>s.inAt>Date.now()-7*864e5).reduce((a,s)=>a+s.vol,0);
-  const recent=S.sessions.slice(-3).reverse();
-  let q;
-  if(A){
-    q=`<div class="quest" style="background:var(--acc);color:var(--inv)"><span class="pill" style="background:var(--inv);color:var(--acc)">Quest in progress</span>
-     <h2 class="h2" style="margin:12px 0 4px">${esc(A.name)}</h2><p style="opacity:.7;font-size:14px">${A.inAt?'Checked in at '+fmtT(A.inAt):'Not checked in yet'}</p>
-     <button class="btn inv" style="margin-top:16px" data-a="resume">Resume</button></div>`;
-  }else if(r){
-    const sets=r.ex.reduce((a,e)=>a+e.sets,0);
-    q=`<div class="quest"><div class="holo">${bodySVG('front',routineMuscles(r))}</div><div class="body">
-     <span class="pill acc">Next quest</span><h2 class="h2" style="margin:12px 0 4px">${esc(r.name)}</h2>
-     <p class="sub" style="font-size:14px">${r.ex.length} exercises · ${sets} sets · ~${estMin(r)} min</p>
-     <ul>${r.ex.slice(0,4).map(e=>`<li><b>${esc(e.name)}</b> ${e.sets}×${repsLabel(e)}</li>`).join('')}${r.ex.length>4?`<li>+${r.ex.length-4} more</li>`:''}</ul></div>
-     <button class="btn acc" style="margin-top:16px" data-a="start" data-v="${r.id}">Start quest</button>
-     ${S.routines.length>1?`<button class="btn ghost" data-a="tab" data-v="plans">Pick a different one</button>`:''}</div>`;
-  }else{
-    q=`<div class="quest"><span class="pill">No plan yet</span><h2 class="h2" style="margin:12px 0 6px">The gate is closed</h2>
-     <p class="sub" style="font-size:14px">Add a plan and your first quest appears here.</p>
-     <div class="grid2" style="margin-top:16px"><button class="btn dark sm" data-a="to" data-v="paste">Paste plan</button><button class="btn acc sm" data-a="to" data-v="starters">Starter plan</button></div></div>`;
-  }
+  const A=S.active,r=nextRoutine(),ws=weekStart(Date.now()),wc=weekCount(ws),ht=V.ht||'quest';
   const sysmsg=A?'[Your quest is still open.]':!S.sessions.length?'[Clear your first quest to leave E-Rank behind.]':wc>=S.target?`[Weekly commitment met. ${wc} of ${S.target}.]`:`[${S.target-wc} more quest${S.target-wc>1?'s':''} this week to hold your streak.]`;
+  const seg=`<div class="hseg">${[['quest','Quest'],['rank','Rank'],['recovery','Recovery']].map(([k,l])=>`<button class="${ht===k?'on':''}" data-a="htab" data-v="${k}">${l}</button>`).join('')}</div>`;
   return `<section class="v enter">
-   <div class="row between"><h1 class="h1" style="font-size:30px;font-weight:500">${greet()},<br><b style="font-weight:750">${esc(S.name||'Hunter')}</b></h1>
-   <button class="ib" data-a="tab" data-v="me" style="font-weight:800">${esc((S.name||'H')[0].toUpperCase())}</button></div>
-   <p class="sysline" style="margin:12px 2px 16px">${esc(sysmsg)}</p>
-   ${hunterCard()}
-   <div style="margin-top:12px">${q}</div>
-   <div class="card" style="margin-top:12px"><div class="cardh"><b>This week</b><span class="pill" style="background:var(--chip)">${wc} / ${S.target}</span></div>${weekStrip()}</div>
-   <div class="grid2" style="margin-top:12px">
-    <div class="stat"><small>Weekly streak</small><span class="si">${ic('flame')}</span><b class="num"><span data-count="${streak()}">0</span><em>weeks</em></b></div>
-    <div class="stat"><small>Quests cleared</small><span class="si">${ic('gate')}</span><b class="num" data-count="${S.sessions.length}">0</b></div>
-    <div class="stat"><small>Moved this week</small><span class="si">${ic('dumb')}</span><b class="num"><span data-count="${vol7}">0</span><em>${S.unit}</em></b></div>
-    <div class="stat"><small>Total XP</small><span class="si">${ic('spark')}</span><b class="num" data-count="${totalXP()}">0</b></div>
-   </div>
-   <h3 class="h3">Quick actions</h3>
-   <div class="list">
-    ${qa('paste','Paste a plan','From a coach, a note or a chat','to','paste')}
-    ${qa('gate','Starter plans','Ready-made gates, home or gym','to','starters')}
-    ${qa('cal','Your record','Every quest you have cleared','tab','history')}
-   </div>
-   ${recent.length?`<h3 class="h3">Recent</h3><div class="list">${recent.map(sessRow).join('')}</div>`:''}
+   <div class="row between"><h1 class="h1" style="font-size:28px;font-weight:500">${greet()},<br><b style="font-weight:750">${esc(S.name||'Hunter')}</b></h1>
+   <button class="ib" data-a="tab" data-v="me" style="background:transparent;width:60px;height:60px">${badge(rankOf(levelOf(totalXP()).lv),60)}</button></div>
+   <p class="sysline" style="margin:10px 2px 0">${esc(sysmsg)}</p>
+   ${seg}
+   ${ht==='rank'?homeRank():ht==='recovery'?homeRecovery():homeQuest()}
   </section>${tabs('home')}`;
 },
 
@@ -1140,6 +1211,7 @@ const ACT={
   back:()=>{if(V.view==='edit'&&V.fromPaste)return go('paste',{text:V.text});
     if(backTo==='plan'&&V.prevId)return go('plan',{id:V.prevId});go(['home','plans','history','me','starters','paste'].includes(backTo)?backTo:'home')},
   tab:d=>{backTo=d.v;go(d.v)},
+  htab:d=>{go('home',{ht:d.v})},
   ob:d=>go('ob',{step:+d.v||0}),
   obNext:()=>{const k=OB[V.step||0];
     if(k==='name'){const n=$('#nm').value.trim();if(!n){$('#nm').focus();return}S.name=n}
