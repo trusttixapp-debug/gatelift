@@ -102,6 +102,40 @@ function mascot(pose='idle',size=120){
   </svg>`;
 }
 
-const ART={badge,mascot,TIERS};
+/* Shade: a shadow soldier the System lends every Hunter. Black silhouette, rim light, lightning eyes, smoke tail.
+   Poses: idle, smug, hype, angry, sleepy, curious. */
+function shade(pose='idle',size=120){
+  const id='sh'+(++uid);
+  const head='M100 62C88 52 74 44 58 26C60 50 48 66 42 92C34 128 62 162 100 174C138 162 166 128 158 92C152 66 140 50 142 26C126 44 112 52 100 62Z';
+  const cheeks='M45 106 20 112 47 126ZM155 106l25 6-27 14Z';
+  const tail='M84 164C70 186 100 192 90 210C84 222 96 236 114 232C104 228 100 220 108 214L122 222 116 206C126 190 112 180 118 164Z M96 198 76 204 90 190Z';
+  const hand=(cx,cy,s=1)=>{const k=1.45;cx=+cx;cy=+cy;const S=v=>v*k;return `M${cx-13*s} ${cy+8}Q${cx-17*s} ${cy-8} ${cx-7*s} ${cy-13}L${cx-6*s} ${cy-25}L${cx+1*s} ${cy-14}L${cx+8*s} ${cy-22}L${cx+8*s} ${cy-10}Q${cx+17*s} ${cy-2} ${cx+8*s} ${cy+9}Z`.replace(/(-?[d.]+) (-?[d.]+)/g,(m,x,y)=>((+x-cx)*k+cx).toFixed(1)+' '+((+y-cy)*k+cy).toFixed(1))};
+  const hands={idle:[[38,196,1],[162,196,-1]],smug:[[38,196,1],[166,150,-1]],hype:[[26,84,1],[174,84,-1]],angry:[[44,186,1],[156,186,-1]],sleepy:[[44,204,1],[156,204,-1]],curious:[[34,196,1],[168,126,-1]]}[pose]||[[38,196,1],[162,196,-1]];
+  const mirror=d=>`<path d="${d}" fill="url(#${id}e)"/><path d="${d}" fill="url(#${id}e)" transform="translate(200 0) scale(-1 1)"/>`;
+  const sparks=(o=1)=>`<g stroke="#6FB6FF" stroke-width="1.7" fill="none" stroke-linecap="round" filter="url(#${id}g)" opacity="${o}">
+    <path d="M58 100 46 94 38 98 28 90M60 110l-14 4-6 8"/><path d="M142 100l12-6 8 4 10-8M140 110l14 4 6 8"/></g>`;
+  let eyes;
+  if(pose==='hype')eyes=`<path d="M60 116Q76 92 94 112M106 112Q124 92 140 116" fill="none" stroke="url(#${id}e)" stroke-width="9" stroke-linecap="round"/>${sparks()}`;
+  else if(pose==='sleepy')eyes=`<path d="M62 112Q78 120 94 110M106 110Q122 120 138 112" fill="none" stroke="#CFE4FF" stroke-width="5" stroke-linecap="round"/>`;
+  else if(pose==='smug')eyes=mirror('M58 110 96 104Q92 122 74 124Q60 121 58 110Z')+sparks(.6);
+  else if(pose==='angry')eyes=mirror('M56 94 97 110Q90 126 74 125Q57 119 56 94Z')+sparks();
+  else if(pose==='curious')eyes=`<path d="M56 104Q70 80 96 96Q96 124 76 128Q56 124 56 104Z" fill="url(#${id}e)"/><path d="M110 104Q122 94 136 100Q136 116 124 118Q110 116 110 104Z" fill="url(#${id}e)"/>`;
+  else eyes=mirror('M58 104Q72 84 96 98Q94 122 75 126Q58 121 58 104Z')+sparks(.75);
+  const extra=pose==='hype'?`<path d="M86 146l7 7 7-7 7 7 7-7" fill="none" stroke="#DDEBFF" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/><g fill="#8FC4FF" filter="url(#${id}g)"><path d="M30 46l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/><path d="M170 40l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></g>`
+    :pose==='sleepy'?`<g font-family="Arial Black,Arial,sans-serif" font-weight="900" fill="#8FB4FF"><text x="150" y="46" font-size="22">z</text><text x="168" y="26" font-size="15">z</text></g>`
+    :pose==='curious'?`<text x="160" y="58" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="34" fill="#8FB4FF">?</text>`
+    :pose==='angry'?`<path d="M150 30l10 10M160 30l-10 10M146 35h18M155 26v18" stroke="#8FB4FF" stroke-width="3.4" stroke-linecap="round" transform="rotate(45 155 35)"/>`:'';
+  const body=`<path d="${tail}"/><path d="${cheeks}"/><path d="${head}"/>${hands.map(h=>`<path d="${hand(...h)}"/>`).join('')}`;
+  return `<svg class="shade" width="${size}" height="${size*1.2}" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shade">
+  <defs><radialGradient id="${id}e" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#E4F1FF"/><stop offset="1" stop-color="#7FBFFF"/></radialGradient>
+    <filter id="${id}g" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="${id}r" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter></defs>
+  <g fill="none" stroke="#7FB2FF" stroke-width="9" opacity=".55" filter="url(#${id}r)">${body}</g>
+  <g fill="#060814" stroke="#BFD6FF" stroke-width="2.2" stroke-linejoin="round">${body}</g>
+  <path d="M72 60C84 66 92 70 100 70" fill="none" stroke="#9DBBFF" stroke-opacity=".35" stroke-width="3" stroke-linecap="round"/>
+  <g filter="url(#${id}g)" transform="translate(100 110) scale(1.38) translate(-100 -110)">${eyes}</g>${extra}</svg>`;
+}
+
+const ART={badge,mascot,shade,TIERS};
 if(typeof module!=='undefined'&&module.exports)module.exports=ART;else root.ART=ART;
 })(typeof window!=='undefined'?window:this);
