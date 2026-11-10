@@ -168,6 +168,28 @@ function shade(pose='idle',size=120){
   <g filter="url(#${id}g)" transform="translate(110 122) scale(1.22) translate(-110 -122)">${eyes}</g></svg>`;
 }
 
-const ART={badge,mascot,shade,TIERS};
+/* App mark: a hooded Hunter walking out of a Gate rift, inside a black disc cut by two crescent blades.
+   variant 'dark' = black disc for light grounds, 'light' = white disc for navy grounds. */
+function logo(variant='dark',size=120){
+  const id='lg'+(++uid),ink=variant==='light'?'#FFFFFF':'#060814',bare=variant==='mark';
+  const cuts='M146 22C186 52 196 104 172 150C182 108 176 70 146 22Z M54 178C14 148 4 96 28 50C18 92 24 130 54 178Z';
+  const rift='M100 18C132 60 142 118 100 186C58 118 68 60 100 18Z';
+  const cloak='M100 66C111 67 116 79 114 91L124 99C136 111 141 142 146 178L130 168L121 181L110 170L100 184L90 170L79 181L70 168L54 178C59 142 64 111 76 99L86 91C84 79 89 67 100 66Z';
+  return `<svg class="logo" width="${size}" height="${size}" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gate mark">
+  <defs><mask id="${id}m"><rect width="200" height="200" fill="#fff"/><path d="${cuts}" fill="#000"/></mask>
+    <clipPath id="${id}k"><circle cx="100" cy="100" r="84"/></clipPath>
+    <linearGradient id="${id}p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E4EEFF"/><stop offset=".4" stop-color="#5B95FF"/><stop offset="1" stop-color="#0A2FD6"/></linearGradient>
+    <radialGradient id="${id}c" cx=".5" cy=".42" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#CFE2FF" stop-opacity=".55"/><stop offset="1" stop-color="#3D7BFF" stop-opacity="0"/></radialGradient>
+    <filter id="${id}g" x="-50%" y="-30%" width="200%" height="160%"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="${id}e" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  ${bare?`<path d="${cuts}" fill="#EAF2FF"/>`:`<circle cx="100" cy="100" r="88" fill="${ink}" mask="url(#${id}m)"/>`}
+  <g clip-path="url(#${id}k)"><path d="${rift}" fill="#3D7BFF" filter="url(#${id}g)" transform="translate(100 100) scale(1.25 1.05) translate(-100 -100)" opacity=".8"/>
+   <path d="${rift}" fill="url(#${id}p)"/><path d="${rift}" fill="url(#${id}c)"/>
+   <path d="${rift}" fill="none" stroke="#EAF2FF" stroke-width="1.4" opacity=".7"/><path d="${cloak}" fill="#060814"/>
+   <path d="M93 84l6 2-1 2.4zM107 84l-6 2 1 2.4z" fill="#9FD0FF" filter="url(#${id}e)"/></g>
+</svg>`;
+}
+
+const ART={badge,mascot,shade,logo,TIERS};
 if(typeof module!=='undefined'&&module.exports)module.exports=ART;else root.ART=ART;
 })(typeof window!=='undefined'?window:this);
