@@ -154,6 +154,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.45}
 .list .it .go{width:44px;height:44px;border-radius:50%;background:var(--chip);display:grid;place-items:center;color:var(--text);flex-shrink:0}
 .list .it .go .ic{width:18px;height:18px}
 .list .it .pill{background:var(--chip);margin-right:4px}
+.list .it .pill.acc{background:var(--acc);color:#fff}
 .list .it b{display:block;font-weight:650}
 .list .it small{color:var(--mute);font-size:13px}
 
@@ -911,7 +912,7 @@ plan:()=>{
    <div class="row between"><button class="ib" data-a="tab" data-v="plans">${ic('back')}</button>
     <div class="row" style="gap:8px"><button class="ib" data-a="editPlan" data-id="${r.id}">${ic('edit')}</button><button class="ib" data-a="delPlan" data-id="${r.id}">${ic('trash')}</button></div></div>
    <div class="hero" style="height:210px;margin-top:4px">${bodies(routineMuscles(r))}<div class="scan"></div><div class="fade"></div></div>
-   <h1 class="h1" style="margin-top:-20px;position:relative">${esc(r.name)}</h1>
+   <h1 class="h1" style="margin-top:18px">${esc(r.name)}</h1>
    <p class="sub" style="margin-top:6px">${r.ex.length} exercises · ~${estMin(r)} min · ${routineMuscles(r).map(g=>MGN[g]).join(', ')||'Full body'}</p>
    ${r.note?`<div class="note">${esc(r.note).replace(/\n/g,'<br>')}</div>`:''}
    ${r.warm.length?`<h3 class="h3">Warm up</h3><div class="card"><ul class="tl">${r.warm.map(w=>`<li><b>${esc(w)}</b></li>`).join('')}</ul></div>`:''}
