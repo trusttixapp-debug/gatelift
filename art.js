@@ -7,63 +7,86 @@ const hex=(cx,cy,r)=>Array.from({length:6},(_,i)=>{const a=Math.PI/180*(60*i-90)
 const poly=pts=>'M'+pts.map(p=>P(p[0],p[1])).join('L')+'Z';
 const lin=(id,c,x2=1,y2=1)=>`<linearGradient id="${id}" x1="0" y1="0" x2="${x2}" y2="${y2}">${c.map((s,i)=>`<stop offset="${i/(c.length-1)}" stop-color="${s}"/>`).join('')}</linearGradient>`;
 
-/* metal = frame and wings, gem = the stone, tier drives ornament */
+/* Rank emblems. The frame shape climbs with you (ring, hexagon, shield), metal gets richer, wings and a crown arrive at the top.
+   metal = frame and front feathers, gem = the stone and back feathers, wing2 = feathers behind the metal ones. */
 const TIERS={
-  E:{metal:['#D5DAE3','#8A93A5','#454C5B'],gem:['#C9D1DE','#6C778B','#2E3442'],tier:0},
-  D:{metal:['#F6D2A4','#C0844A','#5E3517'],gem:['#FFD08A','#E0862B','#6B3307'],tier:1},
-  C:{metal:['#FFFFFF','#C7CFDC','#6B778C'],gem:['#FFFFFF','#BFD0EC','#55678A'],tier:2},
-  B:{metal:['#D4FFF1','#3FD0A0','#0C5F47'],gem:['#C8FFEC','#1FC28D','#064F39'],tier:3},
-  A:{metal:['#DDE9FF','#5B95FF','#13309A'],gem:['#D6E6FF','#3D7BFF','#0A2490'],tier:4},
-  S:{metal:['#FFF5CC','#F5C43B','#8A560A'],gem:['#FFF8DD','#FFC92E','#9A5E06'],tier:5},
-  SS:{metal:['#555B69','#1D2029','#06070A'],gem:['#FFC2C8','#FF3B4E','#6E0412'],tier:6,edge:'#FF4B5C'},
-  M:{metal:['#5E4D86','#231A40','#090514'],gem:['#EBDDFF','#9061FF','#260B66'],tier:7,edge:'#B48CFF'}
+  E: {tier:0,shape:'ring', metal:['#F1F3F7','#A3ABB9','#4A515E','#23272F'],gem:['#B9C3D3','#5D687C','#1D2230']},
+  D: {tier:1,shape:'ring', metal:['#FFE6C4','#D08A4C','#6A3514','#2E1406'],gem:['#FFC27A','#C4601E','#401404']},
+  C: {tier:2,shape:'hex',  metal:['#FFFFFF','#CDD5E2','#66738A','#2A3242'],gem:['#E2F6FF','#5BB9EC','#0F3E60']},
+  B: {tier:3,shape:'hex',  metal:['#FFF4C9','#DDAE40','#6E4A08','#2E1E02'],gem:['#C2FFE0','#17B877','#033F26'],wing2:['#9DF5CC','#14A86B','#04402A']},
+  A: {tier:4,shape:'shield',metal:['#F5F9FF','#A9BEDF','#33476F','#141E36'],gem:['#C9DEFF','#2F6BFF','#061A5E'],wing2:['#9FC1FF','#2F6BFF','#0A2470']},
+  S: {tier:5,shape:'shield',metal:['#FFF8D8','#F3C23E','#7D4C05','#331E00'],gem:['#FFCACA','#E3263F','#540512'],wing2:['#FFE7A0','#E8A320','#6B3C00']},
+  SS:{tier:6,shape:'shield',metal:['#FFE9A8','#C9952A','#3E2705','#120B00'],gem:['#FFB7C0','#FF2B4A','#46000E'],wing2:['#FF8A97','#E0102E','#4A0010'],glow:'#FF3654'},
+  M: {tier:7,shape:'shield',metal:['#FFF4D0','#E7B84A','#6B4306','#281700'],gem:['#F1DEFF','#9A4DFF','#25065E'],wing2:['#D7B6FF','#8B3DFF','#2A0A6E'],glow:'#A66BFF'}
 };
+const shieldPts=(cx,cy,r)=>[[cx,cy-r],[cx+r*.9,cy-r*.52],[cx+r*.82,cy+r*.42],[cx,cy+r*1.02],[cx-r*.82,cy+r*.42],[cx-r*.9,cy-r*.52]];
+const framePath=(t,cx,cy,r)=>t.shape==='ring'
+  ?`M${P(cx-r,cy)}A${r} ${r} 0 1 0 ${P(cx+r,cy)}A${r} ${r} 0 1 0 ${P(cx-r,cy)}Z`
+  :poly(t.shape==='hex'?hex(cx,cy,r):shieldPts(cx,cy,r));
+const framePts=(t,cx,cy,r)=>t.shape==='ring'?Array.from({length:8},(_,i)=>{const a=Math.PI/4*i-Math.PI/2;return[cx+r*Math.cos(a),cy+r*Math.sin(a)]})
+  :t.shape==='hex'?hex(cx,cy,r):shieldPts(cx,cy,r);
+/* polished metal: bright, body, a dark band, a second highlight, then shadow */
+const metalGrad=(id,m,flip)=>`<linearGradient id="${id}" x1="${flip?1:0}" y1="${flip?1:0}" x2="${flip?0:1}" y2="${flip?0:1}">
+  <stop offset="0" stop-color="${m[0]}"/><stop offset=".28" stop-color="${m[1]}"/><stop offset=".5" stop-color="${m[2]}"/>
+  <stop offset=".64" stop-color="${m[0]}" stop-opacity=".95"/><stop offset=".8" stop-color="${m[1]}"/><stop offset="1" stop-color="${m[3]}"/></linearGradient>`;
 
-function feathers(t,cx,cy,id){
-  const n=[0,1,2,3,4,5,5,6][t.tier]; if(!n)return'';
-  const long=t.tier>=5?94:t.tier>=3?84:62, out=[];
-  for(let i=n-1;i>=0;i--){
-    const bx=cx+38, by=cy-22+i*13, a=(-40+i*19)*Math.PI/180, len=long-i*9, w=17-i*1.6;
-    const dx=Math.cos(a), dy=Math.sin(a), nx=-dy, ny=dx;
-    const tx=bx+len*dx, ty=by+len*dy, mx=bx+len*.5*dx, my=by+len*.5*dy;
-    const p0=[bx-nx*w/2,by-ny*w/2], p1=[bx+nx*w/2,by+ny*w/2];
-    const sharp=t.tier>=6;                                   /* SS and Monarch get jagged, flame-cut feathers */
-    const notch=sharp?`L${P(tx-dx*14+nx*5,ty-dy*14+ny*5)}L${P(tx-dx*10+nx*1,ty-dy*10+ny*1)}`:'';
-    out.push(`<path d="M${P(...p0)}Q${P(mx-nx*w*.9,my-ny*w*.9)} ${P(tx,ty)}${notch}Q${P(mx+nx*w*.35,my+ny*w*.35)} ${P(...p1)}Z" fill="url(#${id}w)" stroke="${t.edge||t.metal[2]}" stroke-width="${sharp?2:2.4}" stroke-linejoin="round"/>`);
-    out.push(`<path d="M${P(bx+dx*6,by+dy*6)}L${P(tx-dx*16,ty-dy*16)}" stroke="#fff" stroke-opacity="${sharp?.18:.4}" stroke-width="1.6" stroke-linecap="round"/>`);
-  }
-  const side=out.join('');
-  return `<g>${side}</g><g transform="translate(${2*cx} 0) scale(-1 1)">${side}</g>`;
+function wingSide(t,cx,cy,id){
+  const n=[0,0,0,3,4,5,5,6][t.tier]; if(!n)return'';
+  const long=[0,0,0,62,76,92,92,104][t.tier],flame=t.tier===6,out=[];
+  const blade=(bx,by,a,len,w,fill,stroke,sw)=>{
+    const dx=Math.cos(a),dy=Math.sin(a),nx=-dy,ny=dx,tx=bx+len*dx,ty=by+len*dy,mx=bx+len*.55*dx,my=by+len*.55*dy;
+    const notch=flame?`L${P(tx-dx*16+nx*7,ty-dy*16+ny*7)}L${P(tx-dx*11+nx*2,ty-dy*11+ny*2)}`:'';
+    return `<path d="M${P(bx-nx*w/2,by-ny*w/2)}Q${P(mx-nx*w*.95,my-ny*w*.95)} ${P(tx,ty)}${notch}Q${P(mx+nx*w*.3,my+ny*w*.3)} ${P(bx+nx*w/2,by+ny*w/2)}Z" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"/>
+      <path d="M${P(bx+dx*8,by+dy*8)}Q${P(mx-nx*w*.25,my-ny*w*.25)} ${P(tx-dx*14,ty-dy*14)}" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="1.4" stroke-linecap="round"/>`};
+  for(let i=n-1;i>=0;i--){const bx=cx+44,by=cy-26+i*14,a=(-52+i*17)*Math.PI/180,len=long-i*8;
+    out.push(blade(bx-4,by+2,a-.12,len+14,19-i,`url(#${id}w2)`,t.wing2[2],1.6));}
+  for(let i=n-1;i>=0;i--){const bx=cx+46,by=cy-24+i*14,a=(-46+i*17)*Math.PI/180,len=long-10-i*8;
+    out.push(blade(bx,by,a,len,16-i,`url(#${id}wm)`,t.metal[3],1.8));}
+  return out.join('');
 }
 
 function badge(k,size=64){
-  const t=TIERS[k]||TIERS.E, id='rb'+(++uid), cx=120, cy=104;
-  const outer=hex(cx,cy,60), bevel=hex(cx,cy,51), gem=hex(cx,cy,45), core=hex(cx,cy,22);
-  const facets=gem.map((p,i)=>{const q=gem[(i+1)%6];const o=[.34,.12,-.1,-.22,-.06,.2][i];
+  const t=TIERS[k]||TIERS.E,id='rb'+(++uid),cx=120,cy=t.tier>=5?126:120,R=t.shape==='shield'?66:t.tier>=3?64:74;
+  const side=wingSide(t,cx,cy,id);
+  const wings=side?`<g>${side}</g><g transform="translate(${2*cx} 0) scale(-1 1)">${side}</g>`:'';
+  const outer=framePath(t,cx,cy,R),rim=framePath(t,cx,cy,R*.88),recess=framePath(t,cx,cy,R*.78),stone=framePath(t,cx,cy,R*.6);
+  const sp=framePts(t,cx,cy,R*.6);
+  const facets=sp.map((p,i)=>{const q=sp[(i+1)%sp.length];const o=[.42,.18,-.08,-.3,-.18,.06,.24,.3][i%8];
     return `<path d="M${P(cx,cy)}L${P(...p)}L${P(...q)}Z" fill="${o>0?'#fff':'#000'}" fill-opacity="${Math.abs(o)}"/>`}).join('');
-  const glow=t.edge?`<path d="${poly(outer)}" fill="none" stroke="${t.edge}" stroke-width="7" opacity=".55" filter="url(#${id}b)"/>`:'';
-  const aura=t.tier===7?`<circle cx="${cx}" cy="${cy}" r="104" fill="url(#${id}a)"/>`:'';
-  const horns=t.tier===6?[1,-1].map(s=>`<path d="M${P(cx+s*26,cy-50)}C${P(cx+s*40,cy-74)} ${P(cx+s*58,cy-86)} ${P(cx+s*72,cy-112)}C${P(cx+s*60,cy-82)} ${P(cx+s*50,cy-62)} ${P(cx+s*40,cy-40)}Z" fill="url(#${id}m)" stroke="${t.edge}" stroke-width="2" stroke-linejoin="round"/>`).join(''):'';
-  const crown=t.tier===5||t.tier===7?`<path d="M${P(cx-28,cy-56)}L${P(cx-34,cy-90)}L${P(cx-15,cy-74)}L${P(cx,cy-100)}L${P(cx+15,cy-74)}L${P(cx+34,cy-90)}L${P(cx+28,cy-56)}Z" fill="url(#${id}m)" stroke="${t.edge||t.metal[2]}" stroke-width="2.4" stroke-linejoin="round"/>
-    ${[[cx-34,cy-90],[cx,cy-100],[cx+34,cy-90]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="url(#${id}g)" stroke="${t.edge||t.metal[2]}" stroke-width="1.5"/>`).join('')}`:'';
-  const spike=t.tier===4?`<path d="M${P(cx,cy-92)}L${P(cx+11,cy-70)}L${P(cx,cy-56)}L${P(cx-11,cy-70)}Z" fill="url(#${id}m)" stroke="${t.metal[2]}" stroke-width="2.4" stroke-linejoin="round"/>`:'';
-  const ribbon=t.tier>=2?`<path d="M${P(cx-54,cy+46)}L${P(cx-72,cy+50)}L${P(cx-62,cy+62)}L${P(cx-70,cy+76)}L${P(cx-46,cy+70)}Z M${P(cx+54,cy+46)}L${P(cx+72,cy+50)}L${P(cx+62,cy+62)}L${P(cx+70,cy+76)}L${P(cx+46,cy+70)}Z" fill="${t.metal[2]}" stroke="${t.edge||t.metal[2]}" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="M${P(cx-54,cy+46)}L${P(cx+54,cy+46)}L${P(cx+48,cy+72)}L${P(cx-48,cy+72)}Z" fill="url(#${id}g)" stroke="${t.edge||t.metal[2]}" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M${P(cx-50,cy+50)}L${P(cx+50,cy+50)}" stroke="#fff" stroke-opacity=".45" stroke-width="2"/>`:'';
+  /* studs on the ring for D, side brackets with gems from C up */
+  const studs=t.tier===1?Array.from({length:8},(_,i)=>{const a=Math.PI/4*i;return`<circle cx="${cx+R*.94*Math.cos(a)}" cy="${cy+R*.94*Math.sin(a)}" r="4.2" fill="url(#${id}m)" stroke="${t.metal[3]}" stroke-width="1.2"/>`}).join(''):'';
+  const brackets=t.tier>=2?[1,-1].map(s=>`<path d="M${P(cx+s*R*.86,cy-22)}L${P(cx+s*(R+14),cy-14)}L${P(cx+s*(R+14),cy+14)}L${P(cx+s*R*.86,cy+22)}Z" fill="url(#${id}m)" stroke="${t.metal[3]}" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M${P(cx+s*(R+5),cy-7)}L${P(cx+s*(R+10),cy)}L${P(cx+s*(R+5),cy+7)}L${P(cx+s*R,cy)}Z" fill="url(#${id}g)" stroke="${t.metal[3]}" stroke-width="1"/>`).join(''):'';
+  const top=t.tier===4?`<path d="M${P(cx,cy-R-30)}L${P(cx+13,cy-R-4)}L${P(cx,cy-R+10)}L${P(cx-13,cy-R-4)}Z" fill="url(#${id}m)" stroke="${t.metal[3]}" stroke-width="2" stroke-linejoin="round"/><path d="M${P(cx,cy-R-20)}L${P(cx+6,cy-R-5)}L${P(cx,cy-R+2)}L${P(cx-6,cy-R-5)}Z" fill="url(#${id}g)"/>`
+    :t.tier===5||t.tier===7?(()=>{const y=cy-R+4,h=t.tier===7?40:32;
+      return `<path d="M${P(cx-30,y)}L${P(cx-38,y-h)}L${P(cx-17,y-h*.5)}L${P(cx,y-h-10)}L${P(cx+17,y-h*.5)}L${P(cx+38,y-h)}L${P(cx+30,y)}Z" fill="url(#${id}m)" stroke="${t.metal[3]}" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M${P(cx-28,y-4)}L${P(cx+28,y-4)}" stroke="${t.metal[3]}" stroke-width="2"/>
+      ${[[cx-38,y-h,5],[cx,y-h-10,6.5],[cx+38,y-h,5],[cx-14,y-9,3.6],[cx+14,y-9,3.6]].map(([x,yy,r])=>`<circle cx="${x}" cy="${yy}" r="${r}" fill="url(#${id}g)" stroke="${t.metal[3]}" stroke-width="1.4"/><circle cx="${x-r*.35}" cy="${yy-r*.35}" r="${r*.3}" fill="#fff" opacity=".8"/>`).join('')}`})()
+    :t.tier===6?[1,-1].map(s=>`<path d="M${P(cx+s*22,cy-R+8)}C${P(cx+s*36,cy-R-20)} ${P(cx+s*56,cy-R-30)} ${P(cx+s*74,cy-R-58)}C${P(cx+s*66,cy-R-24)} ${P(cx+s*52,cy-R-6)} ${P(cx+s*40,cy-R+20)}Z" fill="url(#${id}m)" stroke="${t.metal[3]}" stroke-width="2" stroke-linejoin="round"/>`).join('')
+      +`<path d="M${P(cx,cy-R-22)}L${P(cx+10,cy-R)}L${P(cx,cy-R+10)}L${P(cx-10,cy-R)}Z" fill="url(#${id}g)" stroke="${t.metal[3]}" stroke-width="1.6"/>`:'';
+  const tip=t.tier>=5?`<path d="M${P(cx-22,cy+R*.92)}L${P(cx,cy+R*1.5)}L${P(cx+22,cy+R*.92)}Z" fill="url(#${id}m)" stroke="${t.metal[3]}" stroke-width="2" stroke-linejoin="round"/><path d="M${P(cx-8,cy+R*1.06)}L${P(cx,cy+R*1.3)}L${P(cx+8,cy+R*1.06)}Z" fill="url(#${id}g)"/>`:'';
+  const aura=t.glow?`<circle cx="${cx}" cy="${cy}" r="118" fill="url(#${id}a)"/>`:'';
+  const glow=t.glow?`<path d="${outer}" fill="none" stroke="${t.glow}" stroke-width="9" opacity=".7" filter="url(#${id}b)"/>`:'';
   const mark=k==='M'
-    ? `<path d="M${P(cx-20,cy+12)}L${P(cx-24,cy-14)}L${P(cx-10,cy-2)}L${P(cx,cy-20)}L${P(cx+10,cy-2)}L${P(cx+24,cy-14)}L${P(cx+20,cy+12)}Z" fill="#fff" stroke="${t.gem[2]}" stroke-width="3" stroke-linejoin="round"/>`
-    : `<text x="${cx}" y="${cy+(k.length>1?13:16)}" text-anchor="middle" font-family="Arial Black,Arial,Helvetica,sans-serif" font-weight="900" font-size="${k.length>1?36:46}" fill="#fff" stroke="${t.gem[2]}" stroke-width="4" paint-order="stroke" letter-spacing="-1">${k}</text>`;
-  return `<svg class="badge" width="${size}" height="${size}" viewBox="0 0 240 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${k==='M'?'Monarch':k+'-Rank'} badge">
-  <defs>${lin(id+'m',t.metal)}${lin(id+'w',[t.metal[0],t.metal[1],t.metal[2]],1,.3)}${lin(id+'g',t.gem,.3,1)}
-    <radialGradient id="${id}a"><stop offset="0" stop-color="${t.gem[1]}" stop-opacity=".55"/><stop offset="1" stop-color="${t.gem[1]}" stop-opacity="0"/></radialGradient>
-    <filter id="${id}b" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter></defs>
-  ${aura}${feathers(t,cx,cy,id)}${horns}${glow}
-  <path d="${poly(outer)}" fill="url(#${id}m)" stroke="${t.edge||t.metal[2]}" stroke-width="3" stroke-linejoin="round"/>
-  <path d="${poly(bevel)}" fill="${t.metal[2]}"/>
-  <path d="${poly(gem)}" fill="url(#${id}g)"/>${facets}
-  <path d="${poly(core)}" fill="#fff" fill-opacity=".16"/>
-  <path d="${poly(gem)}" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/>
-  ${spike}${crown}${ribbon}${mark}</svg>`;
+    ?`<path d="M${P(cx-22,cy+14)}L${P(cx-27,cy-14)}L${P(cx-11,cy-1)}L${P(cx,cy-22)}L${P(cx+11,cy-1)}L${P(cx+27,cy-14)}L${P(cx+22,cy+14)}Z" fill="url(#${id}l)" stroke="${t.gem[2]}" stroke-width="3" stroke-linejoin="round"/>`
+    :`<text x="${cx}" y="${cy+(k.length>1?15:19)}" text-anchor="middle" font-family="Arial Black,Arial,Helvetica,sans-serif" font-weight="900" font-size="${k.length>1?40:54}" fill="url(#${id}l)" stroke="${t.gem[2]}" stroke-width="5" paint-order="stroke" letter-spacing="-1">${k}</text>`;
+  return `<svg class="badge" width="${size}" height="${size}" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${k==='M'?'Monarch':k+'-Rank'} emblem">
+  <defs>${metalGrad(id+'m',t.metal)}${metalGrad(id+'r',t.metal,1)}${metalGrad(id+'wm',t.metal)}
+    ${t.wing2?`<linearGradient id="${id}w2" x1="0" y1="0" x2="1" y2=".4"><stop offset="0" stop-color="${t.wing2[0]}"/><stop offset=".5" stop-color="${t.wing2[1]}"/><stop offset="1" stop-color="${t.wing2[2]}"/></linearGradient>`:''}
+    <radialGradient id="${id}g" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="${t.gem[0]}"/><stop offset=".45" stop-color="${t.gem[1]}"/><stop offset="1" stop-color="${t.gem[2]}"/></radialGradient>
+    <radialGradient id="${id}d" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="${t.gem[2]}"/><stop offset="1" stop-color="#05060A"/></radialGradient>
+    <linearGradient id="${id}l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="${t.metal[0]}"/><stop offset="1" stop-color="${t.metal[1]}"/></linearGradient>
+    <radialGradient id="${id}a"><stop offset="0" stop-color="${t.glow||'#fff'}" stop-opacity=".5"/><stop offset="1" stop-color="${t.glow||'#fff'}" stop-opacity="0"/></radialGradient>
+    <filter id="${id}b" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="6"/></filter></defs>
+  ${aura}${wings}${glow}${tip}${brackets}
+  <path d="${outer}" fill="url(#${id}m)" stroke="${t.metal[3]}" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="${rim}" fill="url(#${id}r)" stroke="${t.metal[3]}" stroke-opacity=".6" stroke-width="1.5"/>
+  <path d="${recess}" fill="url(#${id}d)"/>
+  <path d="${stone}" fill="url(#${id}g)"/>${facets}
+  <path d="${stone}" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1.6"/>
+  <path d="M${P(cx-R*.42,cy-R*.3)}Q${P(cx-R*.1,cy-R*.56)} ${P(cx+R*.24,cy-R*.46)}" fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="3" stroke-linecap="round"/>
+  ${studs}${top}${mark}
+  <path d="M${P(cx+R*.6,cy-R*.78)}l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#fff" opacity=".9"/></svg>`;
 }
 
 /* Glint: a shard of the System that hatched to keep your record. Poses: idle, wave, cheer, write, sleep. */
