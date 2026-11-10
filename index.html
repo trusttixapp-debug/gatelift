@@ -38,7 +38,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.45}
 #app{max-width:520px;margin:0 auto;position:relative}
 
 /* ── views ── */
-.v{padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 120px);min-height:100dvh}
+.v{padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 96px);min-height:100dvh}
 .v.flush{padding-bottom:calc(env(safe-area-inset-bottom) + 28px)}
 .enter>*{animation:rise .42s cubic-bezier(.2,.8,.2,1) both}
 .enter>*:nth-child(2){animation-delay:.04s}.enter>*:nth-child(3){animation-delay:.08s}
@@ -82,13 +82,14 @@ textarea{resize:vertical;min-height:84px;line-height:1.45}
 .ic.s{width:18px;height:18px}
 
 /* ── tab bar ── */
-.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 12px);
-  width:min(484px,calc(100% - 28px));height:70px;border-radius:999px;background:rgba(7,18,51,.95);
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);display:flex;align-items:center;
-  justify-content:space-around;padding:0 8px;z-index:30;border:1px solid rgba(255,255,255,.06);box-shadow:0 12px 30px rgba(7,18,51,.25)}
-.tabs button{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;color:rgba(255,255,255,.45);transition:color .2s}
-.tabs button.on{color:#fff}
-.tabs button.go{width:62px;height:62px;background:var(--acc);color:var(--inv);box-shadow:0 0 0 6px rgba(26,75,255,.28),0 0 22px rgba(61,123,255,.6)}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(520px,100%);z-index:30;
+  display:grid;grid-template-columns:repeat(4,1fr);padding:6px 8px calc(env(safe-area-inset-bottom) + 6px);
+  background:rgba(255,255,255,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+.tabs button{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 4px;
+  color:var(--dim);font-size:11px;font-weight:650;letter-spacing:.02em;transition:color .2s}
+.tabs button .ic{width:21px;height:21px}
+.tabs button.on{color:var(--acc)}
+.tabs button.on::before{content:'';position:absolute;top:-6px;left:50%;width:22px;height:3px;margin-left:-11px;border-radius:0 0 3px 3px;background:var(--acc)}
 
 /* ── system window: the glow lives on the frame, never the content ── */
 .sys{position:relative;border-radius:18px;padding:16px 18px;background:linear-gradient(180deg,var(--navy2),var(--navy));color:#fff;
@@ -628,8 +629,8 @@ function render(){
   afterRender();
 }
 function tabs(on){
-  const t=(v,i)=>`<button class="${on===v?'on':''}" data-a="tab" data-v="${v}" aria-label="${v}">${ic(i)}</button>`;
-  return `<nav class="tabs">${t('home','home')}${t('plans','list')}<button class="go" data-a="quick" aria-label="Start">${ic('play')}</button>${t('history','cal')}${t('me','user')}</nav>`;
+  const t=(v,i,l)=>`<button class="${on===v?'on':''}" data-a="tab" data-v="${v}">${ic(i)}<span>${l}</span></button>`;
+  return `<nav class="tabs">${t('home','home','Home')}${t('plans','list','Plans')}${t('history','cal','Record')}${t('me','user','Hunter')}</nav>`;
 }
 function hunterCard(){
   const xp=totalXP(),L=levelOf(xp),r=rankOf(L.lv),nr=nextRank(L.lv);
