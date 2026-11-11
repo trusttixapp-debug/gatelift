@@ -204,6 +204,14 @@ h3{font-size:16px;font-weight:650;letter-spacing:-.01em}
 .ta{width:100%;min-height:240px;border-radius:22px;background:var(--card2);border:0;box-shadow:inset 0 0 0 1px var(--line);padding:14px 16px;outline:none;font-size:16px;line-height:1.45;color:var(--text);resize:vertical}
 .ta:focus{box-shadow:inset 0 0 0 1.5px #fff}
 .pday .mlist{margin-top:6px}
+.sets button.no{background:none;width:26px;height:26px;border-radius:50%;justify-self:center;display:grid;place-items:center;color:var(--mute);font-weight:600}
+.sets button.no.f1{box-shadow:inset 0 0 0 2px #3a8f5c}.sets button.no.f2{box-shadow:inset 0 0 0 2px var(--gain)}
+.sets button.no.f3{box-shadow:inset 0 0 0 2px #e0a33a}.sets button.no.f4{box-shadow:inset 0 0 0 2px var(--warn)}
+.sets button.no.pn::after{content:"";position:absolute;right:-1px;top:-1px;width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.feelrow{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;padding:10px 12px;margin:-2px 0 4px;border-radius:18px;background:var(--card)}
+.feelrow .chip{height:32px}.chip.pain.on{background:var(--warn);color:#fff}
+.fb{display:flex;flex-direction:column;gap:10px}.fb .seg button{font-size:13px;padding:0 2px}
+
 
 /* lift: one exercise at a time over its photo */
 .lift{margin:0 -16px;position:relative}
@@ -639,6 +647,9 @@ const ICONS={
  home:'<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
  body:'<circle cx="12" cy="4.6" r="2.1"/><path d="M5 8.6h14M12 8.6v5.6m0 0-3 6.8m3-6.8 3 6.8"/>',
  log:'<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+ share:'<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v5.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V13"/>',
+ copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/>',
+ file:'<path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3.5V8h4.5M9 13h6M9 16.5h6"/>',
  you:'<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5c1.4-3.8 4.3-5.6 7.5-5.6s6.1 1.8 7.5 5.6"/>',
  play:'<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>',
  pause:'<path d="M8.5 5.5v13M15.5 5.5v13" stroke-width="3"/>',
@@ -677,7 +688,7 @@ const caSec=ca=>ca.sec+(ca.run?(Date.now()-ca.run)/1000:0);
 function finish(){
   const c=S.cur;if(c.ca.run){c.ca.sec=caSec(c.ca);c.ca.run=0}
   c.t1=Date.now();
-  c.ex=c.ex.map(e=>({id:e.id,sets:e.sets.filter(s=>s.ok||s.w||s.r)})).filter(e=>e.sets.length);
+  c.ex=c.ex.map(e=>({id:e.id,...(e.note?{note:e.note}:{}),sets:e.sets.filter(s=>s.ok||s.w||s.r)})).filter(e=>e.sets.length);
   c.pr=prsOf(c);
   S.log.push(c);if(setsOf(c))S.idx++;S.cur=null;V.rest=null;V.str=null;V.view='done';V.doneId=c.id;save();render();
 }
@@ -699,6 +710,7 @@ function render(){
   else if(V.view==='day')h=dayView();
   else if(V.view==='imp')h=impView();
   else if(V.view==='past'&&V.past)h=pastView();
+  else if(V.view==='export')h=exportView();
 
   else h=({today,body:bodyTab,log:logTab,you:youTab}[V.tab]||today)()+tabs();
   if(V.sheet)h+=sheet();
@@ -884,11 +896,13 @@ function liftStep(c,i){
      <button class="x" data-a="exInfo" data-v="${e.id}" aria-label="How to do it">${ic('info')}</button></div></div>
    <div class="liftb">
     <div class="last">${last?`Last time: ${lastTxt}`:X.kg?`Your plan says ${X.kg} ${S.unit}. Tick a set to log it.`:'First time. Pick a weight you could lift 2 more reps with.'}${h?` <span class="tag g">${ic('up')}${h}</span>`:''}</div>
-    <div class="sets">${e.sets.map((s,j)=>{const ls=last&&doneSets(last)[j];return `<span class="no ${j===curSet?'cur':''}"><span>${j+1}</span></span>
+    <div class="sets">${e.sets.map((s,j)=>{const ls=last&&doneSets(last)[j],open=V.feel&&V.feel.e===i&&V.feel.s===j&&s.ok;return `<button class="no ${j===curSet?'cur':''} ${s.f?'f'+s.f:''} ${s.p?'pn':''}" ${s.ok?`data-a="feelOpen" data-e="${i}" data-s="${j}" aria-label="How set ${j+1} felt"`:'tabindex="-1"'}><span>${j+1}</span></button>
      <span class="cell ${s.ok?'okc':''}"><input inputmode="decimal" aria-label="Set ${j+1} weight" placeholder="${ls&&ls.w?ls.w:X.kg?X.kg:X.bw?'BW':'–'}" value="${esc(s.w)}" data-in="w" data-e="${i}" data-s="${j}"><span class="u">${R.hold?'+':S.unit}</span></span>
      <span class="cell ${s.ok?'okc':''}"><input inputmode="numeric" aria-label="Set ${j+1} reps" placeholder="${ls?ls.r:R.hi}" value="${esc(s.r)}" data-in="r" data-e="${i}" data-s="${j}"><span class="u">${R.hold?'s':'×'}</span></span>
-     <button class="tk ${s.ok?'y':''}" data-a="tick" data-e="${i}" data-s="${j}" aria-label="Set ${j+1} done">${ic('check')}</button>`}).join('')}</div>
-    <button class="addset" data-a="addSet" data-e="${i}">${ic('plus')}Add set</button>
+     <button class="tk ${s.ok?'y':''}" data-a="tick" data-e="${i}" data-s="${j}" aria-label="Set ${j+1} done">${ic('check')}</button>${open?feelRow(i,j,s):''}`}).join('')}</div>
+
+    <div class="row" style="gap:16px"><button class="addset" data-a="addSet" data-e="${i}">${ic('plus')}Add set</button><button class="addset" data-a="noteOpen" data-e="${i}">${ic('log')}${e.note?'Edit note':'Add note'}</button></div>
+    ${V.noteFor===i||e.note?`<textarea class="ta" style="min-height:70px" data-in="exnote" data-e="${i}" placeholder="How did it feel? Form, pain, machine settings…">${esc(e.note||'')}</textarea>`:''}
     <div class="pager"><div class="ring"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="var(--card3)" stroke-width="3"/><circle cx="22" cy="22" r="19" fill="none" stroke="var(--gate)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-doneN/n)).toFixed(1)}"/></svg>${doneN}/${n}</div>
      <div class="sp"><b>${esc(X.n)}</b><small>${esc(D.n)}</small></div>
      <div class="pnums">${c.ex.map((x,j)=>`<button class="${j===i?'on':''} ${x.sets.length&&x.sets.every(s=>s.ok)?'dn':''}" data-a="exGo" data-v="${j}" aria-label="Exercise ${j+1}">${j+1}</button>`).join('')}</div></div>
@@ -912,6 +926,7 @@ function done(){
     <div class="row" style="padding:12px 0;border-top:1px solid var(--line)">${ic('lift','acc')}<span class="sp">${plural((s.ex||[]).length,'exercise')}</span><span class="mute">${plural(setsOf(s),'set')}</span></div></div>
    ${s.pr&&s.pr.length?`<div class="card"><div class="row">${ic('trophy','acc')}<h3>New best${s.pr.length>1?'s':''}</h3></div>${s.pr.map(p=>`<div class="row" style="margin-top:8px"><span class="sp">${EX[p.id].n}</span><b>${p.w} ${S.unit}</b></div>`).join('')}</div>`:''}
    <div class="card next"><div class="sp"><div class="lbl">Next session</div><h3 style="margin-top:6px;font-size:18px">${esc(DAYS[nk].rest?'Rest day':DAYS[nk].n)}</h3><div class="mute" style="font-size:13px">${DAYS[nk].rest?esc(DAYS[nk].note||'Walk and stretch'):DAYS[nk].f.map(g=>GN[g]).join(' · ')}</div></div>${fig(bestSide(DAYS[nk].f),litOf(dayMuscles(nk)),{noglow:true})}</div>
+   ${fbCard(s)}
    <button class="btn" data-a="home">Back to today</button></div>`;
 }
 
@@ -945,6 +960,7 @@ function logTab(){
   return `<div class="v">
    <div><div class="lbl">History</div><h1 style="margin-top:4px">Log</h1></div>
    <div class="stats"><div class="stat">${ic('lift')}<b>${total}</b><small>workouts</small></div><div class="stat">${ic('log')}<b>${sets}</b><small>sets</small></div><div class="stat">${ic('trophy')}<b>${(()=>{const v=S.log.reduce((a,s)=>a+volOf(s),0);return v>=1e4?(v/1000).toFixed(1)+'k':Math.round(v)})()}</b><small>${S.unit}</small></div></div>
+   <button class="btn" data-a="exportOpen" style="height:50px">${ic('share')}Export for your coach or AI</button>
    <button class="btn ghost" data-a="pastOpen" style="height:50px">${ic('plus')}Log a past day</button>
    <div class="card"><div class="row" style="margin-bottom:12px"><span class="lbl sp">Last 30 days</span><span class="lbl">${[...Array(30)].filter((_,j)=>{const d=new Date();d.setDate(d.getDate()-29+j);return days.has(dkey(d))}).length} · goal ${S.plan?split().d.filter(k=>!DAYS[k].rest).length:S.days}/wk</span></div>
     <div class="grid30">${[...Array(30)].map((_,j)=>{const d=new Date();d.setDate(d.getDate()-29+j);const kk=dkey(d);return `<i class="${days.has(kk)?'y':''} ${kk===t?'t':''}"></i>`}).join('')}</div></div>
@@ -967,6 +983,7 @@ function dayView(){
    <div class="card"><div class="row"><span class="ic on">${ic('stretch')}</span><div class="sp"><h3>Stretch</h3><div class="mute" style="font-size:13px">${Object.entries(s.st||{}).filter(([,v])=>v).map(([k])=>STR[k].n).join(', ')||'Skipped'}</div></div></div></div>
    <div class="card"><div class="row"><span class="ic on">${ic('cardio')}</span><div class="sp"><h3>${esc(s.ca.type)}</h3><div class="mute" style="font-size:13px">${s.ca.sec>0?mmss(s.ca.sec):'Skipped'}${s.ca.dist?` · ${esc(s.ca.dist)} ${S.unit==='lb'?'mi':'km'}`:''}</div></div></div></div>
    ${(s.ex||[]).map(e=>{const R=parseR(EX[e.id].r);return `<div class="card"><h3>${EX[e.id].n}</h3><table class="tbl" style="margin-top:8px">${e.sets.map((x,j)=>`<tr><td>Set ${j+1}</td><td>${R.hold?`${esc(x.r)}s`:`${x.w?esc(x.w)+' '+S.unit+' × ':''}${esc(x.r)} reps`}${x.ok?'':' <span class="dim">(not ticked)</span>'}</td></tr>`).join('')}</table></div>`}).join('')}
+   ${fbCard(s)}
    <button class="btn ghost" data-a="delAsk" data-v="${s.id}" style="color:var(--warn)">Delete this session</button>
    ${V.delAsk===s.id?`<div class="card"><p style="font-size:14px">Delete this session for good? It can’t be undone.</p><div class="row" style="margin-top:12px"><button class="btn ghost" data-a="delNo">Keep it</button><button class="btn" style="background:var(--warn);color:#fff" data-a="del" data-v="${s.id}">Delete</button></div></div>`:''}
   </div>`;
@@ -1058,6 +1075,73 @@ function pastSave(){
   const left=missedDays();
   if(left.length){pastNew(left[0].d,left[0].k);toast(`Saved. Next: ${DOW[fromKey(left[0].d).getDay()]}`)}else{V.view='tab';V.tab='log';scrollTo(0,0);toast('Saved to your log')}
 }
+
+/* ── how it felt: per set, and for the whole session ── */
+const FEEL=['','Easy','Good','Hard','Max'],FEELX=['','easy','good','hard','to failure'];
+const RATE=['','Easy','Good','Solid','Hard','Brutal'];
+const PAINSPOTS=[['shoulders','Shoulders'],['chest','Chest'],['lats','Back'],['lowerback','Lower back'],['biceps','Arms'],['forearms','Wrists/forearms'],['quads','Quads'],['hams','Hamstrings'],['glutes','Hips/glutes'],['knee','Knees'],['calves','Calves/ankles'],['neck','Neck']];
+function feelRow(i,j,s){return `<div class="feelrow"><span class="lbl">How was set ${j+1}?</span><div class="chips">${[1,2,3,4].map(f=>`<button class="chip ${s.f===f?'on':''}" data-a="feel" data-v="${f}" data-e="${i}" data-s="${j}">${FEEL[f]}</button>`).join('')}<button class="chip pain ${s.p?'on':''}" data-a="pain" data-e="${i}" data-s="${j}">Pain</button></div></div>`}
+function fbSess(el){const s=S.log.find(x=>x.id===el.dataset.id);s.fb=s.fb||{};return s}
+function fbCard(s){const f=s.fb||{},P=f.pain||[],id=s.id,mus=new Set((s.ex||[]).flatMap(e=>(EX[e.id]&&EX[e.id].m)||[]));
+  const spots=PAINSPOTS.filter(([k])=>mus.has(k)||['lowerback','knee','neck'].includes(k)||P.includes(k));
+  return `<section class="card fb"><h3>How did it feel?</h3>
+   <span class="lbl">Overall</span><div class="seg">${[1,2,3,4,5].map(r=>`<button class="${f.rate===r?'on':''}" data-a="fbRate" data-v="${r}" data-id="${id}">${RATE[r]}</button>`).join('')}</div>
+   <span class="lbl">Pain or discomfort</span><div class="chips"><button class="chip ${P.includes('none')?'on':''}" data-a="fbPain" data-v="none" data-id="${id}">None</button>${spots.map(([k,n])=>`<button class="chip pain ${P.includes(k)?'on':''}" data-a="fbPain" data-v="${k}" data-id="${id}">${n}</button>`).join('')}</div>
+   <span class="lbl">Stretching felt</span><div class="seg">${['Tight','Normal','Loose'].map(t=>`<button class="${f.stretch===t?'on':''}" data-a="fbStretch" data-v="${t}" data-id="${id}">${t}</button>`).join('')}</div>
+   <span class="lbl">Notes</span><textarea class="ta" style="min-height:90px" data-in="fbnote" data-id="${id}" placeholder="Energy, sleep, what to change next time…">${esc(f.note||'')}</textarea>
+   <small class="dim">Saved as you go. It goes into your export.</small></section>`}
+
+/* ── export: hand your log to a coach or another AI ── */
+const sessIn=days=>{if(!days)return S.log.slice();const c=new Date();c.setDate(c.getDate()-days+1);const ck=dkey(c);return S.log.filter(s=>s.d>=ck)};
+const exName=id=>(EX[id]&&EX[id].n)||id;
+function exportText(days){
+  const L=sessIn(days),u=S.unit,first=L[0],lastS=L[L.length-1];
+  const fmtD=k=>{const d=fromKey(k);return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`};
+  let t=`GATELIFT training log${L.length?` · ${fmtD(first.d)} – ${fmtD(lastS.d)} ${fromKey(lastS.d).getFullYear()}`:''} · weights in ${u}\n`;
+  t+=`Feel per set: easy / good / hard / to failure. Session rating: 1 easy – 5 brutal.\n`;
+  if(!L.length)t+='\nNo sessions logged in this period.\n';
+  L.forEach(s=>{const D=DAYS[s.k],f=s.fb||{},m=Math.max(1,Math.round((s.t1-s.t0)/60000)),st=Object.values(s.st||{}),stD=st.filter(Boolean).length;
+    t+=`\n${fmtD(s.d)} · ${D?(D.rest?'Rest day':D.n):s.kn||'Workout'} · ${m} min${s.past?' (logged afterwards)':''}`;
+    if(f.rate)t+=` · felt ${f.rate}/5 (${RATE[f.rate]})`;
+    t+=`\n  Stretch ${stD}/${st.length}${f.stretch?` (felt ${f.stretch.toLowerCase()})`:''} · Cardio ${s.ca.type} ${mmss(s.ca.sec)}${s.ca.dist?` · ${s.ca.dist} ${u==='lb'?'mi':'km'}`:''}\n`;
+    (s.ex||[]).forEach(e=>{const X=D&&D.spec&&D.spec[e.id],pl=X?` (plan ${X.s}x${X.r}${X.kg?` ${X.kg}${u}`:''})`:'';
+      t+=`  ${exName(e.id)}${pl}: ${e.sets.map(x=>`${x.w?x.w+'×':''}${x.r}${x.f||x.p?` (${[x.f?FEELX[x.f]:'',x.p?'pain':''].filter(Boolean).join(', ')})`:''}${x.ok?'':' (not done)'}`).join(', ')}${e.note?` — note: ${e.note.replace(/\s+/g,' ')}`:''}\n`});
+    const P=(f.pain||[]).filter(p=>p!=='none');if(P.length||(f.pain||[]).includes('none'))t+=`  Pain: ${P.length?P.map(p=>(PAINSPOTS.find(x=>x[0]===p)||[0,p])[1]).join(', '):'none'}\n`;
+    if(f.note)t+=`  Notes: ${f.note.replace(/\s+/g,' ')}\n`;
+    if(s.pr&&s.pr.length)t+=`  New bests: ${s.pr.map(p=>`${exName(p.id)} ${p.w}${u}`).join(', ')}\n`});
+  if(S.plan){t+=`\nCurrent plan (reply with an adjusted version in exactly this format and I'll paste it into GATELIFT → You → Update days or the whole week):\n\n${planToText()}\n`}
+  return t;
+}
+function exportCsv(days){const q=v=>{v=v==null?'':String(v);return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
+  const rows=[['date','day','exercise','set','weight','unit','reps','done','feel','pain','exercise_note','plan_sets','plan_reps','plan_weight','session_rating','session_pain','stretch_felt','session_note','minutes']];
+  sessIn(days).forEach(s=>{const D=DAYS[s.k],f=s.fb||{},m=Math.max(1,Math.round((s.t1-s.t0)/60000)),pain=(f.pain||[]).join('|');
+    const base=[f.rate||'',pain,f.stretch||'',f.note||'',m];
+    if(!(s.ex||[]).length)rows.push([s.d,D?D.n:s.kn,'(no lifting)','','','','','','','','','','','',...base]);
+    (s.ex||[]).forEach(e=>{const X=(D&&D.spec&&D.spec[e.id])||{};e.sets.forEach((x,j)=>rows.push([s.d,D?D.n:s.kn,exName(e.id),j+1,x.w,S.unit,x.r,x.ok?1:0,x.f?FEELX[x.f]:'',x.p?1:0,j?'':(e.note||''),X.s||'',X.r||'',X.kg||'',...base]))})});
+  return rows.map(r=>r.map(q).join(',')).join('\n')+'\n'}
+function exportJson(days){return JSON.stringify({app:'GATELIFT',exported:new Date().toISOString(),unit:S.unit,plan:S.plan?{text:planToText(),days:S.plan.keys.map(k=>({key:k,...DAYS[k]}))}:null,
+  exercises:Object.fromEntries(Object.entries(EX).filter(([id])=>sessIn(days).some(s=>(s.ex||[]).some(e=>e.id===id))).map(([id,x])=>[id,{name:x.n,muscles:x.m}])),sessions:sessIn(days)},null,2)}
+const exStamp=()=>dkey();
+async function exportShare(){const t=exportText(V.exRange);
+  try{if(navigator.share){await navigator.share({title:'GATELIFT training log',text:t});return}}catch(e){if(e&&e.name==='AbortError')return}
+  exportCopy()}
+function exportCopy(){const t=exportText(V.exRange);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copied. Paste it into Claude'),()=>{V.exShow=true;render();const a=document.getElementById('extxt');if(a){a.focus();a.select()}toast('Select all and copy')})}
+async function exportFile(kind){const name=`gatelift-${kind==='csv'?'sets':'log'}-${exStamp()}.${kind}`,type=kind==='csv'?'text/csv':'application/json',body=kind==='csv'?exportCsv(V.exRange):exportJson(V.exRange);
+  const blob=new Blob([body],{type});
+  try{const f=new File([blob],name,{type});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return}}catch(e){if(e&&e.name==='AbortError')return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast('Saved '+name)}
+function exportView(){const r=V.exRange||7,L=sessIn(r),fb=L.filter(s=>s.fb&&(s.fb.rate||s.fb.note||(s.fb.pain||[]).length)).length,sets=L.reduce((a,s)=>a+setsOf(s),0);
+  return `<div class="v" style="padding-bottom:40px">
+   <div class="row"><button class="x" data-a="tab" data-v="log" aria-label="Back">${ic('back')}</button><div class="sp"><div class="lbl">Your data</div><h2 style="font-size:24px;font-weight:700">Export</h2></div></div>
+   <p class="mute" style="font-size:14px">Send your log to a coach, Claude or any other app to review your week and adjust the plan. The text version ends with your current plan, so an adjusted plan can be pasted straight back in.</p>
+   <span class="lbl">Period</span><div class="seg">${[[7,'7 days'],[14,'2 weeks'],[30,'30 days'],[0,'All']].map(([d,n])=>`<button class="${r===d?'on':''}" data-a="exRange" data-v="${d}">${n}</button>`).join('')}</div>
+   <div class="stats"><div class="stat"><b>${L.length}</b><small>sessions</small></div><div class="stat"><b>${sets}</b><small>sets</small></div><div class="stat"><b>${fb}</b><small>check-ins</small></div></div>
+   <button class="btn" data-a="exShare">${ic('share')}Share as text</button>
+   <button class="btn ghost" data-a="exCopy">${ic('copy')}Copy text</button>
+   <div class="row" style="gap:8px"><button class="btn ghost" data-a="exCsv" style="height:50px">${ic('file')}CSV</button><button class="btn ghost" data-a="exJson" style="height:50px">${ic('file')}JSON</button></div>
+   <p class="dim" style="font-size:12px">CSV: one row per set, for spreadsheets. JSON: everything, for apps.</p>
+   <span class="lbl">Preview</span><textarea class="ta" id="extxt" readonly style="min-height:260px;font-size:13px">${esc(exportText(r))}</textarea>
+  </div>`}
 
 /* ── paste your own plan ── */
 const SAMPLE='DAY 1 (Mon) PUSH\n1. Bench press 4x8-10 60kg rest 2min\n2. Lateral raise 3x12-15 10kg rest 60s\n\nDAY 2 (Tue) PULL\n1. Lat pulldown 4x10-12 55kg rest 90s\n\nSUN: REST (30 min walk, 10 min stretch)';
@@ -1204,7 +1288,17 @@ const A={
  caRun:()=>{const ca=S.cur.ca;if(ca.run){ca.sec=caSec(ca);ca.run=0}else ca.run=Date.now();save()},
  caDone:()=>{const ca=S.cur.ca;if(ca.run){ca.sec=caSec(ca);ca.run=0}ca.done=true;if(!S.cur.ex.length){V.sheet={t:'finish'};save();return}S.cur.step=2;save();scrollTo(0,0)},
  tick:(v,el)=>{const e=S.cur.ex[+el.dataset.e],s=e.sets[+el.dataset.s],X=xs(S.cur.k,e.id),R=parseR(X.r),last=lastFor(e.id,S.cur.k),ls=last&&doneSets(last)[+el.dataset.s];
-   if(!s.ok){if(!s.r)s.r=String(ls?ls.r:R.hi);if(!s.w)s.w=ls&&ls.w?String(ls.w):X.kg?String(X.kg):'';s.ok=true;V.rest=X.rest>0?{end:Date.now()+X.rest*1000}:null;buzz(30)}else{s.ok=false}save()},
+   if(!s.ok){if(!s.r)s.r=String(ls?ls.r:R.hi);if(!s.w)s.w=ls&&ls.w?String(ls.w):X.kg?String(X.kg):'';s.ok=true;V.rest=X.rest>0?{end:Date.now()+X.rest*1000}:null;V.feel={e:+el.dataset.e,s:+el.dataset.s};buzz(30)}else{s.ok=false;V.feel=null}save()},
+ feelOpen:(v,el)=>{const f={e:+el.dataset.e,s:+el.dataset.s};V.feel=V.feel&&V.feel.e===f.e&&V.feel.s===f.s?null:f},
+ feel:(v,el)=>{const s=S.cur.ex[+el.dataset.e].sets[+el.dataset.s];s.f=s.f===+v?0:+v;if(s.f)V.feel=null;save()},
+ pain:(v,el)=>{const s=S.cur.ex[+el.dataset.e].sets[+el.dataset.s];s.p=!s.p;save()},
+ noteOpen:(v,el)=>{V.noteFor=V.noteFor===+el.dataset.e?null:+el.dataset.e},
+ fbRate:(v,el)=>{const s=fbSess(el);s.fb.rate=s.fb.rate===+v?0:+v;save()},
+ fbPain:(v,el)=>{const s=fbSess(el),P=s.fb.pain=s.fb.pain||[];if(v==='none'){s.fb.pain=P.includes('none')?[]:['none']}else{const i=P.indexOf(v);if(i>=0)P.splice(i,1);else{P.push(v);const n=P.indexOf('none');if(n>=0)P.splice(n,1)}}save()},
+ fbStretch:(v,el)=>{const s=fbSess(el);s.fb.stretch=s.fb.stretch===v?'':v;save()},
+ exportOpen:()=>{V.view='export';V.exRange=V.exRange||7;scrollTo(0,0)},
+ exRange:v=>{V.exRange=+v},
+ exShare:()=>exportShare(),exCopy:()=>exportCopy(),exCsv:()=>exportFile('csv'),exJson:()=>exportFile('json'),
  addSet:(v,el)=>{const e=S.cur.ex[+el.dataset.e],p=e.sets[e.sets.length-1];e.sets.push({w:p?p.w:'',r:'',ok:false});save()},
  pastOpen:v=>{const [d,k]=String(v||'').split('|');pastNew(d||'',k||'')},
  pastBack:()=>{V.past=null;V.view='tab'},
@@ -1246,6 +1340,8 @@ document.addEventListener('input',e=>{
   const el=e.target,k=el.dataset.in;if(!k)return;
   if(k==='imp'){V.imp=el.value;clearTimeout(A.impT);A.impT=setTimeout(()=>{const P=parsePlan(V.imp),pv=document.getElementById('impPrev'),b=document.getElementById('impGo');
     if(pv)pv.innerHTML=impPrev(P);const okk=P.days.some(d=>d.ex.length||d.rest);if(b)b.disabled=!okk;const b2=document.getElementById("impGo2");if(b2)b2.disabled=!okk},250);return}
+  if(k==='exnote'){const e=S.cur&&S.cur.ex[+el.dataset.e];if(e){e.note=el.value;save()}return}
+  if(k==='fbnote'){const s=S.log.find(x=>x.id===el.dataset.id);if(s){s.fb=s.fb||{};s.fb.note=el.value;save()}return}
   if(k==='pw'||k==='pr'){if(V.past)V.past.ex[+el.dataset.e].sets[+el.dataset.s][k==='pw'?'w':'r']=el.value.replace(/[^\d.]/g,'');return}
   if(k==='name')S.name=el.value.trim();
 
