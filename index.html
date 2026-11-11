@@ -760,8 +760,12 @@ function render(){
   if(V.rest&&V.view!=='run')h+=`<button class="restpill glass" data-a="resume">${ic('clock')}Rest <b class="clock" id="rst">${mmss((V.rest.end-Date.now())/1000)}</b></button>`;
   if(V.streakPop)h+=streakPop();
   if(V.toast)h+=`<div class="toast">${esc(V.toast)}</div>`;
+  /* keep your place: re-drawing the page must not jump it back to the top */
+  const keepY=window.scrollY;
   a.innerHTML=h;
   mount3d();
+  if(!document.body.classList.contains('lock')&&Math.abs(window.scrollY-keepY)>2)window.scrollTo(0,keepY);
+  V.skipView=false;
   tick();
 }
 function tabs(){
@@ -1304,11 +1308,11 @@ function mount3d(){
     let h=B3[key];
     if(!h){const host=document.createElement('div');host.className='b3d';h=B3[key]={host,api:null,view:'',sex:S.sex};
       try{h.api=Body3D.mount(host,{sex:S.sex,lit:o.lit||{},autoRotate:!o.tap,interactive:true,selectOnPick:!!o.tap,
-        onPick:g=>{if(!o.tap)return;V.sel=g&&GN[g]?g:null;render()}});
+        onPick:g=>{if(!o.tap)return;V.sel=g&&GN[g]?g:null;if(V.sel&&Body3D.bestView){const bv=Body3D.bestView(V.sel);if(bv){V.side=bv;V.skipView=true}}render()}});
         Promise.resolve(h.api.ready).then(()=>host.classList.add('ready'),e=>console.warn('3D body failed to load',e))}catch(e){console.warn('3D body failed',e)}}
     ph.replaceWith(h.host);
     if(h.api){try{if(h.sex!==S.sex&&h.api.setSex){h.sex=S.sex;h.api.setSex(S.sex)}h.api.setLit(o.lit||{});
-if(o.tap)h.api.setSelected(V.sel||null);if(o.view&&o.view!==h.view){h.view=o.view;h.api.setView(o.view)}}catch(e){}}
+if(o.tap)h.api.setSelected(V.sel||null);if(o.view&&o.view!==h.view){h.view=o.view;if(!V.skipView)h.api.setView(o.view)}}catch(e){}}
   });
 }
 
@@ -1357,7 +1361,7 @@ let wake=null;async function keepAwake(){try{if('wakeLock' in navigator&&!wake)w
 
 /* ══════════════ ACTIONS ══════════════ */
 const A={
- tab:v=>{V.tab=v;V.view='tab';V.restore=false;V.resetAsk=false;if(v!=='you')V.you='';scrollTo(0,0)},
+ tab:v=>{if(v==='body'&&V.tab!=='body')V.sel=null;V.tab=v;V.view='tab';V.restore=false;V.resetAsk=false;if(v!=='you')V.you='';scrollTo(0,0)},
  youGo:v=>{V.you=v||'';V.restore=false;scrollTo(0,0)},
  nameEdit:()=>{V.editName=true;setTimeout(()=>{const i=document.getElementById('nmIn');if(i)i.focus()},50)},
  nameDone:()=>{V.editName=false;save()},
@@ -1414,7 +1418,7 @@ const A={
  discard:()=>{S.cur=null;V.sheet=null;V.rest=null;V.str=null;V.view='tab';V.tab='today';save()},
  home:()=>{V.view='tab';V.tab='today';scrollTo(0,0)},
  rotate:()=>{V.side=V.side==='front'?'back':'front';if(V.sel&&!(V.side==='front'?FRONTG:BACKG).includes(V.sel))V.sel=null},
- pick:v=>{V.sel=v||null},
+ pick:v=>{V.sel=v||null;if(V.sel&&window.Body3D&&Body3D.bestView){const bv=Body3D.bestView(V.sel);if(bv){V.side=bv;V.skipView=true}}},
  openDay:v=>{V.logId=v;V.view='day';V.delAsk=null;scrollTo(0,0)},closeDay:()=>{V.view='tab';V.tab='log'},
  delAsk:v=>{V.delAsk=v},delNo:()=>{V.delAsk=null},del:v=>{S.log=S.log.filter(s=>s.id!==v);save();V.view='tab';V.tab='log'},
  copy:()=>{const t=JSON.stringify(S);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Backup copied'),()=>{V.restore=true;render();const i=document.getElementById('rs');if(i){i.value=t;i.select()}toast('Select and copy the text')})},
