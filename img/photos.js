@@ -1,0 +1,2 @@
+/* exercise photos available in img/ex (AI-generated for GATELIFT) */
+window.GL_PHOTOS=["bbrow","bench","bridge","bss","cablerow","calf","ccurl","clat","crunch","curl","dbbench","dbrdl","dbrow","diamond","dip","ezcurl","facepull","fsquat","gobletsq","hammer","hipthrust","hlr","inccurl","incdb","incfly","kneeraise","lat_raise","legcurl","legext","legpress","lunge","mshp","ohext","ohp","pecdeck","pike","plank","pulldown","pullup","pushdown","pushup","rdl","reardelt","revlunge","sideplank","skull","snow","squat","superman","tbar","xover"];

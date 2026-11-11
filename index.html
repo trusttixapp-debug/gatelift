@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0A0B0D">
+<meta name="theme-color" content="#0B0B0C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,214 +13,304 @@
 <link rel="icon" href="icon-192.png">
 <title>GATELIFT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,500;100,700;100,800;125,800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap">
 <style>
-/* One dark look, one accent. The grey body is the hero of every screen; volt marks what you train. */
+/* Graphite and white. Soft rounded slabs, glassy pills, big numbers with grey decimals.
+   Two warm blocks (orange plan, periwinkle cardio) are the only colour on Today. */
 :root{color-scheme:dark;
-  --bg:#0A0B0D;--card:#131518;--card2:#1A1D21;--card3:#23272C;--line:#24282D;
-  --text:#F2F4F6;--mute:#9BA2AB;--dim:#5E656E;
-  --acc:#C8FF2E;--acc-d:#9FD400;--acc-ink:#0A0B0D;--acc-soft:rgba(200,255,46,.12);
-  --warn:#FF6A4D;
-  --r:22px;
-  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,"Segoe UI",Roboto,system-ui,sans-serif;
-  --disp:"Archivo","SF Pro Display",-apple-system,"Segoe UI",system-ui,sans-serif;
+  --bg:#0B0B0C;--card:#161618;--card2:#1E1E21;--card3:#2A2A2E;--line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.13);
+  --text:#F5F5F7;--mute:#8E8E93;--dim:#56565B;
+  --acc:#FFFFFF;--acc-d:#C9C9CE;--acc-ink:#0B0B0C;--acc-soft:rgba(255,255,255,.08);
+  --orange:#FF5A1F;--orange-2:#FF7A45;--peri:#A3B4F7;--peri-ink:#0E1222;--gain:#34C759;
+  --warn:#FF5A4D;
+  --r:26px;
+  --font:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;
+  --disp:Inter,"SF Pro Display",-apple-system,"Segoe UI",system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
+html,body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased;overscroll-behavior-y:none;font-feature-settings:"cv11","ss01"}
 body{min-height:100dvh}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-input{font:inherit;color:inherit}
-svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+input,textarea{font:inherit;color:inherit}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
 #app{max-width:480px;margin:0 auto;min-height:100dvh;position:relative}
-.v{padding:calc(env(safe-area-inset-top,0px) + 18px) max(18px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 96px) max(18px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
-h1,h2,h3,.disp{font-family:var(--disp);font-stretch:100%;letter-spacing:-.01em;text-wrap:balance}
-h1{font-size:30px;font-weight:800;line-height:1.05}
-h2{font-size:20px;font-weight:700}
-h3{font-size:16px;font-weight:700}
-.lbl{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.v{padding:calc(env(safe-area-inset-top,0px) + 14px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 104px) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px}
+h1,h2,h3,.disp{font-family:var(--disp);letter-spacing:-.025em;text-wrap:balance}
+h1{font-size:30px;font-weight:700;line-height:1.08}
+h2{font-size:21px;font-weight:650}
+h3{font-size:16px;font-weight:650;letter-spacing:-.01em}
+.lbl{font-size:13px;font-weight:500;color:var(--mute)}
 .mute{color:var(--mute)}.dim{color:var(--dim)}.acc{color:var(--acc)}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.num em{font-style:normal;color:var(--dim)}
 .row{display:flex;align-items:center;gap:10px}.sp{flex:1;min-width:0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:54px;border-radius:18px;background:var(--acc);color:var(--acc-ink);font-family:var(--disp);font-weight:800;font-size:16px;letter-spacing:.02em;width:100%}
+.card{background:var(--card);border-radius:var(--r);padding:18px}
+/* glassy dark pill, like the wallet buttons */
+.glass{background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.02));box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 1px rgba(255,255,255,.06),0 6px 18px rgba(0,0,0,.35)}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;height:56px;border-radius:99px;background:var(--acc);color:var(--acc-ink);font-weight:650;font-size:17px;letter-spacing:-.01em;width:100%}
+.btn svg.i{width:18px;height:18px}
+.btn .pl{width:22px;height:22px;border-radius:6px;background:var(--acc-ink);color:var(--acc);display:grid;place-items:center}
+.btn .pl svg{width:12px;height:12px}
 .btn:active{transform:scale(.985)}
-.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
-.btn[disabled]{opacity:.35}
-.chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:99px;background:var(--card2);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--mute);white-space:nowrap}
-.chip.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.btn.ghost{background:var(--card2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.btn[disabled]{opacity:.35;pointer-events:none}
+.chip{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:99px;background:var(--card2);font-size:14px;font-weight:550;color:var(--mute);white-space:nowrap;box-shadow:inset 0 0 0 1px var(--line)}
+.chip.on{background:var(--acc);color:var(--acc-ink);box-shadow:none}
+.chip svg.i{width:16px;height:16px}
 .chips{display:flex;gap:8px;flex-wrap:wrap;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
-.tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--acc-soft);color:var(--acc)}
-.ic{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:var(--card2);color:var(--mute);flex:none}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--acc-soft);color:var(--text)}
+.tag.g{background:rgba(52,199,89,.14);color:var(--gain)}
+.ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--card2);color:var(--mute);flex:none}
 .ic.on{background:var(--acc);color:var(--acc-ink)}
 
-/* ── the body ── */
+/* ── the body (flat figure, used for small thumbnails and as the fallback) ── */
 .fig{display:block;overflow:visible}
-.fig .bs path,.fig .bs ellipse,.fig .bs rect{fill:#34383E;stroke:#34383E;stroke-width:20;stroke-linejoin:round}
+.fig .bs path,.fig .bs ellipse,.fig .bs rect{fill:#2B2C30;stroke:#2B2C30;stroke-width:20;stroke-linejoin:round}
 .fig .bs line,.fig .bs [fill="none"]{display:none}
-.fig .ms path:not([fill="none"]),.fig .ms ellipse,.fig .ms rect{fill:url(#gMus);stroke:#141619;stroke-width:2.6;stroke-linejoin:round}
+.fig .ms path:not([fill="none"]),.fig .ms ellipse,.fig .ms rect{fill:url(#gMus);stroke:#101012;stroke-width:2.6;stroke-linejoin:round}
 .fig .ms .fx ellipse,.fig .ms .fx rect{fill:url(#gJoint)}
-.fig .ms .dim path:not([fill="none"]){fill:url(#gDim);stroke:#2E3A0C}
-.fig .ms .on path:not([fill="none"]){fill:url(#gLit);stroke:#3F5A00}
-.fig .ms .sel path:not([fill="none"]){fill:url(#gLit);stroke:#fff;stroke-width:4}
-.fig .ms [fill="none"],.fig .ms line{stroke:#141619;stroke-width:2.4;fill:none}
-.fig .gw{filter:url(#fGlow);opacity:.8}
-.fig .gw path{fill:var(--acc)}.fig .gw [fill="none"],.fig .gw line{display:none}
+.fig .ms .dim path:not([fill="none"]){fill:url(#gDim);stroke:#2a2a2e}
+.fig .ms .on path:not([fill="none"]){fill:url(#gLit);stroke:#6d6f74}
+.fig .ms .sel path:not([fill="none"]){fill:url(#gLit);stroke:#fff;stroke-width:5}
+.fig .ms [fill="none"],.fig .ms line{stroke:#101012;stroke-width:2.4;fill:none}
+.fig .gw{filter:url(#fGlow);opacity:.55}
+.fig .gw path{fill:#fff}.fig .gw [fill="none"],.fig .gw line{display:none}
 .fig.tap .ms g[data-m]{cursor:pointer}
-.stage{position:relative;border-radius:28px;overflow:hidden;background:radial-gradient(120% 80% at 50% 38%,#2A2E33 0%,#15171A 48%,#0C0D0F 100%);border:1px solid var(--line)}
-.stage .floor{position:absolute;left:18%;right:18%;bottom:14px;height:22px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.65),transparent)}
+.stage{position:relative;border-radius:28px;overflow:hidden;background:radial-gradient(90% 70% at 50% 30%,#232326 0%,#141416 55%,#0E0E10 100%)}
+.stage .floor{position:absolute;left:22%;right:22%;bottom:12px;height:20px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.7),transparent)}
 .pair{display:flex;justify-content:center;align-items:flex-end;gap:2px;padding:18px 0 22px;position:relative}
 .pair .fig{height:250px;width:auto}
 .pair[style*="absolute"] .fig{height:100%}
+.b3d{position:absolute;inset:0}
+.b3d canvas{display:block;width:100%!important;height:100%!important;touch-action:pan-y}
+.b3d{opacity:0;transition:opacity .4s}.b3d.ready{opacity:1}
+.b3d.ready~.pair,.b3d.ready~.fig{visibility:hidden}
 
-/* ── tab bar ── */
-.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:4px;padding:5px;background:rgba(20,22,25,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:99px;z-index:20}
-.tabs button{height:42px;min-width:52px;padding:0 14px;border-radius:99px;display:flex;align-items:center;gap:7px;color:var(--dim);font-size:13px;font-weight:700}
-.tabs button.on{background:var(--acc);color:var(--acc-ink)}
-.tabs button span{display:none}.tabs button.on span{display:inline}
+
+/* ── floating tab bar ── */
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);display:flex;gap:2px;padding:6px;background:rgba(30,30,33,.82);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-radius:99px;z-index:20;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.5)}
+.tabs button{height:46px;width:54px;border-radius:99px;display:grid;place-items:center;color:var(--mute)}
+.tabs button.on{background:rgba(255,255,255,.16);color:var(--text)}
+.tabs button span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 /* ── today ── */
-.hello{display:flex;align-items:flex-end;gap:12px}
-.streak{display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:14px}
-.streak svg{color:var(--acc);width:18px;height:18px}
-.hero-t{position:absolute;left:18px;top:16px;right:18px;display:flex;justify-content:space-between;align-items:flex-start;z-index:2}
-.hero-b{position:absolute;left:18px;right:18px;bottom:16px;z-index:2}
+.top{display:flex;align-items:center;gap:12px;padding:2px 0 4px}
+.av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(160deg,#3a3a3f,#1b1b1e);font-weight:700;font-size:18px;box-shadow:inset 0 0 0 1px var(--line2)}
+.top small{display:block;font-size:13px;color:var(--mute)}
+.top b{display:block;font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.streak{display:flex;align-items:center;gap:6px;height:44px;padding:0 14px;border-radius:99px;font-weight:650;font-size:15px}
+.streak svg{color:var(--orange);width:18px;height:18px}
+.hero{background:var(--card);border-radius:30px;padding:18px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.dname{display:inline-flex;align-self:flex-start;padding:6px 16px 8px;border-radius:18px;border:1.5px dashed rgba(255,255,255,.28);font-size:40px;font-weight:750;letter-spacing:-.035em;line-height:1.05;max-width:100%}
+.hero .sub{font-size:14px;color:var(--dim);margin-top:-6px}
+.meta{display:flex;gap:8px;flex-wrap:wrap}
+.meta span{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border-radius:99px;background:var(--card2);font-size:14px;color:var(--mute);font-weight:500}
+.meta svg.i{width:16px;height:16px}
+.hero .stage{height:300px;margin:0 -6px}
 .musc{display:flex;gap:6px;flex-wrap:wrap}
-.musc span{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:rgba(10,11,13,.6);border:1px solid rgba(200,255,46,.35);color:var(--acc)}
-.steps{display:flex;flex-direction:column;gap:8px}
-.st{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:18px;text-align:left;width:100%}
-.st .n{font-family:var(--disp);font-weight:800;font-size:13px;color:var(--dim);width:16px}
-.st b{display:block;font-weight:700;font-size:15px}
-.st small{display:block;color:var(--mute);font-size:13px}
-.st .ok{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex:none}
-.st .ok.y{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
-.st .ok svg{width:15px;height:15px;stroke-width:3}
+.musc span{font-size:12px;font-weight:600;padding:5px 11px;border-radius:99px;background:rgba(11,11,12,.7);color:var(--text);box-shadow:inset 0 0 0 1px var(--line2)}
+.hero-b{position:absolute;left:14px;right:14px;bottom:14px;z-index:2;pointer-events:none}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.blk{border-radius:28px;padding:16px;display:flex;flex-direction:column;gap:10px;text-align:left;min-height:200px;min-width:0;position:relative;overflow:hidden}
+.blk.or{background:var(--orange);color:#fff}
+.blk.pe{background:var(--peri);color:var(--peri-ink)}
+.blk h3{font-size:21px;font-weight:500;line-height:1.12;letter-spacing:-.02em}
+.blk h3 b{font-weight:700}
+.blk small{font-size:12px;font-weight:500;opacity:.8}
+.blk .badge{position:absolute;right:12px;top:12px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center}
+.pit{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:99px;border:1.5px dashed rgba(255,255,255,.55);background:rgba(255,255,255,.1);text-align:left;width:100%;color:#fff}
+.pit .o{width:20px;height:20px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;flex:none}
+.pit .o.y{background:#fff;color:var(--orange)}
+.pit .o svg{width:12px;height:12px;stroke-width:3.2}
+.pit b{display:block;font-size:14px;font-weight:600;line-height:1.15}
+.pit small{display:block;font-size:12px;opacity:.85}
+.slide{margin-top:auto;display:flex;align-items:center;justify-content:space-between;height:54px;padding:0 5px 0 18px;border-radius:99px;background:#fff;color:#0B0B0C;font-weight:600;font-size:16px;width:100%}
+.slide i{width:44px;height:44px;border-radius:50%;background:#0B0B0C;color:#fff;display:grid;place-items:center}
+.slide svg{width:16px;height:16px}
+.mscroll{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px;scroll-snap-type:x mandatory}
+.mscroll::-webkit-scrollbar{display:none}
+.mcard{flex:0 0 172px;scroll-snap-align:start;background:var(--card2);border-radius:24px;padding:14px;display:flex;flex-direction:column;gap:4px;text-align:left}
+.mcard .fig{height:96px;width:auto;align-self:flex-start;margin:-2px 0 6px -6px}
+.mcard b{font-size:19px;font-weight:650;letter-spacing:-.02em}
+.mcard .st8{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mute)}
+.mcard .st8 i{width:18px;height:18px;border-radius:50%;background:var(--card3);display:grid;place-items:center;font-style:normal}
+.mcard .st8 svg{width:11px;height:11px;stroke-width:3}
+.dots8{display:flex;gap:3px;margin-top:6px}
+.dots8 i{width:5px;height:5px;border-radius:50%;background:var(--card3)}
+.dots8 i.y{background:#fff}
+.dlab{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mute);margin-top:2px;font-variant-numeric:tabular-nums}
+.exl{display:flex;flex-direction:column;gap:8px}
+.exl button{display:flex;align-items:center;gap:10px;min-height:58px;padding:8px 18px;border-radius:99px;box-shadow:inset 0 0 0 1.5px var(--line2);text-align:left;width:100%}
+.exl b{font-size:16px;font-weight:550;letter-spacing:-.01em}
+.exl .n{color:var(--mute);font-size:15px;white-space:nowrap}
+.exl .ph{width:40px;height:40px;border-radius:50%;flex:none;background:#000 center/cover;margin-left:-8px}
+.sect{display:flex;align-items:baseline;gap:10px;padding:8px 2px 0}
+.sect h2{flex:1}
+.sect .lbl{font-size:14px}
 .next{display:flex;gap:14px;align-items:center;overflow:hidden}
 .next .fig{height:96px;width:auto;margin:-6px -4px -10px}
+.steps{display:flex;flex-direction:column;gap:8px}
+.st{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border-radius:22px;text-align:left;width:100%}
+.st b{display:block;font-weight:600;font-size:15px}
+.st small{display:block;color:var(--mute);font-size:13px}
+.st .ok{width:26px;height:26px;border-radius:50%;border:2px solid var(--card3);display:grid;place-items:center;flex:none}
+.st .ok.y{background:var(--gain);border-color:var(--gain);color:#fff}
+.st .ok svg{width:15px;height:15px;stroke-width:3}
 
 /* ── body tab ── */
-.bodyv .stage{height:min(62vh,560px)}
+.bodyv .stage{height:min(64vh,580px)}
 .bodyv .fig{height:calc(100% - 40px);width:auto;margin:20px auto 0}
-.rot{position:absolute;right:14px;bottom:14px;z-index:3;height:44px;padding:0 16px;border-radius:99px;background:var(--acc);color:var(--acc-ink);display:flex;align-items:center;gap:8px;font-weight:800;font-family:var(--disp)}
+.rot{position:absolute;right:14px;bottom:14px;z-index:3;height:44px;padding:0 16px;border-radius:99px;display:flex;align-items:center;gap:8px;font-weight:600}
 .side{position:absolute;left:14px;bottom:14px;z-index:3}
-.legend{position:absolute;left:14px;top:14px;z-index:3;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--mute)}
-.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.legend{position:absolute;left:16px;top:16px;z-index:3;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--mute);pointer-events:none}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
 .mlist{display:flex;flex-direction:column}
 .mlist .it{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
 .mlist .it:first-child{border-top:0}
 .bar{height:6px;border-radius:9px;background:var(--card3);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--acc);border-radius:9px}
+.bar i{display:block;height:100%;background:#fff;border-radius:9px}
 
 /* ── run ── */
-.runh{position:sticky;top:0;z-index:10;background:rgba(10,11,13,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:calc(env(safe-area-inset-top,0px) + 10px) max(18px,env(safe-area-inset-right,0px)) 12px max(18px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--line)}
+.runh{position:sticky;top:0;z-index:10;background:rgba(11,11,12,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:calc(env(safe-area-inset-top,0px) + 10px) max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px}
+.runh.ov{position:absolute;left:0;right:0;background:linear-gradient(rgba(0,0,0,.55),transparent);backdrop-filter:none;-webkit-backdrop-filter:none}
 .prog{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.prog button{display:flex;flex-direction:column;gap:7px;text-align:left;font-size:12px;font-weight:700;color:var(--dim);letter-spacing:.04em;text-transform:uppercase}
-.prog button i{display:block;height:4px;border-radius:4px;background:var(--card3)}
-.prog button.done i{background:var(--acc-d)}
-.prog button.on{color:var(--text)}.prog button.on i{background:var(--acc)}
-.clock{font-family:var(--disp);font-weight:800;font-variant-numeric:tabular-nums}
-.sx{display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:18px}
-.sx.act{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
-.sx.dn{opacity:.55}
+.prog button{display:flex;flex-direction:column;gap:7px;text-align:left;font-size:12px;font-weight:600;color:var(--mute)}
+.prog button i{display:block;height:4px;border-radius:4px;background:rgba(255,255,255,.14)}
+.prog button.done i{background:var(--gain)}
+.prog button.on{color:var(--text)}.prog button.on i{background:#fff}
+.clock{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.sx{display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border-radius:22px}
+.sx.act{box-shadow:inset 0 0 0 1.5px #fff}
+.sx.dn{opacity:.5}
 .sx .fig{height:64px;width:auto;flex:none;margin:-4px 0}
-.sx b{display:block;font-size:15px}
+.sx b{display:block;font-size:15px;font-weight:600}
 .sx small{display:block;font-size:13px;color:var(--mute)}
-.pbtn{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--card3);flex:none;position:relative}
-.pbtn.on{background:var(--acc);color:var(--acc-ink)}
-.pbtn svg.ring{position:absolute;inset:-3px;width:52px;height:52px;transform:rotate(-90deg)}
-.pbtn .t{font-family:var(--disp);font-weight:800;font-size:13px}
+.pbtn{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--card3);flex:none;position:relative}
+.pbtn.on{background:#fff;color:var(--acc-ink)}
+.pbtn svg.ring{position:absolute;inset:-3px;width:54px;height:54px;transform:rotate(-90deg)}
+.pbtn .t{font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
 .big{display:flex;flex-direction:column;align-items:center;gap:6px;padding:22px 0 8px}
 .big .clock{font-size:64px;line-height:1}
 .dial{position:relative;width:230px;height:230px;display:grid;place-items:center}
 .dial svg{position:absolute;inset:0;transform:rotate(-90deg)}
 .field{display:flex;flex-direction:column;gap:6px}
-.field input{height:48px;border-radius:14px;background:var(--card2);border:1px solid var(--line);padding:0 14px;outline:none;font-size:16px}
-.field input:focus{border-color:var(--acc)}
-.ta{width:100%;min-height:240px;border-radius:14px;background:var(--card2);border:1px solid var(--line);padding:12px 14px;outline:none;font:inherit;font-size:16px;line-height:1.45;color:var(--text);resize:vertical}
-.ta:focus{border-color:var(--acc)}
-.btn[disabled]{opacity:.35;pointer-events:none}
+.field input{height:50px;border-radius:99px;background:var(--card2);border:0;box-shadow:inset 0 0 0 1px var(--line);padding:0 18px;outline:none;font-size:16px}
+.field input:focus{box-shadow:inset 0 0 0 1.5px #fff}
+.ta{width:100%;min-height:240px;border-radius:22px;background:var(--card2);border:0;box-shadow:inset 0 0 0 1px var(--line);padding:14px 16px;outline:none;font-size:16px;line-height:1.45;color:var(--text);resize:vertical}
+.ta:focus{box-shadow:inset 0 0 0 1.5px #fff}
 .pday .mlist{margin-top:6px}
 
-.ex{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
-.ex.alldone{border-color:rgba(200,255,46,.35)}
-.exh{display:flex;gap:12px;align-items:center;text-align:left}
-.exh .thumb{width:58px;height:70px;border-radius:14px;background:radial-gradient(circle at 50% 35%,#2A2E33,#101113);display:grid;place-items:center;overflow:hidden;flex:none}
-.exh .thumb .fig{height:66px;width:auto}
-.exh b{font-size:16px;display:block}
-.exh small{font-size:13px;color:var(--mute);display:block}
-.sets{display:grid;grid-template-columns:28px 1fr 1fr 44px;gap:6px 8px;align-items:center}
-.sets .hd{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;text-align:center}
-.sets .no{font-family:var(--disp);font-weight:800;color:var(--dim);text-align:center}
-.sets input{width:100%;height:42px;border-radius:12px;background:var(--card2);border:1px solid var(--line);text-align:center;font-size:16px;font-weight:700;outline:none;font-variant-numeric:tabular-nums}
-.sets input:focus{border-color:var(--acc)}
-.sets input::placeholder{color:var(--dim);font-weight:600}
-.sets .tk{width:44px;height:42px;border-radius:12px;background:var(--card3);display:grid;place-items:center;color:var(--dim)}
-.sets .tk.y{background:var(--acc);color:var(--acc-ink)}
-.sets .tk svg{stroke-width:3}
-.sets .row-ok input{background:var(--acc-soft);border-color:transparent}
-.addset{font-size:13px;font-weight:700;color:var(--mute);display:flex;align-items:center;gap:6px;padding:4px 0}
+/* lift: one exercise at a time over its photo */
+.lift{margin:0 -16px;position:relative}
+.exhero{position:relative;height:min(58vh,460px);background:#0B0B0C center 40%/cover no-repeat}
+.exhero::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(11,11,12,.25) 0%,rgba(11,11,12,0) 30%,rgba(11,11,12,.15) 55%,var(--bg) 100%)}
+.exhero .nofoto{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(80% 70% at 50% 35%,#232326,#0B0B0C)}
+.exhero .nofoto .fig{height:78%;width:auto}
+.exttl{position:absolute;left:16px;right:16px;bottom:10px;z-index:2;display:flex;align-items:flex-end;gap:10px}
+.exttl h2{font-size:28px;font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.exttl small{display:block;font-size:14px;color:var(--mute);margin-top:4px}
+.exttl .x{background:rgba(30,30,33,.7);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.liftb{padding:6px 16px 0;display:flex;flex-direction:column;gap:12px}
+.sets{display:grid;grid-template-columns:26px 1fr 1fr 50px;gap:8px 8px;align-items:center}
+.sets .hd{font-size:12px;font-weight:500;color:var(--dim);text-align:center}
+.sets .no{font-weight:600;color:var(--mute);text-align:center;font-variant-numeric:tabular-nums;position:relative}
+.sets .no.cur::before{content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:var(--orange)}
+.sets .no.cur span{visibility:hidden}
+.sets .cell{position:relative}
+.sets input{width:100%;height:52px;border-radius:99px;background:var(--card2);border:0;text-align:center;font-size:18px;font-weight:600;outline:none;font-variant-numeric:tabular-nums;color:var(--text)}
+.sets input:focus{box-shadow:inset 0 0 0 1.5px #fff}
+.sets input::placeholder{color:#76767c;font-weight:500}
+.sets .u{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--mute);pointer-events:none}
+.sets .tk{width:50px;height:50px;border-radius:50%;background:var(--card2);display:grid;place-items:center;color:var(--mute)}
+.sets .tk.y{background:var(--gain);color:#fff}
+.sets .tk svg{stroke-width:2.6}
+.sets .okc input{background:#1a1a1d;color:var(--mute)}
+.addset{font-size:14px;font-weight:600;color:var(--mute);display:flex;align-items:center;gap:6px;padding:6px 0}
 .addset svg{width:16px;height:16px}
-.last{font-size:12.5px;color:var(--mute);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.foot{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:12px max(18px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(18px,env(safe-area-inset-left,0px));background:linear-gradient(transparent,var(--bg) 30%)}
-.foot>div{max-width:444px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
-.restbar{display:flex;align-items:center;gap:12px;padding:10px 12px 10px 16px;border-radius:18px;background:var(--card2);border:1px solid var(--acc)}
-.restbar .clock{font-size:24px;color:var(--acc)}
-.restbar button{height:36px;padding:0 12px;border-radius:12px;background:var(--card3);font-weight:700;font-size:13px}
-.x{width:40px;height:40px;border-radius:50%;background:var(--card2);display:grid;place-items:center;flex:none}
+.last{font-size:13px;color:var(--mute);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pager{display:flex;align-items:center;gap:12px;padding:12px 0 2px;border-top:1px dashed var(--line2)}
+.pager .ring{width:44px;height:44px;position:relative;flex:none;display:grid;place-items:center;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.pager .ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.pager b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pager small{display:block;font-size:13px;color:var(--mute)}
+.pnums{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;max-width:52%}
+.pnums::-webkit-scrollbar{display:none}
+.pnums button{width:36px;height:36px;border-radius:50%;flex:none;font-size:15px;font-weight:550;color:var(--dim);font-variant-numeric:tabular-nums}
+.pnums button.dn{color:var(--gain)}
+.pnums button.on{background:var(--card3);color:var(--text)}
+
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(16px,env(safe-area-inset-left,0px));background:linear-gradient(transparent,var(--bg) 35%)}
+.foot>div{max-width:448px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.restbar{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 20px;border-radius:99px;background:rgba(30,30,33,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:inset 0 0 0 1px var(--line2)}
+.restbar .clock{font-size:24px}
+.restbar .lbl{font-size:12px}
+.restbar button{height:42px;padding:0 14px;border-radius:99px;background:var(--card3);font-weight:600;font-size:14px}
+.x{width:44px;height:44px;border-radius:50%;background:var(--card2);display:grid;place-items:center;flex:none}
 
 /* ── sheet ── */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:flex;align-items:flex-end;justify-content:center}
-.sheet{width:100%;max-width:480px;max-height:88dvh;overflow:auto;background:var(--card);border-radius:28px 28px 0 0;border:1px solid var(--line);border-bottom:0;padding:10px max(18px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 20px) max(18px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.sheet{width:100%;max-width:480px;max-height:90dvh;overflow:auto;background:var(--card);border-radius:30px 30px 0 0;padding:10px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 20px) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.sheet .shot{height:300px;margin:0 -16px;background:#000 center 40%/cover;position:relative}
+.sheet .shot::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,var(--card))}
 .grab{width:40px;height:5px;border-radius:9px;background:var(--card3);margin:0 auto 4px}
 .howto{display:flex;flex-direction:column;gap:10px;counter-reset:s}
 .howto li{list-style:none;display:flex;gap:12px;font-size:15px;color:var(--mute)}
-.howto li::before{counter-increment:s;content:counter(s);font-family:var(--disp);font-weight:800;color:var(--acc);width:18px;flex:none}
+.howto li::before{counter-increment:s;content:counter(s);font-weight:700;color:var(--text);width:18px;flex:none}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.stat{background:var(--card2);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
-.stat b{font-family:var(--disp);font-size:20px;font-weight:800}
-.stat small{font-size:12px;color:var(--mute)}
+.stat{background:var(--card);border-radius:22px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center;position:relative}
+.stat svg.i{color:var(--mute);width:18px;height:18px}
+.stat b{font-size:24px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.stat b small{font-size:13px;color:var(--mute);font-weight:500}
+.stat>small{font-size:13px;color:var(--mute)}
 
 /* ── log ── */
+.grid30{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.grid30 i{height:22px;border-radius:99px;background:transparent;box-shadow:inset 0 0 0 1.5px var(--card3)}
+.grid30 i.y{background:#D9D9DE;box-shadow:none}
+.grid30 i.r{box-shadow:none;border:1.5px dashed var(--card3)}
+.grid30 i.t{box-shadow:inset 0 0 0 2px #4A7BFF}
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
 .week div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--dim);font-weight:600}
-.week i{width:34px;height:34px;border-radius:50%;background:var(--card2);display:grid;place-items:center;font-style:normal;color:var(--mute);font-weight:700;font-size:13px}
-.week i.y{background:var(--acc);color:var(--acc-ink)}
-.week i.t{box-shadow:0 0 0 2px var(--acc) inset}
-.sess{display:flex;align-items:center;gap:12px;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;text-align:left;width:100%}
+.week i{width:34px;height:34px;border-radius:50%;background:var(--card2);display:grid;place-items:center;font-style:normal;color:var(--mute);font-weight:600;font-size:13px}
+.week i.y{background:#fff;color:var(--acc-ink)}
+.week i.t{box-shadow:0 0 0 2px #fff inset}
+.sess{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border-radius:24px;text-align:left;width:100%}
 .sess .d{width:46px;text-align:center;flex:none}
-.sess .d b{display:block;font-family:var(--disp);font-size:20px;font-weight:800;line-height:1}
-.sess .d small{font-size:11px;color:var(--dim);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.sess .d b{display:block;font-size:21px;font-weight:700;line-height:1;letter-spacing:-.03em}
+.sess .d small{font-size:11px;color:var(--dim);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .trio{display:flex;gap:4px;margin-top:6px}
-.trio span{font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--card3);color:var(--dim)}
-.trio span.y{background:var(--acc-soft);color:var(--acc)}
+.trio span{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--card3);color:var(--dim)}
+.trio span.y{background:var(--acc-soft);color:var(--text)}
 .tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-.tbl td{padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.tbl td{padding:8px 0;border-top:1px solid var(--line);font-size:14px}
 .tbl td:last-child{text-align:right;color:var(--mute)}
 
 /* ── onboarding ── */
 .ob{min-height:100dvh;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 18px) max(20px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 20px) max(20px,env(safe-area-inset-left,0px));gap:18px}
 .ob .grow{flex:1;display:flex;flex-direction:column;gap:18px}
-.wordmark{font-family:var(--disp);font-stretch:125%;font-weight:800;font-size:15px;letter-spacing:.18em}
-.wordmark i{color:var(--acc);font-style:normal}
-.dots{display:flex;gap:6px}.dots i{height:4px;flex:1;border-radius:4px;background:var(--card3)}.dots i.on{background:var(--acc)}
-.opt{display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line);text-align:left;width:100%}
-.opt.on{border-color:var(--acc);background:linear-gradient(var(--acc-soft),var(--acc-soft)),var(--card)}
-.opt b{display:block;font-size:16px}.opt small{display:block;color:var(--mute);font-size:13px}
+.wordmark{font-weight:800;font-size:15px;letter-spacing:.2em}
+.wordmark i{color:var(--mute);font-style:normal}
+.dots{display:flex;gap:6px}.dots i{height:4px;flex:1;border-radius:4px;background:var(--card3)}.dots i.on{background:#fff}
+.opt{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:24px;background:var(--card);text-align:left;width:100%}
+.opt.on{box-shadow:inset 0 0 0 1.5px #fff}
+.opt b{display:block;font-size:16px;font-weight:600}.opt small{display:block;color:var(--mute);font-size:13px}
 .opt .rad{width:22px;height:22px;border-radius:50%;border:2px solid var(--dim);flex:none}
-.opt.on .rad{border:7px solid var(--acc)}
-.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:16px}
-.seg button{height:44px;border-radius:12px;font-weight:700;color:var(--mute)}
-.seg button.on{background:var(--acc);color:var(--acc-ink)}
+.opt.on .rad{border:7px solid #fff}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;background:var(--card2);border-radius:99px}
+.seg button{height:44px;border-radius:99px;font-weight:600;color:var(--mute)}
+.seg button.on{background:#fff;color:var(--acc-ink)}
 .welcome .stage{flex:1;min-height:340px;display:flex;align-items:center;justify-content:center}
 .welcome .fig{height:min(52vh,470px);width:auto}
-.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);background:var(--acc);color:var(--acc-ink);font-weight:800;padding:10px 16px;border-radius:99px;z-index:60;font-size:14px}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);background:#fff;color:var(--acc-ink);font-weight:650;padding:11px 18px;border-radius:99px;z-index:60;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
  <defs>
-  <radialGradient id="gMus" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="#B6BCC4"/><stop offset=".45" stop-color="#7C828A"/><stop offset="1" stop-color="#3E434A"/></radialGradient>
-  <radialGradient id="gJoint" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#7E848C"/><stop offset="1" stop-color="#383C42"/></radialGradient>
-  <radialGradient id="gLit" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="#F6FFB8"/><stop offset=".4" stop-color="#D4FF3A"/><stop offset="1" stop-color="#86B800"/></radialGradient>
-  <radialGradient id="gDim" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="#C9D98E"/><stop offset=".5" stop-color="#8FA247"/><stop offset="1" stop-color="#4A5626"/></radialGradient>
+  <radialGradient id="gMus" cx=".38" cy=".28" r=".9"><stop offset="0" stop-color="#6E7076"/><stop offset=".5" stop-color="#46484D"/><stop offset="1" stop-color="#242528"/></radialGradient>
+  <radialGradient id="gJoint" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#4E5055"/><stop offset="1" stop-color="#252629"/></radialGradient>
+  <radialGradient id="gLit" cx=".38" cy=".28" r=".9"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#ECEDEF"/><stop offset="1" stop-color="#B7B9BE"/></radialGradient>
+  <radialGradient id="gDim" cx=".38" cy=".28" r=".9"><stop offset="0" stop-color="#B9BBC0"/><stop offset=".55" stop-color="#8D9095"/><stop offset="1" stop-color="#5E6065"/></radialGradient>
   <clipPath id="cut-male-front"><rect x="-60" y="165" width="820" height="1100"/></clipPath>
   <clipPath id="cut-male-back"><rect x="-60" y="146" width="820" height="1100"/></clipPath>
   <clipPath id="cut-female-front"><rect x="-60" y="176" width="820" height="1100"/></clipPath>
@@ -230,6 +320,7 @@ h3{font-size:16px;font-weight:700}
 </svg>
 <div id="app"></div>
 <script src="figures.js"></script>
+<script src="img/photos.js"></script>
 <script>
 /* ══════════════ STATE ══════════════ */
 const KEY='gatelift.v2';
@@ -502,6 +593,7 @@ const ICONS={
  stretch:'<circle cx="14" cy="4.6" r="2"/><path d="M4 10.5 9 9.5l4.2 2 5.3-4.3M13.2 11.5l-2 4.8 4 4.7M11.2 16.3 6 20"/>',
  cardio:'<path d="M3 12h4l2.2-5.5 4.3 11 2.2-5.5H21"/>',
  lift:'<path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11"/>',
+ info:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6v.01"/>',up:'<path d="M12 18V6M6.5 11.5 12 6l5.5 5.5"/>',dot:'<circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/>',
  trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4.2M16 6h3a3 3 0 0 1-3 4.2M12 13v4M8.5 20h7"/>',
 };
 function streak(){
@@ -554,6 +646,7 @@ function render(){
   if(V.sheet)h+=sheet();
   if(V.toast)h+=`<div class="toast">${esc(V.toast)}</div>`;
   a.innerHTML=h;
+  mount3d();
   tick();
 }
 function tabs(){
@@ -588,95 +681,126 @@ function onb(){
 }
 
 /* ── today ── */
+/* realistic exercise photos (AI-generated for GATELIFT). Key = built-in id, or a name rule for pasted exercises. */
+const PHOTOS=new Set(window.GL_PHOTOS||[]);
+const PHR=[[/shoulder press machine|machine (shoulder|overhead) press/i,'mshp'],[/cable lateral/i,'clat'],[/ez.?bar curl|sz.?bar curl/i,'ezcurl'],[/skull/i,'skull'],
+ [/cable curl/i,'ccurl'],[/t-?bar/i,'tbar'],[/incline.*(fly|flye)/i,'incfly'],[/crossover|cable cross|cable fly/i,'xover'],[/incline.*curl/i,'inccurl'],
+ [/front squat/i,'fsquat'],[/hanging leg raise|toes to bar/i,'hlr'],[/knee raise/i,'kneeraise'],[/goblet/i,'gobletsq'],[/bulgarian|split squat/i,'bss'],[/reverse lunge/i,'revlunge'],
+ [/(dumbbell|db).*(romanian|rdl)/i,'dbrdl'],[/face ?pull/i,'facepull'],[/(one|single).?arm.*row|dumbbell row/i,'dbrow'],[/pike/i,'pike'],[/close.?grip push|diamond/i,'diamond'],[/push-?up/i,'pushup'],[/\bdips?\b/i,'dip'],[/side plank/i,'sideplank'],[/plank/i,'plank'],[/glute bridge|^bridge/i,'bridge']];
+function phKey(id){if(PHOTOS.has(id))return id;const X=EX[id];if(!X)return '';for(const [re,k] of PHR)if(re.test(X.n)&&PHOTOS.has(k))return k;const g=guessM(X.n);return g.b&&PHOTOS.has(g.b)?g.b:''}
+const photo=id=>{const k=phKey(id);return k?`img/ex/${k}.jpg`:''};
+const litMain=m=>({[m[0]]:2,...Object.fromEntries(m.slice(1).map(g=>[g,1]))});
+/* a 3D body slot: the flat figure shows until the 3D model is ready, then the shared canvas moves in */
+const slot3d=(key,lit,o={})=>`<div data-b3d="${key}" data-o='${esc(JSON.stringify({lit,tap:!!o.tap,view:o.view||''}))}'></div>`;
+const minsOf=k=>{const wk=warmOf(k),D=DAYS[k],st=wk.reduce((a,id)=>a+STR[id].sec*(STR[id].sides||1),0)/60,
+  ca=D.rest&&D.cardio?D.cardio:S.cardio,li=exList(k).reduce((a,id)=>{const X=xs(k,id);return a+X.s*(40+(X.rest||0))},0)/60;return {st:Math.round(st),ca,li:Math.round(li),all:Math.round(st+ca+li)}};
 function today(){
   const now=new Date(),hr=now.getHours(),greet=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
-  const c=S.cur,k=c?c.k:todayKey(),D=DAYS[k],mus=dayMuscles(k),sd=split().d;
+  const c=S.cur,k=c?c.k:todayKey(),D=DAYS[k],sd=split().d,mus=dayMuscles(k);
   const doneToday=!c&&S.log.find(s=>s.d===dkey()&&counted(s));
-  const tk=doneToday?doneToday.k:k;
-  const wk=warmOf(k),ex=exList(k),nSets=ex.reduce((a,id)=>a+xs(k,id).s,0);
-  const stDone=c?Object.values(c.st).filter(Boolean).length:0;
-  const exDone=c?c.ex.filter(e=>e.sets.length&&e.sets.every(s=>s.ok)).length:0;
-  const pos=sd.filter(x=>!DAYS[x].rest).indexOf(k);
-  const tag=doneToday?'Done today':D.rest?`Rest day · ${DOW[now.getDay()]}`:weekMode()?`Day ${pos+1} of ${sd.filter(x=>!DAYS[x].rest).length} · ${DOW[now.getDay()]}`:`Day ${(S.idx%sd.length)+1} of ${sd.length}`;
-  const heroK=doneToday?tk:k,heroM=doneToday?dayMuscles(tk):mus,HD=DAYS[heroK];
-  const step=(n,i,t,sub,ok,part)=>`<button class="st" data-a="${c?'goStep':'start'}" data-v="${n-1}"><span class="ic ${ok?'on':''}">${ic(i)}</span><span class="sp"><b>${t}</b><small>${sub}</small></span>${part?`<span class="tag">${part}</span>`:`<span class="ok ${ok?'y':''}">${ok?ic('check'):''}</span>`}</button>`;
+  const wk=warmOf(k),ex=exList(k),nSets=ex.reduce((a,id)=>a+xs(k,id).s,0),M=minsOf(k);
+  const stDone=c?Object.values(c.st).filter(Boolean).length:0,stOk=c&&stDone===wk.length;
+  const exDone=c?c.ex.filter(e=>e.sets.length&&e.sets.every(s=>s.ok)).length:0,liOk=c&&ex.length&&exDone===ex.length;
+  const caOk=c&&c.ca.done;
+  const trn=sd.filter(x=>!DAYS[x].rest),pos=trn.indexOf(k);
+  const sub=D.rest?'Recovery day':S.plan?(weekMode()?`Day ${pos+1} of ${trn.length} · ${DOW[now.getDay()]}`:`Day ${pos+1} of ${trn.length}`):`${split().n} · day ${(S.idx%sd.length)+1}`;
   const nk=weekMode()?nextKey():doneToday?dayAt(S.idx):dayAt(S.idx+1),N=DAYS[nk];
+  const load=weekLoad();
+  const pit=(v,t,s,ok)=>`<button class="pit" data-a="${c?'goStep':'start'}" data-v="${v}"><span class="o ${ok?'y':''}">${ok?ic('check'):''}</span><span class="sp"><b>${t}</b><small>${s}</small></span></button>`;
+  const caType=c?c.ca.type:(D.cType||S.cardioType||CARDIO[S.place==='home'?'home':'gym'][0]);
   return `<div class="v">
-   <div class="hello"><div class="sp"><div class="lbl">${DOW[now.getDay()]} ${now.getDate()} ${MON[now.getMonth()]}</div><h1 style="margin-top:4px">${greet}${S.name?`, ${esc(S.name)}`:''}</h1></div>
-     <div class="streak">${ic('flame')}${streak()}</div></div>
-   <div class="stage" style="height:340px">
-     <div class="hero-t"><div><span class="tag">${tag}</span><h2 style="margin-top:8px;font-size:28px;font-weight:800">${esc(dT(heroK))}</h2></div></div>
-     <div class="pair" style="position:absolute;inset:0;padding:84px 0 48px">${fig('front',litOf(heroM))}${fig('back',litOf(heroM))}</div>
-     <div class="floor"></div>
-     <div class="hero-b"><div class="musc">${HD.rest?`<span>${esc(HD.note||'Walk, stretch, recover')}</span>`:HD.f.map(g=>`<span>${GN[g]}</span>`).join('')}</div></div>
+   <header class="top"><span class="av">${esc((S.name||'G').charAt(0).toUpperCase())}</span><div class="sp"><small>${greet}</small><b>${esc(S.name||'Hunter')}</b></div>
+     <div class="streak glass" aria-label="Day streak">${ic('flame')}${streak()}</div></header>
+   <section class="hero">
+     <div class="lbl">Today · ${DOW[now.getDay()]} ${now.getDate()} ${MON[now.getMonth()]}</div>
+     <div class="dname">${esc(D.rest?'Rest':D.n)}</div>
+     <div class="sub">${esc(sub)}</div>
+     <div class="meta"><span>${ic('clock')}~${M.all} min</span>${ex.length?`<span>${ic('lift')}${plural(ex.length,'exercise')}</span>`:`<span>${ic('cardio')}${M.ca} min ${esc(caType.toLowerCase())}</span>`}</div>
+     <div class="stage">${slot3d('hero',litOf(mus))}<div class="pair" style="position:absolute;inset:0;padding:16px 0 44px">${fig('front',litOf(mus))}${fig('back',litOf(mus))}</div><div class="floor"></div>
+       <div class="hero-b"><div class="musc">${D.rest?`<span>${esc(D.note||'Walk, stretch, recover')}</span>`:D.f.map(g=>`<span>${GN[g]}</span>`).join('')}</div></div></div>
+     ${doneToday?`<button class="btn" data-a="openDay" data-v="${doneToday.id}">${ic('check')}Done today · view log</button><button class="btn ghost" data-a="start" data-v="0">Train again</button>`:
+       `<button class="btn" data-a="${c?'resume':'start'}" data-v="0"><span class="pl">${ic('play')}</span>${c?'Continue workout':D.rest?'Start rest day':'Start workout'}</button>`}
+   </section>
+   <div class="duo">
+     <div class="blk or"><h3>Today’s<br>plan</h3>
+       ${pit(0,'Stretch',`${wk.length} moves · ${M.st} min`,stOk)}
+       ${pit(1,'Cardio',`${M.ca} min`,caOk)}
+       ${ex.length?pit(2,'Lift',`${nSets} sets`,liOk):''}</div>
+     <div class="blk pe"><small>${now.getDate()} ${MON[now.getMonth()]}, ${now.getFullYear()}</small><h3>Start your <b>daily cardio</b></h3>
+       <small>${esc(caType)} · ${M.ca} min</small>
+       <button class="slide" data-a="${c?'goStep':'start'}" data-v="1">${caOk?'Done':'Start'}<i>${caOk?ic('check'):ic('play')}</i></button></div>
    </div>
-   ${doneToday?`<div class="card row"><span class="ic on">${ic('check')}</span><div class="sp"><b>${esc(dT(tk))} logged</b><div class="mute" style="font-size:13px">${setsOf(doneToday)?plural(setsOf(doneToday),'set'):mmss(doneToday.ca.sec)+' cardio'} · ${Math.round((doneToday.t1-doneToday.t0)/60000)} min</div></div><button class="chip" data-a="openDay" data-v="${doneToday.id}">View</button></div>`:
-   `<div class="steps">
-     ${step(1,'stretch','Stretch',`${wk.length} moves · about ${Math.round(wk.reduce((a,id)=>a+STR[id].sec*(STR[id].sides||1),0)/60)} min`,c&&stDone===wk.length,c&&stDone&&stDone<wk.length?`${stDone}/${wk.length}`:'')}
-     ${step(2,'cardio','Cardio',`${esc(c?c.ca.type:(D.cType||S.cardioType||CARDIO[S.place][0]))} · ${c?c.ca.goal:D.rest&&D.cardio?D.cardio:S.cardio} min`,c&&c.ca.done,c&&!c.ca.done&&caSec(c.ca)>0?mmss(caSec(c.ca)):'')}
-     ${ex.length?step(3,'lift',`Lift · ${esc(D.n)}`,`${plural(ex.length,'exercise')} · ${nSets} sets`,c&&exDone===ex.length,c&&exDone&&exDone<ex.length?`${exDone}/${ex.length}`:''):''}
-   </div>
-   <button class="btn" data-a="${c?'resume':'start'}" data-v="0">${c?'Continue':D.rest?'Start rest day':'Start today'}</button>`}
-   <div class="card next"><div class="sp"><div class="lbl">${weekMode()?`Tomorrow · ${DOW[(now.getDay()+1)%7]}`:doneToday?'Next session':'Tomorrow'}</div><h3 style="margin-top:6px;font-size:18px">${esc(N.rest?'Rest day':N.n)}</h3><div class="mute" style="font-size:13px;margin-top:2px">${N.rest?esc(N.note||'Walk and stretch'):N.f.map(g=>GN[g]).join(' · ')}</div></div>${fig(bestSide(N.f),litOf(dayMuscles(nk)),{noglow:true})}</div>
-   ${doneToday?`<button class="btn ghost" data-a="start" data-v="0">Train again today</button>`:''}
+   ${D.f.length?`<div class="sect"><h2>Muscles today</h2><span class="lbl">sets this week</span></div>
+   <div class="mscroll">${D.f.map(g=>{const n=Math.round(load[g]||0),f=Math.min(18,n);
+     return `<button class="mcard" data-a="pickBody" data-v="${g}">${fig(bestSide([g]),{[g]:2},{noglow:true})}<b>${GN[g]}</b>
+       <span class="st8"><i>${ic(n>=10?'up':n?'up':'dot')}</i>${n>=10?'Growing':n?'Building':'Fresh'}</span>
+       <span class="dots8">${[...Array(18)].map((_,j)=>`<i class="${j<f?'y':''}"></i>`).join('')}</span><span class="dlab"><span>0</span><span>${n?'+'+n:''}</span><span>18</span></span></button>`}).join('')}</div>`:''}
+   ${ex.length?`<div class="sect"><h2>${esc(D.n)}</h2><span class="lbl">${nSets} sets</span></div>
+   <div class="exl">${ex.map(id=>{const X=xs(k,id),h=hint(id,k),p=photo(id);
+     return `<button data-a="exInfo" data-v="${id}">${p?`<span class="ph" style="background-image:url('${p}')"></span>`:''}<span class="sp"><b>${esc(X.n)}</b>${h?` <span class="tag g">${ic('up')}${h.replace('Go up ','')}</span>`:''}</span><span class="n">${plural(X.s,'set')}</span></button>`}).join('')}</div>`:''}
+   <div class="card next"><div class="sp"><div class="lbl">${weekMode()?`Tomorrow · ${DOW[(now.getDay()+1)%7]}`:doneToday?'Next session':'Tomorrow'}</div><h3 style="margin-top:6px;font-size:19px">${esc(N.rest?'Rest day':N.n)}</h3><div class="mute" style="font-size:13px;margin-top:2px">${N.rest?esc(N.note||'Walk and stretch'):N.f.map(g=>GN[g]).join(' · ')}</div></div>${fig(bestSide(N.f),litOf(dayMuscles(nk)),{noglow:true})}</div>
   </div>`;
 }
 
 /* ── run: stretch → cardio → lift ── */
 function run(){
-  const c=S.cur,D=DAYS[c.k],noLift=!c.ex.length;
+  const c=S.cur,D=DAYS[c.k],noLift=!c.ex.length,lift=c.step===2&&!noLift;
   const stepsDone=[Object.values(c.st).every(Boolean),c.ca.done,c.ex.every(e=>e.sets.every(s=>s.ok))];
-  const head=`<div class="runh"><div class="row"><button class="x" data-a="leave" aria-label="Back">${ic('back')}</button>
-     <div class="sp"><div class="lbl">${esc(dT(c.k))}</div><div class="clock" id="tot" style="font-size:18px">${mmss((Date.now()-c.t0)/1000)}</div></div>
-     <button class="chip" data-a="finishAsk">Finish</button></div>
+  const head=`<div class="runh ${lift?'ov':''}"><div class="row"><button class="x glass" data-a="leave" aria-label="Back">${ic('back')}</button>
+     <div class="sp"><div class="lbl">${esc(dT(c.k))}</div><div class="clock" id="tot" style="font-size:19px">${mmss((Date.now()-c.t0)/1000)}</div></div>
+     <button class="chip glass" data-a="finishAsk">Finish</button></div>
      <div class="prog">${(noLift?['Stretch','Cardio']:['Stretch','Cardio','Lift']).map((l,i)=>`<button class="${c.step===i?'on':''} ${stepsDone[i]?'done':''}" data-a="goStep" data-v="${i}"><i></i>${l}</button>`).join('')}</div></div>`;
   let body='',foot='';
   if(c.step===0){
     const ids=Object.keys(c.st);
     body=`<div><h2>Warm up</h2><p class="mute" style="font-size:14px;margin-top:4px">Tap play. Each one ticks itself off when the time is up.</p></div>
-     ${ids.map(id=>{const s=STR[id],tot=s.sec*(s.sides||1),act=V.str&&V.str.id===id,dn=c.st[id];
+     ${ids.map(id=>{const s=STR[id],act=V.str&&V.str.id===id,dn=c.st[id];
       return `<div class="sx ${act?'act':''} ${dn&&!act?'dn':''}">${fig(bestSide(s.m),litOf(s.m),{noglow:true})}
         <div class="sp"><b>${s.n}</b><small>${s.sides?`${s.sec}s each side`:`${s.sec}s`} · ${s.m.map(g=>GN[g]).join(', ')}</small><small class="dim" style="margin-top:2px">${esc(s.how)}</small></div>
         ${dn&&!act?`<button class="pbtn on" data-a="stTog" data-v="${id}" aria-label="Undo">${ic('check')}</button>`:
-        `<button class="pbtn ${act?'on':''}" data-a="stPlay" data-v="${id}" aria-label="${act?'Pause':'Start'}">${act?`<span class="t" id="stt">${Math.ceil((V.str.end-Date.now())/1000)}</span><svg class="ring" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="rgba(10,11,13,.25)" stroke-width="3"/><circle id="str" cx="26" cy="26" r="24" fill="none" stroke="#0A0B0D" stroke-width="3" stroke-dasharray="150.8" stroke-dashoffset="0" stroke-linecap="round"/></svg>`:ic('play')}</button>`}
+        `<button class="pbtn ${act?'on':''}" data-a="stPlay" data-v="${id}" aria-label="${act?'Pause':'Start'}">${act?`<span class="t" id="stt">${Math.ceil((V.str.end-Date.now())/1000)}</span><svg class="ring" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="none" stroke="rgba(11,11,12,.18)" stroke-width="3"/><circle id="str" cx="26" cy="26" r="24" fill="none" stroke="#0B0B0C" stroke-width="3" stroke-dasharray="150.8" stroke-dashoffset="0" stroke-linecap="round"/></svg>`:ic('play')}</button>`}
       </div>`}).join('')}`;
     foot=`<button class="btn" data-a="goStep" data-v="1">${stepsDone[0]?'Next: cardio':'Skip to cardio'}</button>`;
   }else if(c.step===1){
     const ca=c.ca,sec=caSec(ca),pct=Math.min(1,sec/(ca.goal*60)),C=2*Math.PI*104;
     body=`<div><h2>Cardio</h2><p class="mute" style="font-size:14px;margin-top:4px">Easy pace. You should be able to talk.</p></div>
      <div class="chips">${[...new Set([ca.type,...CARDIO[S.place==='home'?'home':'gym']])].map(t=>`<button class="chip ${ca.type===t?'on':''}" data-a="caType" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>
-     <div class="big"><div class="dial"><svg viewBox="0 0 230 230"><circle cx="115" cy="115" r="104" fill="none" stroke="var(--card3)" stroke-width="10"/><circle id="car" cx="115" cy="115" r="104" fill="none" stroke="var(--acc)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-pct)).toFixed(1)}"/></svg>
-       <div style="text-align:center"><div class="clock" id="cat" style="font-size:52px">${mmss(sec)}</div><div class="mute" style="font-size:13px">of ${ca.goal}:00</div></div></div>
-       <div class="row" style="gap:14px;margin-top:8px"><button class="pbtn ${ca.run?'':'on'}" style="width:64px;height:64px" data-a="caRun" aria-label="${ca.run?'Pause':'Start'}">${ic(ca.run?'pause':'play')}</button></div></div>
+     <div class="big"><div class="dial"><svg viewBox="0 0 230 230"><circle cx="115" cy="115" r="104" fill="none" stroke="var(--card3)" stroke-width="10"/><circle id="car" cx="115" cy="115" r="104" fill="none" stroke="var(--peri)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-pct)).toFixed(1)}"/></svg>
+       <div style="text-align:center"><div class="clock" id="cat" style="font-size:54px">${mmss(sec)}</div><div class="mute" style="font-size:13px">of ${ca.goal}:00</div></div></div>
+       <div class="row" style="gap:14px;margin-top:8px"><button class="pbtn ${ca.run?'':'on'}" style="width:66px;height:66px" data-a="caRun" aria-label="${ca.run?'Pause':'Start'}">${ic(ca.run?'pause':'play')}</button></div></div>
      <div class="lbl">Target</div>
-     <div class="seg">${[5,10,15,20,30].map(m=>`<button class="${ca.goal===m?'on':''}" data-a="caGoal" data-v="${m}">${m}m</button>`).join('')}</div>
+     <div class="seg">${[...new Set([5,10,15,20,30,ca.goal])].sort((a,b)=>a-b).map(m=>`<button class="${ca.goal===m?'on':''}" data-a="caGoal" data-v="${m}">${m}m</button>`).join('')}</div>
      <div class="field"><span class="lbl">Distance (optional)</span><input inputmode="decimal" placeholder="${S.unit==='lb'?'miles':'km'}" value="${esc(ca.dist)}" data-in="dist"></div>`;
     foot=noLift?`<button class="btn" data-a="caDone">Done, finish rest day</button>`:`<button class="btn" data-a="caDone">${ca.done?'Next: lift':'Done, on to lifting'}</button>`;
   }else{
-    body=`<div class="row"><div class="sp"><h2>${esc(D.n)}</h2><p class="mute" style="font-size:14px;margin-top:4px">Tick each set as you finish it. Rest starts on its own.</p></div></div>
-     ${c.ex.map((e,i)=>exCard(e,i)).join('')}`;
-    const all=stepsDone[2];
-    foot=(V.rest?restBar():'')+`<button class="btn ${all?'':'ghost'}" data-a="finishAsk">${all?'Finish workout':'Finish early'}</button>`;
+    const n=c.ex.length,i=Math.min(c.exi||0,n-1),e=c.ex[i],cur=e.sets.length&&e.sets.every(s=>s.ok);
+    body=liftStep(c,i);
+    foot=(V.rest?restBar():'')+(cur&&i<n-1?`<button class="btn" data-a="exGo" data-v="${i+1}">Next: ${esc(xs(c.k,c.ex[i+1].id).n)}${ic('chev')}</button>`:stepsDone[2]?`<button class="btn" data-a="finishAsk">Finish workout</button>`:'');
   }
-  return head+`<div class="v" style="padding-top:16px;padding-bottom:${c.step===2&&V.rest?190:120}px">${body}</div><div class="foot"><div>${foot}</div></div>`;
+  return head+`<div class="v" style="padding-top:${lift?0:16}px;padding-bottom:${lift?(V.rest?170:110):120}px">${body}</div><div class="foot"><div>${foot}</div></div>`;
 }
-function exCard(e,i){
-  const k=S.cur.k,X=xs(k,e.id),R=parseR(X.r),last=lastFor(e.id,k),h=hint(e.id,k),all=e.sets.length&&e.sets.every(s=>s.ok);
+function liftStep(c,i){
+  const n=c.ex.length,e=c.ex[i],k=c.k,D=DAYS[k],X=xs(k,e.id),R=parseR(X.r),last=lastFor(e.id,k),h=hint(e.id,k),ph=photo(e.id);
+  const doneN=c.ex.filter(x=>x.sets.length&&x.sets.every(s=>s.ok)).length,curSet=e.sets.findIndex(s=>!s.ok),C=2*Math.PI*19;
   const lastTxt=last?doneSets(last).map(s=>R.hold?`${s.r}s`:(s.w?`${s.w}×${s.r}`:`${s.r}`)).join(', '):'';
-  return `<div class="ex ${all?'alldone':''}">
-   <button class="exh" data-a="exInfo" data-v="${e.id}"><span class="thumb">${fig(bestSide(X.m),{[X.m[0]]:2,...Object.fromEntries(X.m.slice(1).map(g=>[g,1]))},{noglow:true})}</span>
-    <span class="sp"><b>${X.n}</b><small>${X.s} × ${X.r}${X.kg?` · ${X.kg} ${S.unit}`:X.bw?' · bodyweight':''} · ${restTxt(X.rest)}</small>
-    ${last?`<span class="last">Last: ${lastTxt}${h?` <span class="tag">${h}</span>`:''}</span>`:`<span class="last">${X.kg?`First time logging it here. Your plan says ${X.kg} ${S.unit}.`:'First time. Pick a weight you could lift 2 more reps with.'}</span>`}</span>${ic('chev','dim')}</button>
-   <div class="sets"><span class="hd">Set</span><span class="hd">${R.hold?'Added':S.unit}</span><span class="hd">${R.hold?'Secs':'Reps'}</span><span></span>
-    ${e.sets.map((s,j)=>{const ls=last&&doneSets(last)[j];return `<span class="no">${j+1}</span>
-     <input inputmode="decimal" placeholder="${ls&&ls.w?ls.w:X.kg?X.kg:X.bw?'BW':'–'}" value="${esc(s.w)}" data-in="w" data-e="${i}" data-s="${j}" class="${s.ok?'okc':''}" ${s.ok?'style="background:var(--acc-soft);border-color:transparent"':''}>
-     <input inputmode="numeric" placeholder="${ls?ls.r:R.hi}" value="${esc(s.r)}" data-in="r" data-e="${i}" data-s="${j}" ${s.ok?'style="background:var(--acc-soft);border-color:transparent"':''}>
-     <button class="tk ${s.ok?'y':''}" data-a="tick" data-e="${i}" data-s="${j}" aria-label="Set ${j+1} done">${ic('check')}</button>`}).join('')}
-   </div>
-   <button class="addset" data-a="addSet" data-e="${i}">${ic('plus')}Add set</button></div>`;
+  return `<div class="lift">
+   <div class="exhero" ${ph?`style="background-image:url('${ph}')"`:''}>${ph?'':`<div class="nofoto">${fig(bestSide(X.m),litMain(X.m),{noglow:true})}</div>`}
+    <div class="exttl"><div class="sp"><h2>${esc(X.n)}</h2><small>${X.s} × ${X.r}${X.kg?` · ${X.kg} ${S.unit}`:X.bw?' · bodyweight':''} · ${restTxt(X.rest)}</small></div>
+     <button class="x" data-a="exInfo" data-v="${e.id}" aria-label="How to do it">${ic('info')}</button></div></div>
+   <div class="liftb">
+    <div class="last">${last?`Last time: ${lastTxt}`:X.kg?`Your plan says ${X.kg} ${S.unit}. Tick a set to log it.`:'First time. Pick a weight you could lift 2 more reps with.'}${h?` <span class="tag g">${ic('up')}${h}</span>`:''}</div>
+    <div class="sets">${e.sets.map((s,j)=>{const ls=last&&doneSets(last)[j];return `<span class="no ${j===curSet?'cur':''}"><span>${j+1}</span></span>
+     <span class="cell ${s.ok?'okc':''}"><input inputmode="decimal" aria-label="Set ${j+1} weight" placeholder="${ls&&ls.w?ls.w:X.kg?X.kg:X.bw?'BW':'–'}" value="${esc(s.w)}" data-in="w" data-e="${i}" data-s="${j}"><span class="u">${R.hold?'+':S.unit}</span></span>
+     <span class="cell ${s.ok?'okc':''}"><input inputmode="numeric" aria-label="Set ${j+1} reps" placeholder="${ls?ls.r:R.hi}" value="${esc(s.r)}" data-in="r" data-e="${i}" data-s="${j}"><span class="u">${R.hold?'s':'×'}</span></span>
+     <button class="tk ${s.ok?'y':''}" data-a="tick" data-e="${i}" data-s="${j}" aria-label="Set ${j+1} done">${ic('check')}</button>`}).join('')}</div>
+    <button class="addset" data-a="addSet" data-e="${i}">${ic('plus')}Add set</button>
+    <div class="pager"><div class="ring"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="var(--card3)" stroke-width="3"/><circle cx="22" cy="22" r="19" fill="none" stroke="var(--orange)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-doneN/n)).toFixed(1)}"/></svg>${doneN}/${n}</div>
+     <div class="sp"><b>${esc(X.n)}</b><small>${esc(D.n)}</small></div>
+     <div class="pnums">${c.ex.map((x,j)=>`<button class="${j===i?'on':''} ${x.sets.length&&x.sets.every(s=>s.ok)?'dn':''}" data-a="exGo" data-v="${j}" aria-label="Exercise ${j+1}">${j+1}</button>`).join('')}</div></div>
+   </div></div>`;
 }
-function restBar(){return `<div class="restbar"><div class="sp"><div class="lbl" style="color:var(--mute)">Rest</div><div class="clock" id="rst">${mmss((V.rest.end-Date.now())/1000)}</div></div>
-  <button data-a="restAdd" data-v="-15">−15</button><button data-a="restAdd" data-v="15">+15</button><button data-a="restSkip" style="background:var(--acc);color:var(--acc-ink)">Skip</button></div>`}
+function restBar(){return `<div class="restbar"><div class="sp"><div class="lbl">Rest</div><div class="clock" id="rst">${mmss((V.rest.end-Date.now())/1000)}</div></div>
+  <button data-a="restAdd" data-v="-15">−15</button><button data-a="restAdd" data-v="15">+15</button><button data-a="restSkip" style="background:#fff;color:var(--acc-ink)">Skip</button></div>`}
 
 /* ── done ── */
 function done(){
@@ -705,10 +829,10 @@ function bodyTab(){
   return `<div class="v bodyv">
    <div class="row"><div class="sp"><div class="lbl">This week</div><h1 style="margin-top:4px">Your body</h1></div></div>
    <div class="stage">
-    <div class="legend"><span><i style="background:var(--acc)"></i>6+ sets</span><span><i style="background:#8FA247"></i>Some work</span><span><i style="background:#7C828A"></i>Not yet</span></div>
-    ${fig(side,lit,{tap:true,sel})}<div class="floor"></div>
-    <div class="side"><span class="chip">${side==='front'?'Front':'Back'}</span></div>
-    <button class="rot" data-a="rotate">${ic('rotate')}Rotate</button></div>
+    <div class="legend"><span><i style="background:#fff"></i>6+ sets</span><span><i style="background:#8D9095"></i>Some work</span><span><i style="background:#3a3b3f"></i>Not yet</span></div>
+    ${slot3d('body',lit,{tap:true,view:side})}${fig(side,lit,{tap:true,sel})}<div class="floor"></div>
+    <div class="side"><span class="chip glass">${side==='front'?'Front':'Back'}</span></div>
+    <button class="rot glass" data-a="rotate">${ic('rotate')}Rotate</button></div>
    <div class="chips" style="flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px">${list.map(g=>`<button class="chip ${sel===g?'on':''}" data-a="pick" data-v="${g}">${GN[g]}</button>`).join('')}</div>
    ${sel?`<div class="card"><div class="row"><div class="sp"><h2>${GN[sel]}</h2><div class="mute" style="font-size:13px;margin-top:2px">${load[sel]?`${Math.round(load[sel])} sets this week`:'No sets this week yet'}</div></div><button class="x" data-a="pick" data-v="">${ic('x')}</button></div>
      <div class="bar" style="margin:12px 0 4px"><i style="width:${Math.min(100,(load[sel]||0)/12*100)}%"></i></div><div class="dim" style="font-size:12px">Aim for 10–12 hard sets a week.</div>
@@ -724,9 +848,11 @@ function logTab(){
   const list=[...S.log].reverse();
   return `<div class="v">
    <div><div class="lbl">History</div><h1 style="margin-top:4px">Log</h1></div>
+   <div class="stats"><div class="stat">${ic('lift')}<b>${total}</b><small>workouts</small></div><div class="stat">${ic('log')}<b>${sets}</b><small>sets</small></div><div class="stat">${ic('trophy')}<b>${(()=>{const v=S.log.reduce((a,s)=>a+volOf(s),0);return v>=1e4?(v/1000).toFixed(1)+'k':Math.round(v)})()}</b><small>${S.unit}</small></div></div>
+   <div class="card"><div class="row" style="margin-bottom:12px"><span class="lbl sp">Last 30 days</span><span class="lbl">${[...Array(30)].filter((_,j)=>{const d=new Date();d.setDate(d.getDate()-29+j);return days.has(dkey(d))}).length} · goal ${S.plan?split().d.filter(k=>!DAYS[k].rest).length:S.days}/wk</span></div>
+    <div class="grid30">${[...Array(30)].map((_,j)=>{const d=new Date();d.setDate(d.getDate()-29+j);const kk=dkey(d);return `<i class="${days.has(kk)?'y':''} ${kk===t?'t':''}"></i>`}).join('')}</div></div>
    <div class="card"><div class="row" style="margin-bottom:12px"><h3 class="sp">This week</h3><span class="mute" style="font-size:14px"><b style="color:var(--text)">${thisWeek}</b> / ${S.plan?split().d.filter(k=>!DAYS[k].rest).length:S.days} sessions</span></div>
     <div class="week">${wk.map(k=>{const d=fromKey(k);return `<div>${'MTWTFSS'[(d.getDay()+6)%7]}<i class="${days.has(k)?'y':''} ${k===t?'t':''}">${d.getDate()}</i></div>`}).join('')}</div></div>
-   <div class="stats"><div class="stat"><b>${total}</b><small>Sessions</small></div><div class="stat"><b>${streak()}</b><small>Day streak</small></div><div class="stat"><b>${sets}</b><small>Sets logged</small></div></div>
    ${list.length?`<div class="steps">${list.map(s=>{const d=fromKey(s.d),st=Object.values(s.st||{}).filter(Boolean).length;
      return `<button class="sess" data-a="openDay" data-v="${s.id}"><span class="d"><small>${DOW[d.getDay()]}</small><b>${d.getDate()}</b><small>${MON[d.getMonth()]}</small></span>
       <span class="sp"><b>${esc(DAYS[s.k].rest?'Rest day':DAYS[s.k].n)}</b><div class="mute" style="font-size:13px">${plural(setsOf(s),'set')} · ${Math.round(volOf(s)).toLocaleString()} ${S.unit} · ${Math.max(1,Math.round((s.t1-s.t0)/60000))} min</div>
@@ -808,9 +934,9 @@ function impView(){const P=parsePlan(V.imp);
 /* ── sheets ── */
 function sheet(){
   const sh=V.sheet;let inner='';
-  if(sh.t==='ex'){const X=EX[sh.id],last=lastFor(sh.id);
-    inner=`<div class="row"><div class="sp"><div class="lbl">Exercise</div><h2 style="font-size:22px;margin-top:4px">${X.n}</h2></div><button class="x" data-a="close">${ic('x')}</button></div>
-     <div class="stage" style="height:280px"><div class="pair" style="position:absolute;inset:0;padding:16px 0 22px">${fig('front',{[X.m[0]]:2,...Object.fromEntries(X.m.slice(1).map(g=>[g,1]))})}${fig('back',{[X.m[0]]:2,...Object.fromEntries(X.m.slice(1).map(g=>[g,1]))})}</div><div class="floor"></div></div>
+  if(sh.t==='ex'){const X=EX[sh.id],last=lastFor(sh.id),p=photo(sh.id);
+    inner=`${p?`<div class="shot" style="background-image:url('${p}')"></div>`:''}<div class="row"><div class="sp"><div class="lbl">Exercise</div><h2 style="font-size:24px;margin-top:4px">${esc(X.n)}</h2></div><button class="x" data-a="close">${ic('x')}</button></div>
+     <div class="stage" style="height:${p?200:280}px"><div class="pair" style="position:absolute;inset:0;padding:14px 0 20px">${fig('front',litMain(X.m))}${fig('back',litMain(X.m))}</div><div class="floor"></div></div>
      <div class="musc">${X.m.map((g,i)=>`<span style="${i?'opacity:.7':''}">${GN[g]}${i?'':' · main'}</span>`).join('')}</div>
      <div class="stats"><div class="stat"><b>${X.s}</b><small>Sets</small></div><div class="stat"><b>${X.r}</b><small>${parseR(X.r).hold?'Hold':'Reps'}</small></div><div class="stat"><b>${X.rest>=60?(X.rest/60)+'m':X.rest+'s'}</b><small>Rest</small></div></div>
      <div><h3 style="margin-bottom:10px">How to</h3><ol class="howto">${X.how.map(t=>`<li>${esc(t)}</li>`).join('')}</ol></div>
@@ -822,6 +948,23 @@ function sheet(){
      <button class="addset" data-a="discard" style="justify-content:center;color:var(--warn)">Discard this session</button>`;
   }
   return `<div class="scrim" data-a="close"><div class="sheet" data-stop>${inner}</div></div>`;
+}
+
+/* ══════════════ 3D BODY ══════════════ */
+/* One canvas per slot key, kept alive across renders: render() rebuilds the HTML, then the live canvas is moved into the new slot. */
+const B3={};
+function mount3d(){
+  if(!window.Body3D)return;
+  document.querySelectorAll('[data-b3d]').forEach(ph=>{
+    const key=ph.dataset.b3d;let o={};try{o=JSON.parse(ph.dataset.o||'{}')}catch(e){}
+    let h=B3[key];
+    if(!h){const host=document.createElement('div');host.className='b3d';h=B3[key]={host,api:null};
+      try{h.api=Body3D.mount(host,{lit:o.lit||{},autoRotate:!o.tap,interactive:true,
+        onPick:g=>{if(!o.tap||!GN[g])return;V.sel=g;render()},
+        onReady:()=>host.classList.add('ready')})}catch(e){console.warn('3D body failed',e)}}
+    ph.replaceWith(h.host);
+    if(h.api){try{h.api.setLit(o.lit||{});if(o.tap)h.api.setSelected(V.sel||null);if(o.view)h.api.setView(o.view)}catch(e){}}
+  });
 }
 
 /* ══════════════ TIMERS ══════════════ */
@@ -872,6 +1015,8 @@ const A={
  tick:(v,el)=>{const e=S.cur.ex[+el.dataset.e],s=e.sets[+el.dataset.s],X=xs(S.cur.k,e.id),R=parseR(X.r),last=lastFor(e.id,S.cur.k),ls=last&&doneSets(last)[+el.dataset.s];
    if(!s.ok){if(!s.r)s.r=String(ls?ls.r:R.hi);if(!s.w)s.w=ls&&ls.w?String(ls.w):X.kg?String(X.kg):'';s.ok=true;V.rest=X.rest>0?{end:Date.now()+X.rest*1000}:null;buzz(30)}else{s.ok=false}save()},
  addSet:(v,el)=>{const e=S.cur.ex[+el.dataset.e],p=e.sets[e.sets.length-1];e.sets.push({w:p?p.w:'',r:'',ok:false});save()},
+ exGo:v=>{S.cur.exi=+v;save();scrollTo(0,0)},
+ pickBody:v=>{V.tab='body';V.view='tab';V.sel=v;V.side=BACKG.includes(v)&&!FRONTG.includes(v)?'back':'front';scrollTo(0,0)},
  restAdd:v=>{if(V.rest)V.rest.end+=(+v)*1000},restSkip:()=>{V.rest=null},
  exInfo:v=>{V.sheet={t:'ex',id:v}},close:()=>{V.sheet=null},
  finishAsk:()=>{V.sheet={t:'finish'}},finish:()=>{V.sheet=null;finish()},
