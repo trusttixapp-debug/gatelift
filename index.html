@@ -761,11 +761,14 @@ function render(){
   if(V.streakPop)h+=streakPop();
   if(V.toast)h+=`<div class="toast">${esc(V.toast)}</div>`;
   /* keep your place: re-drawing the page must not jump it back to the top */
-  const keepY=window.scrollY;
+  const keepY=window.scrollY,keepX={};document.querySelectorAll('[data-keep]').forEach(e=>keepX[e.dataset.keep]=e.scrollLeft);
   a.innerHTML=h;
+  document.querySelectorAll('[data-keep]').forEach(e=>{if(keepX[e.dataset.keep]!=null)e.scrollLeft=keepX[e.dataset.keep]});
   mount3d();
   if(!document.body.classList.contains('lock')&&Math.abs(window.scrollY-keepY)>2)window.scrollTo(0,keepY);
   V.skipView=false;
+  /* tapped a muscle on the 3D body: slide its chip into view without moving the page */
+  if(V.chipJump){V.chipJump=false;const row=document.querySelector('[data-keep=muscles]'),on=row&&row.querySelector('.chip.on');if(on){const r=row.getBoundingClientRect(),c=on.getBoundingClientRect();if(c.left<r.left||c.right>r.right)row.scrollLeft+=c.left-r.left-(r.width-c.width)/2}}
   tick();
 }
 function tabs(){
@@ -885,7 +888,7 @@ function today(){
       return pathCard(null,nk,bwk,bex,bS,bM,bc,false,false,false,true)})():pathCard(c,k,wk,ex,nSets,M,caType,stOk,caOk,liOk)}
    ${(()=>{const bk=doneToday?nk:k,BD=DAYS[bk],bex=exList(bk),bS=bex.reduce((a,id)=>a+xs(bk,id).s,0),tw=doneToday?'tomorrow':'today';
    return (BD.f.length?`<div class="sect"><h2>Muscles ${tw}</h2><span class="lbl">sets this week</span></div>
-   <div class="mscroll">${BD.f.map(g=>{const n=Math.round(load[g]||0),f=Math.min(18,n);
+   <div class="mscroll" data-keep="mcards">${BD.f.map(g=>{const n=Math.round(load[g]||0),f=Math.min(18,n);
      return `<button class="mcard" data-a="pickBody" data-v="${g}">${fig(bestSide([g]),{[g]:2},{noglow:true})}<b>${GN[g]}</b>
        <span class="st8 ${n?'up':''}">${n?ic('up'):''}${n>=10?'Growing':n?'Building':'Fresh'}</span>
        <span class="seg6">${[...Array(6)].map((_,j)=>`<i class="${j*3<f?'y':''}"></i>`).join('')}</span><span class="dlab"><span>${n} sets</span><span>goal 10–18</span></span></button>`}).join('')}</div>`:'')
@@ -982,7 +985,8 @@ function bodyTab(){
   /* only the muscle you pick glows; muscles trained this week get a faint tint */
   const load=weekLoad(),lit={};if(V.sel)lit[V.sel]=2;
   const sel=V.sel,side=V.side;
-  const all=Object.keys(GN),list=side==='front'?FRONTG:BACKG;
+  /* one fixed list of every muscle, so the row never reshuffles when the body turns */
+  const all=Object.keys(GN),list=['chest','shoulders','biceps','triceps','forearms','abs','obliques','traps','lats','lowerback','glutes','quads','adductors','hams','calves'];
   const exFor=g=>Object.keys(EX).filter(id=>EX[id].m[0]===g||(EX[id].m.includes(g)&&EX[id].m.indexOf(g)<2)).filter(id=>split().d.some(k=>DAYS[k][S.place==='home'?'home':'gym'].includes(id)));
   return `<div class="v bodyv">
    <div class="row"><div class="sp"><div class="lbl">This week</div><h1 style="margin-top:4px">Your body</h1></div></div>
@@ -992,7 +996,7 @@ function bodyTab(){
     ${slot3d('body',lit,{tap:true,view:side})}${fig(side,lit,{tap:true,sel})}<div class="floor"></div>
     <div class="side"><span class="chip glass">${side==='front'?'Front':'Back'}</span></div>
     <button class="rot glass" data-a="rotate">${ic('rotate')}Rotate</button></div>
-   <div class="chips" style="flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px">${list.map(g=>`<button class="chip ${sel===g?'on':''}" data-a="pick" data-v="${g}">${GN[g]}</button>`).join('')}</div>
+   <div class="chips" data-keep="muscles" style="flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px">${list.map(g=>`<button class="chip ${sel===g?'on':''}" data-a="pick" data-v="${g}">${GN[g]}</button>`).join('')}</div>
    ${sel?`<div class="card"><div class="row"><div class="sp"><h2>${GN[sel]}</h2><div class="mute" style="font-size:13px;margin-top:2px">${load[sel]?`${Math.round(load[sel])} sets this week`:'No sets this week yet'}</div></div><button class="x" data-a="pick" data-v="">${ic('x')}</button></div>
      <div class="bar" style="margin:12px 0 4px"><i style="width:${Math.min(100,(load[sel]||0)/12*100)}%"></i></div><div class="dim" style="font-size:12px">Aim for 10–12 hard sets a week.</div>
      <div class="mlist" style="margin-top:8px">${exFor(sel).map(id=>`<button class="it" data-a="exInfo" data-v="${id}" style="text-align:left;width:100%"><span class="sp"><b style="font-size:15px">${EX[id].n}</b><div class="mute" style="font-size:13px">${EX[id].s} × ${EX[id].r}</div></span>${ic('chev','dim')}</button>`).join('')||'<div class="mute" style="padding:10px 0">Trained as a helper muscle in your plan.</div>'}</div></div>`
@@ -1310,7 +1314,7 @@ function mount3d(){
     let h=B3[key];
     if(!h){const host=document.createElement('div');host.className='b3d';h=B3[key]={host,api:null,view:'',sex:S.sex};
       try{h.api=Body3D.mount(host,{sex:S.sex,lit:o.lit||{},autoRotate:!o.tap,interactive:true,selectOnPick:!!o.tap,
-        onPick:g=>{if(!o.tap)return;V.sel=g&&GN[g]?g:null;if(V.sel&&Body3D.bestView){const bv=Body3D.bestView(V.sel);if(bv){V.side=bv;V.skipView=true}}render()}});
+        onPick:g=>{if(!o.tap)return;V.sel=g&&GN[g]?g:null;V.chipJump=true;if(V.sel&&Body3D.bestView){const bv=Body3D.bestView(V.sel);if(bv){V.side=bv;V.skipView=true}}render()}});
         Promise.resolve(h.api.ready).then(()=>host.classList.add('ready'),e=>console.warn('3D body failed to load',e))}catch(e){console.warn('3D body failed',e)}}
     ph.replaceWith(h.host);
     if(h.api){try{if(h.sex!==S.sex&&h.api.setSex){h.sex=S.sex;h.api.setSex(S.sex)}h.api.setLit(o.lit||{});
