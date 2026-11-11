@@ -1,0 +1,40 @@
+body.glb - 3D human muscle body model
+=====================================
+
+body.glb is an adapted work (meshes selected, merged into 16 named groups, cut, simplified,
+re-normalised and quantised) of the following openly licensed datasets:
+
+1) Z-Anatomy - Muscular system and Skeletal system models
+   Files used: MuscularSystem100.fbx, SkeletalSystem100.fbx
+   Source:  https://github.com/LluisV/Z-Anatomy  (branch PC-Version, Resources/Models/FBX)
+            project: https://github.com/Z-Anatomy
+   Authors: Z-Anatomy project (Gauthier Kervyn, Lluis Vinent Juanico and contributors)
+   License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+            https://creativecommons.org/licenses/by-sa/4.0/
+
+2) BodyParts3D (Z-Anatomy's models are derived from it)
+   Source:  https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html
+   License page: https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html
+   License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+            https://creativecommons.org/licenses/by/4.0/
+   (BodyParts3D was formerly distributed under CC BY-SA 2.1 JP; the current license
+   page, checked 2026-11-11, states CC Attribution 4.0 International.)
+
+Changes made: only skeletal muscles, bones and a few tendons/aponeuroses were kept;
+internal organs, vessels, nerves, fasciae, bursae and deep muscles were removed. Muscles were
+merged into the groups chest, shoulders, biceps, triceps, forearms, abs, obliques, traps,
+lats, lowerback, glutes, quads, adductors, hams, calves, plus "body". The oblique
+aponeuroses over the rectus abdominis, the lumbar part of the latissimus dorsi aponeurosis
+over the erector spinae, and the iliotibial tract were cut away so the underlying groups are
+visible. The meshes were simplified (meshoptimizer), smooth normals were recomputed, and the
+model was rescaled to 2 units tall.
+
+License of body.glb: CC BY-SA 4.0 (ShareAlike, inherited from Z-Anatomy).
+The ShareAlike terms apply to the model file and modified versions of it. They do not
+apply to the separate viewer code (body3d.js) or the rest of the app.
+
+Required attribution (show it in the app, e.g. on an About/Credits screen):
+
+  3D anatomy model adapted from Z-Anatomy (https://github.com/Z-Anatomy), CC BY-SA 4.0,
+  based on BodyParts3D, (c) The Database Center for Life Science, licensed under
+  CC Attribution 4.0 International. Modified (merged, simplified).
