@@ -302,6 +302,8 @@ h3{font-size:16px;font-weight:650;letter-spacing:-.01em}
 .seg button.on{background:#fff;color:var(--acc-ink)}
 .welcome .stage{flex:1;min-height:340px;display:flex;align-items:center;justify-content:center}
 .welcome .fig{height:min(52vh,470px);width:auto}
+.restpill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 80px);z-index:21;display:flex;align-items:center;gap:8px;height:44px;padding:0 18px;border-radius:99px;background:rgba(30,30,33,.92);font-weight:600;font-size:15px}
+.restpill b{font-size:17px}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);background:#fff;color:var(--acc-ink);font-weight:650;padding:11px 18px;border-radius:99px;z-index:60;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
 </style>
 </head>
@@ -329,7 +331,31 @@ const KEY='gatelift.v2';
 const fresh=()=>({v:2,onb:false,name:'',sex:'male',days:3,place:'gym',unit:'kg',cardio:10,cardioType:'',idx:0,log:[],cur:null});
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===2)return Object.assign(fresh(),s)}catch(e){}return fresh()}
 let S=load();
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){S.ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}cloudPush()}
+/* A second copy so a cleared browser can't wipe your log.
+   On the claude.ai link: the artifact's private per-person store (only you can read it).
+   Everywhere: ask the browser to keep this site's storage (installed iPhone apps keep it). */
+const CLOUD={ref:null,busy:false,again:false,t:0};
+function cloudPush(){if(!CLOUD.ref)return;clearTimeout(CLOUD.t);CLOUD.t=setTimeout(async()=>{
+  if(CLOUD.busy){CLOUD.again=true;return}CLOUD.busy=true;
+  try{await CLOUD.ref.set({json:JSON.stringify(S),ts:S.ts||Date.now()})}catch(e){console.warn('cloud save failed',e)}
+  CLOUD.busy=false;if(CLOUD.again){CLOUD.again=false;cloudPush()}},900)}
+async function cloudInit(){
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}
+  if(!(window.claude&&typeof window.claude.use==='function'))return;
+  try{
+    const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);if(!db||!user)return;
+    const id=await user.id();if(!id)return;
+    const ref=db.collection('data/users/'+id).doc('state');
+    const snap=await ref.get();const d=snap==null?null:typeof snap.data==='function'?snap.data():snap;
+    let r=null;try{r=d&&d.json?JSON.parse(d.json):null}catch(e){}
+    CLOUD.ref=ref;
+    if(r&&r.v===2&&r.onb&&(!S.onb||(r.ts||0)>(S.ts||0))){
+      S=Object.assign(fresh(),r);regLib();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+      if(V.view==='ob')V.view='tab';render();toast('Your data is back');
+    }else if(S.onb)cloudPush();
+  }catch(e){console.warn('cloud copy unavailable',e)}
+}
 let V={view:S.onb?'tab':'ob',tab:'today',ob:0,side:'front',sel:null,sheet:null,rest:null,str:null,logId:null,toast:''};
 
 /* ══════════════ MUSCLES ══════════════ */
@@ -647,6 +673,7 @@ function render(){
 
   else h=({today,body:bodyTab,log:logTab,you:youTab}[V.tab]||today)()+tabs();
   if(V.sheet)h+=sheet();
+  if(V.rest&&V.view!=='run')h+=`<button class="restpill glass" data-a="resume">${ic('clock')}Rest <b class="clock" id="rst">${mmss((V.rest.end-Date.now())/1000)}</b></button>`;
   if(V.toast)h+=`<div class="toast">${esc(V.toast)}</div>`;
   a.innerHTML=h;
   mount3d();
@@ -905,6 +932,8 @@ function youTab(){
     <div class="seg"><button class="${S.place==='gym'?'on':''}" data-a="set" data-k="place" data-v="gym">Gym</button><button class="${S.place==='home'?'on':''}" data-a="set" data-k="place" data-v="home">Home</button></div>`}
     <span class="lbl">Cardio length</span>
     <div class="seg">${[5,10,15,20,30].map(m=>`<button class="${S.cardio===m?'on':''}" data-a="set" data-k="cardio" data-v="${m}">${m}m</button>`).join('')}</div>
+    <span class="lbl">Timer sound</span>
+    <div class="seg"><button class="${S.sound!==false?'on':''}" data-a="sound" data-v="1">On</button><button class="${S.sound===false?'on':''}" data-a="sound" data-v="0">Off</button><button data-a="soundTest">Test</button></div>
     <span class="lbl">Weights in</span>
     <div class="seg"><button class="${S.unit==='kg'?'on':''}" data-a="set" data-k="unit" data-v="kg">kg</button><button class="${S.unit==='lb'?'on':''}" data-a="set" data-k="unit" data-v="lb">lb</button></div></div>
    <div class="card" style="display:flex;flex-direction:column;gap:10px">
@@ -1033,22 +1062,41 @@ if(o.tap)h.api.setSelected(V.sel||null);if(o.view&&o.view!==h.view){h.view=o.vie
 
 /* ══════════════ TIMERS ══════════════ */
 let tickH=0;
+/* ── timer sounds: Web Audio beeps, unlocked by your first tap (phones block sound until then) ── */
+let AC=null;
+function audioUnlock(){try{
+  if(navigator.audioSession)navigator.audioSession.type='playback'; /* iPhone: play even with the silent switch on */
+  if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(!C)return;AC=new C()}
+  if(AC.state==='suspended')AC.resume();
+  if(!audioUnlock.done){const b=AC.createBuffer(1,1,22050),s=AC.createBufferSource();s.buffer=b;s.connect(AC.destination);s.start(0);audioUnlock.done=1}
+}catch(e){}}
+document.addEventListener('pointerdown',audioUnlock,{passive:true});
+function tone(f,t0,d,vol,type){const o=AC.createOscillator(),g=AC.createGain();o.type=type||'square';o.frequency.value=f;
+  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.012);g.gain.setValueAtTime(vol,t0+d-.03);g.gain.linearRampToValueAtTime(0,t0+d);
+  o.connect(g);g.connect(AC.destination);o.start(t0);o.stop(t0+d+.03)}
+/* kind: 'tick' (last 3 seconds), 'soft' (stretch done), 'alarm' (rest over, cardio target) */
+function beep(kind){if(S.sound===false||!AC)return;try{if(AC.state==='suspended')AC.resume();const t=AC.currentTime+.03;
+  if(kind==='tick'){tone(988,t,.09,.35,'sine');return}
+  if(kind==='soft'){tone(1175,t,.12,.45,'sine');tone(1568,t+.16,.18,.45,'sine');return}
+  for(let i=0;i<4;i++){tone(1319,t+i*.42,.13,.6);tone(1760,t+i*.42+.17,.15,.6)}}catch(e){}}
 function tick(){
   clearInterval(tickH);
-  if(V.view!=='run')return;
+  /* keep timing while a timer runs, even if you step out to another screen */
+  if(!S.cur||!(V.view==='run'||V.rest||V.str||S.cur.ca.run))return;
   tickH=setInterval(()=>{
     const c=S.cur;if(!c)return;const now=Date.now();
     const t=document.getElementById('tot');if(t)t.textContent=mmss((now-c.t0)/1000);
     if(V.str){const left=(V.str.end-now)/1000;
-      if(left<=0){c.st[V.str.id]=true;const ids=Object.keys(c.st),nx=ids.find(id=>!c.st[id]);V.str=null;buzz(200);save();
+      if(left<=0){c.st[V.str.id]=true;const ids=Object.keys(c.st),nx=ids.find(id=>!c.st[id]);V.str=null;buzz(200);beep(nx?'soft':'alarm');save();
         if(nx){startStr(nx)}render();return}
       const e=document.getElementById('stt');if(e)e.textContent=Math.ceil(left);
       const r=document.getElementById('str');if(r)r.setAttribute('stroke-dashoffset',(150.8*(1-left/V.str.tot)).toFixed(1));}
     if(c.ca.run){const sec=caSec(c.ca),e=document.getElementById('cat');if(e)e.textContent=mmss(sec);
       const r=document.getElementById('car'),C=2*Math.PI*104;if(r)r.setAttribute('stroke-dashoffset',(C*(1-Math.min(1,sec/(c.ca.goal*60)))).toFixed(1));
-      if(sec>=c.ca.goal*60&&!c.ca.hit){c.ca.hit=1;buzz([200,100,200]);toast('Cardio target hit')}}
+      if(sec>=c.ca.goal*60&&!c.ca.hit){c.ca.hit=1;buzz([200,100,200]);beep('alarm');toast('Cardio target hit')}}
     if(V.rest){const left=(V.rest.end-now)/1000;
-      if(left<=0){V.rest=null;buzz([150,80,150]);render();return}
+      const ls=Math.ceil(left);if(ls<=3&&ls>0&&V.rest.tk!==ls){V.rest.tk=ls;beep('tick')}
+      if(left<=0){V.rest=null;buzz([150,80,150]);beep('alarm');toast('Rest over. Next set');render();return}
       const e=document.getElementById('rst');if(e)e.textContent=mmss(left);}
   },250);
 }
@@ -1102,7 +1150,10 @@ const A={
  restoreOpen:()=>{V.restore=!V.restore},
  restore:()=>{try{const o=JSON.parse(document.getElementById('rs').value);if(o.v!==2)throw 0;S=Object.assign(fresh(),o);regLib();save();V.restore=false;toast('Restored')}catch(e){toast('That text is not a backup')}},
  resetAsk:()=>{V.resetAsk=true},resetNo:()=>{V.resetAsk=false},
- reset:()=>{S=fresh();save();V={...V,view:'ob',ob:0,tab:'today',resetAsk:false}},
+ sound:v=>{S.sound=v==='1';save();if(S.sound){audioUnlock();beep('alarm')}},
+ soundTest:()=>{audioUnlock();setTimeout(()=>beep('alarm'),60)},
+ reset:()=>{
+S=fresh();save();V={...V,view:'ob',ob:0,tab:'today',resetAsk:false}},
 };
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-a]');
@@ -1123,8 +1174,9 @@ document.addEventListener('input',e=>{
   else if(k==='w'||k==='r'){S.cur.ex[+el.dataset.e].sets[+el.dataset.s][k]=el.value.replace(/[^\d.]/g,'')}
   save();
 });
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&V.view==='run'){keepAwake();render()}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){audioUnlock();if(V.view==='run'){keepAwake()}if(S.cur)render()}});
 render();
+cloudInit();
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
