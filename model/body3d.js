@@ -63,7 +63,13 @@
   }
     
   makeFabricLit();
-  var live = [];   // running viewers, so setGlowColor can recolour them
+  var live = [];
+  // Yaw (radians, model rotation about the vertical axis) at which each group faces the camera.
+  // 0 = front, PI = back. Positive yaw turns the model's right side towards the camera.
+  var BEST_YAW = {
+    chest: 0, abs: 0, shoulders: 0.45, biceps: 0.35, forearms: 0.3, obliques: 0.5, quads: 0.15, adductors: 0.55,
+    traps: Math.PI, lats: Math.PI, lowerback: Math.PI, glutes: Math.PI, hams: Math.PI, calves: Math.PI, triceps: Math.PI - 0.4
+  };   // running viewers, so setGlowColor can recolour them
 
   var libPromise = null, modelPromises = {};
 
@@ -125,7 +131,14 @@
     var handle = {
       ready: null,
       setLit: function (obj) { state.lit = Object.assign({}, obj || {}); if (t) t.applyLook(); return handle; },
-      setSelected: function (g) { state.selected = (g && GROUPS.indexOf(g) >= 0) ? g : null; if (t) t.applyLook(); return handle; },
+      setSelected: function (g) {
+        state.selected = (g && GROUPS.indexOf(g) >= 0) ? g : null;
+        if (t) { t.applyLook(); if (state.selected) t.focus(state.selected); else t.kick(); }
+        else if (state.selected) pendingView = { focus: state.selected };
+        return handle;
+      },
+      // turn the model so the group faces the camera (does not change the selection)
+      focus: function (g) { if (t) t.focus(g); else pendingView = { focus: g }; return handle; },
       setView: function (v) { if (t) t.setView(v); else pendingView = v; return handle; },
       setAutoRotate: function (on) { state.autoRotate = !!on; if (t) t.kick(); return handle; },
       // Swap the body in place (lit / selected / rotation are kept). Returns a promise for the swap.
@@ -146,7 +159,7 @@
           if (state.destroyed || token !== buildToken) return handle;
           if (t) t.destroy();
           t = build(lib.THREE, template, container, state);
-          if (pendingView) { t.setView(pendingView); pendingView = null; }
+          if (pendingView) { if (pendingView.focus) t.focus(pendingView.focus); else t.setView(pendingView); pendingView = null; }
           return handle;
         });
       });
@@ -392,8 +405,10 @@
     var IDLE_MS = 2500;
     function now() { return performance.now(); }
 
-    function setView(v) {
-      var base = v === 'back' ? Math.PI : 0;
+    function setView(v) { turnTo(v === 'back' ? Math.PI : 0); }
+    // rotate (shortest way) so that the given group faces the camera
+    function focus(g) { if (BEST_YAW.hasOwnProperty(g)) turnTo(BEST_YAW[g]); }
+    function turnTo(base) {
       var twoPi = Math.PI * 2;
       var k = Math.round((yaw - base) / twoPi);
       targetYaw = base + k * twoPi;
@@ -473,9 +488,9 @@
         if (Math.abs(diff) < 0.001) { yaw = targetYaw; targetYaw = null; } else animating = true;
       } else if (!ptr && Math.abs(yawVel) > 0.01) {
         yaw += yawVel * dt; yawVel *= Math.pow(0.04, dt); animating = true;
-      } else if (!ptr && state.autoRotate && now() - lastInteract > IDLE_MS) {
+      } else if (!ptr && state.autoRotate && !state.selected && now() - lastInteract > IDLE_MS) {
         yaw += AUTO_SPEED * dt; animating = true;
-      } else if (state.autoRotate) {
+      } else if (state.autoRotate && !state.selected) {
         animating = true; // waiting for idle timeout
       }
       if (targetYaw === null && Math.abs(yaw) > 64) yaw = yaw % (Math.PI * 2);
@@ -498,6 +513,7 @@
     resize();
 
     var runtime = {
+      focus: focus,
       recolor: function () { setTargets(false); fading = 1; kick(); },
       applyLook: applyLook,
       setView: setView,
@@ -534,6 +550,8 @@
     mount: mount,
     preload: function () { return loadModel().then(function () {}); },
     groups: GROUPS.slice(),
+    // 'front' | 'back': which side shows the group best (for a Front/Back chip)
+    bestView: function (g) { var y = BEST_YAW[g]; return (y !== undefined && Math.cos(y) < 0) ? 'back' : 'front'; },
     version: '1.0.0'
   };
 })();

@@ -643,7 +643,7 @@ function usePlan(P,src,how='replace'){
   if(how!=='replace'&&how!=='merge'){const d=P.days.find(x=>x.ex.length||x.rest);if(d){const old=DAYS[how];if(old&&d.dow<0)d.dow=old.dow;put(d,how)}}
   else if(how==='merge'&&S.plan){P.days.forEach(d=>{const k=matchKey(d,used);const nk=put(d,k);if(!S.plan.keys.includes(nk))S.plan.keys.push(nk)})}
   else{const keys=P.days.map(d=>put(d,matchKey(d,used)));S.plan={src,keys,mode:P.mode};S.idx=0}
-  S.plan.mode=planMode();
+  regLib();S.plan.mode=planMode();
   if(weekMode())S.plan.keys.sort((a,b)=>((DAYS[a].dow+6)%7)-((DAYS[b].dow+6)%7));
   if(P.unit)S.unit=P.unit;regLib();S.plan.src=planToText();save();return changed;
 }
@@ -1097,7 +1097,9 @@ function youBackup(){
   return `<div class="v">${youHead('Backup and restore')}
    <div class="card" style="display:flex;flex-direction:column;gap:10px">
     <p class="mute" style="font-size:14px">Your data lives on this phone. Copy a backup now and then, and paste it here to restore it on this or another phone.</p>
-    <div class="row"><button class="btn ghost" data-a="copy" style="height:46px">Copy backup</button><button class="btn ghost" data-a="restoreOpen" style="height:46px">Restore</button></div>
+    <div class="row"><button class="btn ghost" data-a="copy" style="height:46px">Copy backup</button><button class="btn ghost" data-a="restoreOpen" style="height:46px">Paste backup</button></div>
+    <label class="btn" style="height:46px">${ic('file')}Restore from a file<input type="file" id="rsFile" accept=".json,.txt,application/json,text/plain" hidden></label>
+    <p class="dim" style="font-size:12px">Restoring replaces what is on this phone now.</p>
     ${V.restore?`<div class="field"><input id="rs" placeholder="Paste backup text"></div><button class="btn" data-a="restore" style="height:46px">Restore from text</button>`:''}
    </div></div>`;
 }
@@ -1423,7 +1425,7 @@ const A={
  delAsk:v=>{V.delAsk=v},delNo:()=>{V.delAsk=null},del:v=>{S.log=S.log.filter(s=>s.id!==v);save();V.view='tab';V.tab='log'},
  copy:()=>{const t=JSON.stringify(S);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Backup copied'),()=>{V.restore=true;render();const i=document.getElementById('rs');if(i){i.value=t;i.select()}toast('Select and copy the text')})},
  restoreOpen:()=>{V.restore=!V.restore},
- restore:()=>{try{const o=JSON.parse(document.getElementById('rs').value);if(o.v!==2)throw 0;S=Object.assign(fresh(),o);regLib();save();V.restore=false;toast('Restored')}catch(e){toast('That text is not a backup')}},
+ restore:(v,el,txt)=>{try{const o=JSON.parse(txt!=null?txt:document.getElementById('rs').value);if(o.v!==2)throw 0;S=Object.assign(fresh(),o);regLib();save();V.restore=false;toast('Restored')}catch(e){toast('That text is not a backup')}},
  resetAsk:()=>{V.resetAsk=true},resetNo:()=>{V.resetAsk=false},
  sound:v=>{S.sound=v==='1';save();if(S.sound){audioUnlock();beep('alarm')}},
  soundTest:()=>{audioUnlock();setTimeout(()=>beep('alarm'),60)},
@@ -1438,6 +1440,7 @@ document.addEventListener('click',e=>{
   if(el.classList.contains('scrim')&&e.target.closest('[data-stop]'))return;
   const f=A[el.dataset.a];if(!f)return;f(el.dataset.v,el);if(!toast.h||el.dataset.a!=='copy')render();
 });
+document.addEventListener('change',e=>{const el=e.target;if(el.id!=='rsFile'||!el.files||!el.files[0])return;const r=new FileReader();r.onload=()=>{A.restore(null,null,String(r.result));render()};r.readAsText(el.files[0])});
 document.addEventListener('input',e=>{
   const el=e.target,k=el.dataset.in;if(!k)return;
   if(k==='imp'){V.imp=el.value;clearTimeout(A.impT);A.impT=setTimeout(()=>{const P=parsePlan(V.imp),pv=document.getElementById('impPrev'),b=document.getElementById('impGo');
