@@ -1,7 +1,8 @@
 /*
  * body3d.js - interactive 3D muscle body (classic script, attaches window.Body3D)
  *
- * Models: body.glb (male) and body-female.glb (female), next to this file, derived from Z-Anatomy (CC BY-SA 4.0),
+ * Models: body.glb (male) and body-female.glb (female), next to this file, built from the MakeHuman base mesh (CC0)
+ * with muscle-group regions adapted from Z-Anatomy (CC BY-SA 4.0),
  * which is based on BodyParts3D (c) The Database Center for Life Science. See LICENSE-model.txt.
  *
  * Usage:
@@ -41,12 +42,22 @@
     LOOK = {
       base: { color: BODY_COLOR, emissive: 0x000000, ei: 0, rough: 0.5, metal: 0.15, rim: 0, bloom: 0 },
       body: { color: BODY_COLOR, emissive: 0x000000, ei: 0, rough: 0.5, metal: 0.15, rim: 0, bloom: 0 },
-      lit1: { color: mixHex(BODY_COLOR, GLOW, 0.09), emissive: GLOW, ei: 0.02, rough: 0.48, metal: 0.12, rim: 0.12, bloom: 0 },
+      // level 1: the skin itself takes a faint violet tint (same roughness/metalness as the body)
+      lit1: { color: mixHex(BODY_COLOR, GLOW, 0.13), emissive: GLOW, ei: 0.012, rough: 0.5, metal: 0.15, rim: 0.05, bloom: 0 },
       lit2: { color: mixHex(GLOW, 0xffffff, 0.12), emissive: GLOW, ei: 0.5, rough: 0.4, metal: 0.05, rim: 0.55, bloom: 0.8 },
       sel:  { color: mixHex(GLOW, 0xffffff, 0.2), emissive: GLOW, ei: 0.62, rough: 0.38, metal: 0.05, rim: 0.7, bloom: 1.05 }
     };
   }
   makeLook();
+  // matte black cloth (shorts, sports top)
+  var FABRIC = { color: 0x0d0d0f, emissive: 0x000000, ei: 0, rough: 0.82, metal: 0.0, rim: 0, bloom: 0 };
+  // cloth over a lit group (shorts seat / sports-bra cups) glows softly through
+  var FABRIC_LIT1 = FABRIC, FABRIC_LIT = FABRIC;
+  function makeFabricLit() {
+    FABRIC_LIT1 = { color: mixHex(FABRIC.color, GLOW, 0.12), emissive: GLOW, ei: 0.03, rough: 0.82, metal: 0, rim: 0.05, bloom: 0 };
+    FABRIC_LIT = { color: mixHex(FABRIC.color, GLOW, 0.5), emissive: GLOW, ei: 0.42, rough: 0.78, metal: 0, rim: 0.45, bloom: 0.7 };
+  }
+  makeFabricLit();
   var live = [];   // running viewers, so setGlowColor can recolour them
 
   var libPromise = null, modelPromises = {};
@@ -197,42 +208,34 @@
       side: THREE.BackSide, transparent: true, depthWrite: false
     });
 
-    // Surface shader additions (cheap, per fragment):
-    //  - fine muscle-fibre striations: a thin sine pattern across a per-group fibre direction, applied
-    //    as a small normal tilt and faded out by fwidth() before it can alias;
-    //  - the lit glow: emissive fresnel rim on the group's own surface (no separate geometry).
-    var FIBRE = {
-      chest: [1, 0.35, 0], shoulders: [0.15, 1, 0], biceps: [0.35, -0.94, 0], triceps: [0.35, -0.94, 0],
-      forearms: [0.3, -0.95, 0.1], abs: [0, 1, 0], obliques: [0.55, -0.8, 0.25], traps: [1, -0.7, 0],
-      lats: [0.75, 0.65, 0], lowerback: [0, 1, 0], glutes: [1, -0.5, 0], quads: [0.05, 1, 0],
-      adductors: [0.35, -1, 0], hams: [0, 1, 0], calves: [0, 1, 0], body: [0, 1, 0]
-    };
-    function addSurface(m, g) {
-      var f = FIBRE[g] || FIBRE.body;
-      m.userData.uni = {
-        uRim: { value: 0 }, uFib: { value: new THREE.Vector3(f[0], f[1], f[2]).normalize() },
-        uFibAmp: { value: g === 'body' ? 0.07 : 0.13 }, uFreq: { value: 1000.0 }
-      };
+    // Lit glow on the surface itself: emissive fresnel rim on the group's own material
+    // (no separate geometry); the soft halo comes from the selective bloom pass below.
+    // Feathered region borders: skin meshes carry a per-vertex '_edge' (0 on the group border ->
+    // 1 a few mm inside), so a lit group fades smoothly into the plain body colour at its edge.
+    function addSurface(m, feather, baseHex) {
+      m.userData.uni = { uRim: { value: 0 }, uBase: { value: new THREE.Color(baseHex) } };
       m.onBeforeCompile = function (sh) {
-        var u = m.userData.uni; for (var k in u) sh.uniforms[k] = u[k];
-        sh.vertexShader = sh.vertexShader
-          .replace('#include <common>', '#include <common>\nuniform vec3 uFib; varying vec3 vObjP; varying vec3 vFibBo; varying vec3 vFibBv;')
-          .replace('#include <begin_vertex>', '#include <begin_vertex>\n' +
-            'vec3 fd = normalize(vec3(uFib.x * (position.x < 0.0 ? -1.0 : 1.0), uFib.y, uFib.z));\n' +
-            'vec3 on = normalize(objectNormal); vec3 ft = fd - dot(fd, on) * on; ft = normalize(ft + vec3(1e-4));\n' +
-            'vec3 fb = cross(on, ft); vObjP = position; vFibBo = fb; vFibBv = normalMatrix * fb;');
+        sh.uniforms.uRim = m.userData.uni.uRim; sh.uniforms.uBase = m.userData.uni.uBase;
+        if (feather) sh.vertexShader = sh.vertexShader
+          .replace('#include <common>', '#include <common>\nattribute float _edge; varying float vEdge;')
+          .replace('#include <begin_vertex>', '#include <begin_vertex>\nvEdge = _edge;');
         sh.fragmentShader = sh.fragmentShader
-          .replace('#include <common>', '#include <common>\nuniform float uRim; uniform float uFibAmp; uniform float uFreq; varying vec3 vObjP; varying vec3 vFibBo; varying vec3 vFibBv;')
-          .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n' +
-            'float ph = dot(vObjP, vFibBo) * uFreq + 1.8 * sin(dot(vObjP, vec3(41.0, 27.0, 33.0)));\n' +
-            'float aa = 1.0 - smoothstep(0.7, 1.8, fwidth(ph));\n' +
-            'float fa = uFibAmp * aa * (1.0 - smoothstep(0.6, 0.68, vObjP.y)) * (0.6 + 0.4 * sin(dot(vObjP, vec3(9.0, 13.0, 7.0))));\n' +
-            'normal = normalize(normal + normalize(vFibBv) * (fa * sin(ph)));')
+          .replace('#include <common>', '#include <common>\nuniform float uRim; uniform vec3 uBase;' + (feather ? ' varying float vEdge;' : ' const float vEdge = 1.0;'))
+          .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb = mix(uBase, diffuseColor.rgb, vEdge);')
           .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' +
+            'totalEmissiveRadiance *= vEdge;\n' +
             'float rimF = 1.0 - saturate(dot(normal, normalize(vViewPosition)));\n' +
-            'totalEmissiveRadiance += emissive * uRim * (0.15 + 0.85 * pow(rimF, 2.2));');
+            'totalEmissiveRadiance += emissive * uRim * vEdge * (0.15 + 0.85 * pow(rimF, 2.2));');
       };
-      m.customProgramCacheKey = function () { return 'body3d-v12'; };
+      m.customProgramCacheKey = function () { return 'body3d-v14-' + (feather ? 'f' : 'n'); };
+    }
+    // node name -> { group, fabric }: 'chest', 'glutes_fabric', 'body_fabric', 'hem_fabric' (GLTFLoader may append _1 etc.)
+    function parseNode(o) {
+      var nm = o.name || '', ud = o.userData || {}, pn = (o.parent && o.parent.name) || '', pud = (o.parent && o.parent.userData) || {};
+      var fabric = !!(ud.fabric || pud.fabric) || /_fabric(_\d+)?$/.test(nm) || /_fabric(_\d+)?$/.test(pn);
+      var base = (ud.group || pud.group || nm.replace(/(_fabric)?(_\d+)?$/, ''));
+      if (GROUPS.indexOf(base) < 0) { var pb = pn.replace(/(_fabric)?(_\d+)?$/, ''); base = GROUPS.indexOf(pb) >= 0 ? pb : 'body'; }
+      return { group: base, fabric: fabric };
     }
 
     var meshes = {};       // group -> mesh
@@ -243,18 +246,19 @@
     var srcMeshes = [];
     model.traverse(function (o) { if (o.isMesh) srcMeshes.push(o); });
     srcMeshes.forEach(function (o) {
-      var name = o.name || (o.parent && o.parent.name) || '';
-      var g = GROUPS.indexOf(name) >= 0 ? name : (GROUPS.indexOf(o.parent && o.parent.name) >= 0 ? o.parent.name : 'body');
+      var pn = parseNode(o), g = pn.group;
       var isBody = g === 'body';
-      var m = new THREE.MeshPhysicalMaterial({ color: LOOK.base.color, roughness: LOOK.base.rough, metalness: LOOK.base.metal, clearcoat: 0.22, clearcoatRoughness: 0.5 });
-      m.userData = { group: g, isBody: isBody, tColor: new THREE.Color(), tEm: new THREE.Color(), tEi: 0, tRough: 0.5, tMetal: 0.1, tRim: 0, rim: 0, tBloom: 0, bloom: 0 };
-      addSurface(m, g);
+      var m = pn.fabric
+        ? new THREE.MeshStandardMaterial({ color: FABRIC.color, roughness: FABRIC.rough, metalness: 0 })
+        : new THREE.MeshPhysicalMaterial({ color: LOOK.base.color, roughness: LOOK.base.rough, metalness: LOOK.base.metal, clearcoat: 0.3, clearcoatRoughness: 0.45 });
+      m.userData = { group: g, isBody: isBody, fabric: pn.fabric, tColor: new THREE.Color(), tEm: new THREE.Color(), tEi: 0, tRough: 0.5, tMetal: 0.1, tRim: 0, rim: 0, tBloom: 0, bloom: 0 };
+      addSurface(m, !pn.fabric && !!(o.geometry && o.geometry.getAttribute('_edge')), pn.fabric ? FABRIC.color : BODY_COLOR);
       o.material = m;
       o.userData.group = g;
       mats.push(m);
       pickables.push(o);
       if (!isBody) {
-        meshes[g] = o;
+        if (!meshes[g] || !pn.fabric) meshes[g] = o;
         var ol = new THREE.Mesh(o.geometry, outlineMat);
         ol.visible = false; ol.renderOrder = 2; ol.raycast = function () {};
         o.add(ol); outlines[g] = ol;
@@ -266,6 +270,7 @@
         var u = m.userData;
         var lvl = +state.lit[u.group] || 0;
         var L = u.isBody ? LOOK.body : lookFor(lvl, state.selected === u.group, false);
+        if (u.fabric) L = (L === LOOK.base || L === LOOK.body) ? FABRIC : (L === LOOK.lit1 ? FABRIC_LIT1 : FABRIC_LIT);
         u.tColor.setHex(L.color); u.tEm.setHex(L.emissive); u.tEi = L.ei; u.tRough = L.rough; u.tMetal = L.metal; u.tRim = L.rim; u.tBloom = L.bloom;
         if (snap) { m.color.copy(u.tColor); m.emissive.copy(u.tEm); m.emissiveIntensity = u.tEi; m.roughness = u.tRough; m.metalness = u.tMetal; u.rim = u.tRim; u.bloom = u.tBloom; }
       });
@@ -519,7 +524,7 @@
     // Change the glow colour of lit muscles in every viewer (sRGB hex, e.g. 0x8c7cff or '#8c7cff').
     setGlowColor: function (hex) {
       GLOW = typeof hex === 'string' ? parseInt(hex.replace('#', ''), 16) : (+hex | 0);
-      makeLook(); live.forEach(function (r) { r.recolor(); });
+      makeLook(); makeFabricLit(); live.forEach(function (r) { r.recolor(); });
     },
     mount: mount,
     preload: function () { return loadModel().then(function () {}); },

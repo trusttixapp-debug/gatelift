@@ -1,51 +1,45 @@
-body.glb / body-female.glb - 3D human body models (skin-covered athletic male and female figures with muscle groups)
-==========================================================================================================
+body.glb / body-female.glb - 3D human body models (smooth athletic mannequins with muscle groups)
+==================================================================================================
 
-body.glb (male) and body-female.glb (female) are adapted works (a smooth skin surface generated from the muscle and bone meshes,
-split into 16 named groups, simplified, re-normalised and quantised) of the following openly
-licensed datasets:
+Geometry
+--------
+Both models are built from the MakeHuman base mesh and modelling targets:
 
-1) Z-Anatomy - Muscular system and Skeletal system models
-   Files used: MuscularSystem100.fbx, SkeletalSystem100.fbx
-   Source:  https://github.com/LluisV/Z-Anatomy  (branch PC-Version, Resources/Models/FBX)
-            project: https://github.com/Z-Anatomy
-   Authors: Z-Anatomy project (Gauthier Kervyn, Lluis Vinent Juanico and contributors)
-   License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
-            https://creativecommons.org/licenses/by-sa/4.0/
+  MakeHuman (base mesh base.obj, macrodetails / breast / torso / armslegs / stomach targets,
+  default rig weights default_weights.mhw)
+  Source:  https://github.com/makehumancommunity/makehuman (makehuman/data)
+  License: CC0 1.0 Universal (the MakeHuman assets - base mesh, proxies, targets and modifiers -
+           were released as CC0; see license.txt / LICENSE.ASSETS.md in that repository).
+  Original copyright (C) Manuel Bastioni and the MakeHuman team; released as CC0.
 
-2) BodyParts3D (Z-Anatomy's models are derived from it)
-   Source:  https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html
-   License page: https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html
-   License: Creative Commons Attribution 4.0 International (CC BY 4.0)
-            https://creativecommons.org/licenses/by/4.0/
-   (BodyParts3D was formerly distributed under CC BY-SA 2.1 JP; the current license
-   page, checked 2026-11-11, states CC Attribution 4.0 International.)
+Changes: young adult male / female targets with raised muscle and slightly low weight, local muscle
+targets, arms re-posed about the shoulder with the MakeHuman rig weights, legs brought slightly
+together, one level of Catmull-Clark subdivision, nipples smoothed. The head was replaced by a smooth
+faceless mannequin head generated from the MakeHuman head silhouette (voxel remesh + smoothing; no
+facial features). Plain shorts (and a sports top on the female) were generated as cloth shells on the
+skin. Simplified (meshoptimizer), split into the regions chest, shoulders, biceps, triceps, forearms,
+abs, obliques, traps, lats, lowerback, glutes, quads, adductors, hams, calves plus "body"
+(cloth nodes are marked with extras.fabric), rescaled to 2 units tall and quantised.
 
-Changes made: skeletal muscles and bones (no organs, vessels, nerves or fasciae) were re-posed
-(arms abducted about the shoulder, forearms pronated, legs slightly apart) and re-proportioned to a
-fit, non-bodybuilder build (smaller shoulders, traps, arms and legs, slimmer neck),
-voxelised and wrapped in a continuous skin surface (morphological closing with a soft-tissue offset,
-Gaussian smoothing, iso-surface extraction, Taubin smoothing). Shallow channels were carved along the
-boundaries between neighbouring source muscles so the muscle separations stay readable. The
-individual muscles are no longer separate meshes. The skull and face were replaced by a smooth, bald,
-faceless egg-shaped head, and the hands by sculpted mannequin hands (both generated, not taken from
-the datasets).
-body-female.glb was made from the same source with smooth spatial warps (narrower shoulders and
-ribcage, waist taper, wider pelvis, slimmer arms and neck), generated breast, hip and glute volumes,
-a softer head and softer muscle channels. No genital or nipple detail is modelled on either figure.
-Each surface was simplified (meshoptimizer) to about 120k triangles and split into the regions chest,
-shoulders, biceps, triceps, forearms, abs, obliques, traps, lats, lowerback, glutes, quads, adductors,
-hams, calves, plus "body", by projecting each skin area onto the nearest Z-Anatomy muscle (with the
-oblique aponeuroses over the rectus abdominis and the lumbar latissimus aponeurosis cut away for that
-projection). The models were rescaled to 2 units tall.
+Muscle-group regions
+--------------------
+Arm and leg regions come from the MakeHuman rig. The torso regions (chest, abs, obliques, traps,
+lats, lowerback, glutes) were transferred by nearest-surface lookup from an earlier figure derived
+from:
 
-License of body.glb and body-female.glb: CC BY-SA 4.0 (ShareAlike, inherited from Z-Anatomy).
-The ShareAlike terms apply to the model files and modified versions of them. They do not
-apply to the separate viewer code (body3d.js) or the rest of the app.
+  Z-Anatomy - Muscular system and Skeletal system models
+  Source:  https://github.com/LluisV/Z-Anatomy (Resources/Models/FBX), project https://github.com/Z-Anatomy
+  License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+  Z-Anatomy is based on BodyParts3D, (c) The Database Center for Life Science, CC BY 4.0
+  (https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html).
 
-Required attribution (show it in the app, e.g. on an About/Credits screen):
+No Z-Anatomy geometry is contained in the files; only the region labelling of the torso was derived
+from it. To stay on the safe side the model files are distributed under CC BY-SA 4.0 and credit both
+sources. The ShareAlike terms apply to the model files and modified versions of them, not to the
+viewer code (body3d.js) or the rest of the app.
 
-  3D anatomy model adapted from Z-Anatomy (https://github.com/Z-Anatomy), CC BY-SA 4.0,
-  based on BodyParts3D, (c) The Database Center for Life Science, licensed under
-  CC Attribution 4.0 International. Modified (re-posed, skin surface generated from
-  the muscles and bones, head replaced, female variant reshaped, simplified).
+Attribution (show it in the app, e.g. on an About/Credits screen):
+
+  3D body based on the MakeHuman base mesh and targets (CC0, makehumancommunity.org); muscle-group
+  regions adapted from Z-Anatomy (https://github.com/Z-Anatomy), CC BY-SA 4.0, based on BodyParts3D,
+  (c) The Database Center for Life Science, CC Attribution 4.0 International. Modified.
