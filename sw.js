@@ -1,5 +1,5 @@
 /* Network first so a new upload shows on next open; cache keeps it working offline. */
-const CACHE='getfit-v4-4';
+const CACHE='getfit-v4-5';
 const ASSETS=['./','./index.html','./figures.js','./img/photos.js','./img/logo.png','./model/body3d.js','./model/body.glb','./model/body-female.glb','./manifest.webmanifest','./icon-180.png','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});

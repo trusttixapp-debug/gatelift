@@ -95,6 +95,8 @@ h3{font-size:16px;font-weight:650;letter-spacing:-.01em}
 .tabs button span{display:none;font-size:14px;font-weight:600}
 .tabs button.on{width:auto;padding:0 18px 0 16px;display:flex;align-items:center;gap:8px}
 .tabs button.on span{display:inline}
+.tg-g{width:24px;height:24px;border-radius:7px;background:#000 url(img/logo.png) center/cover;flex:none;opacity:.6;transition:opacity .2s}
+.tabs button.on .tg-g{opacity:1}
 /* account page */
 .prof{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0 4px;text-align:center}
 .prof h1{font-size:28px}
@@ -773,7 +775,7 @@ function render(){
 }
 function tabs(){
   const T=[['today','home','Today'],['body','body','Body'],['log','log','Log'],['you','you','Account']];
-  return `<nav class="tabs">${T.map(([k,i,l])=>`<button class="${V.tab===k?'on':''}" data-a="tab" data-v="${k}" aria-label="${l}">${ic(i)}<span>${l}</span></button>`).join('')}</nav>`;
+  return `<nav class="tabs">${T.map(([k,i,l])=>`<button class="${V.tab===k?'on':''}" data-a="tab" data-v="${k}" aria-label="${l}">${k==='today'?'<i class="tg-g"></i>':ic(i)}<span>${l}</span></button>`).join('')}</nav>`;
 }
 
 /* ── onboarding: three short screens ── */
