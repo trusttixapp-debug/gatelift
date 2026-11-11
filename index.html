@@ -88,7 +88,7 @@ h3{font-size:16px;font-weight:650;letter-spacing:-.01em}
 
 
 /* ── floating tab bar ── */
-.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);display:flex;gap:2px;padding:6px;background:rgba(30,30,33,.82);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-radius:99px;z-index:20;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.5)}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:max(8px,calc(env(safe-area-inset-bottom,0px) - 6px));display:flex;gap:2px;padding:6px;background:rgba(30,30,33,.82);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-radius:99px;z-index:20;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.5)}
 .tabs button{height:46px;width:54px;border-radius:99px;display:grid;place-items:center;color:var(--mute)}
 .tabs button.on{background:rgba(255,255,255,.16);color:var(--text)}
 .tabs button span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -255,7 +255,15 @@ h3{font-size:16px;font-weight:650;letter-spacing:-.01em}
 /* ── sheet ── */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:flex;align-items:flex-end;justify-content:center}
 .sheet{width:100%;max-width:480px;max-height:90dvh;overflow:auto;background:var(--card);border-radius:30px 30px 0 0;padding:10px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 20px) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
-.sheet .shot{height:300px;margin:0 -16px;background:#000 center 40%/cover;position:relative}
+.sheet .shot{position:relative;aspect-ratio:1/1;height:auto!important;margin:-10px -16px 0!important;background-color:#000;background-position:center top!important;background-size:cover!important;background-repeat:no-repeat;flex:none}
+.sheet .shot .x{position:absolute;right:14px;top:14px;z-index:2;background:rgba(20,20,22,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.sheet{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.scrim{overscroll-behavior:contain;touch-action:none}
+.scrim .sheet{touch-action:pan-y}
+body.lock{position:fixed;left:0;right:0;overflow:hidden}
+.tabs.hide{transform:translate(-50%,calc(100% + 40px));opacity:0;pointer-events:none}
+.tabs{transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .2s}
+.sheet .shot-old{height:300px;margin:0 -16px;background:#000 center 40%/cover;position:relative}
 .sheet .shot::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,var(--card))}
 .grab{width:40px;height:5px;border-radius:9px;background:var(--card3);margin:0 auto 4px}
 .howto{display:flex;flex-direction:column;gap:10px;counter-reset:s}
@@ -694,6 +702,8 @@ function render(){
 
   else h=({today,body:bodyTab,log:logTab,you:youTab}[V.tab]||today)()+tabs();
   if(V.sheet)h+=sheet();
+  lockScroll(!!V.sheet);
+
   if(V.rest&&V.view!=='run')h+=`<button class="restpill glass" data-a="resume">${ic('clock')}Rest <b class="clock" id="rst">${mmss((V.rest.end-Date.now())/1000)}</b></button>`;
   if(V.toast)h+=`<div class="toast">${esc(V.toast)}</div>`;
   a.innerHTML=h;
@@ -740,6 +750,30 @@ const PHR=[[/shoulder press machine|machine (shoulder|overhead) press/i,'mshp'],
  [/(dumbbell|db).*(romanian|rdl)/i,'dbrdl'],[/face ?pull/i,'facepull'],[/(one|single).?arm.*row|dumbbell row/i,'dbrow'],[/pike/i,'pike'],[/close.?grip push|diamond/i,'diamond'],[/push-?up/i,'pushup'],[/\bdips?\b/i,'dip'],[/side plank/i,'sideplank'],[/plank/i,'plank'],[/glute bridge|^bridge/i,'bridge']];
 function phKey(id){if(PHOTOS.has(id))return id;const X=EX[id];if(!X)return '';for(const [re,k] of PHR)if(re.test(X.n)&&PHOTOS.has(k))return k;const g=guessM(X.n);return g.b&&PHOTOS.has(g.b)?g.b:''}
 const photo=id=>{const k=phKey(id);return k?`img/ex/${k}.jpg`:''};
+/* how-to steps for pasted exercises that the built-in list doesn't cover exactly (matched like the photos) */
+const HOWX={
+ mshp:['Set the seat so the handles start at shoulder height.','Press up until your arms are almost straight, back on the pad.','Lower slowly to shoulder height.'],
+ clat:['Stand side-on to a low cable, handle in the far hand.','Raise your arm out to the side to shoulder height, elbow soft.','Lower slowly, keeping tension on the cable.'],
+ ezcurl:['Hold the EZ bar on the angled grips, elbows at your sides.','Curl it up to your shoulders without swinging.','Lower all the way under control.'],
+ skull:['Lie on a flat bench, EZ bar straight up over your chest.','Bend only at the elbows to lower it toward your forehead.','Straighten your arms back up.'],
+ ccurl:['Hold the straight bar from the low pulley, elbows pinned.','Curl up to your chest.','Lower slowly until your arms are straight.'],
+ tbar:['Straddle the bar, hinge forward with a flat back.','Pull the handle to your lower chest.','Lower until your arms are straight.'],
+ incfly:['Lie on a bench set to about 30°, dumbbells up over your chest.','Open your arms wide with soft elbows until you feel a stretch.','Bring them back together in a hug.'],
+ xover:['Stand between two high cables, one step forward.','Bring the handles down and together in front of your chest.','Open slowly back to a stretch.'],
+ inccurl:['Sit back on a 45° bench, arms hanging straight.','Curl both dumbbells up without moving your elbows forward.','Lower slowly to a full stretch.'],
+ fsquat:['Rest the bar on the front of your shoulders, elbows high.','Squat straight down, chest tall.','Drive up through your whole foot.'],
+ hlr:['Hang from a bar with straight arms.','Raise your straight legs to hip height.','Lower slowly without swinging.'],
+};
+const howOf=id=>{const k=phKey(id),X=EX[id];return (X&&X.mine&&HOWX[k])||(X&&X.how)||GEN_HOW};
+/* keep the page behind a panel still (iPhone scrolls the page under fixed layers otherwise) */
+let lockY=0;
+function lockScroll(on){const b=document.body;if(on&&!b.classList.contains('lock')){lockY=window.scrollY;b.style.top=`-${lockY}px`;b.classList.add('lock')}
+  else if(!on&&b.classList.contains('lock')){b.classList.remove('lock');b.style.top='';window.scrollTo(0,lockY)}}
+/* tab bar: hides while you scroll down, comes back when you scroll up */
+let lastY=0;
+window.addEventListener('scroll',()=>{const y=window.scrollY,t=document.querySelector('.tabs');if(!t||document.body.classList.contains('lock'))return;
+  if(y>lastY+6&&y>80)t.classList.add('hide');else if(y<lastY-6||y<40)t.classList.remove('hide');lastY=y},{passive:true});
+
 const litMain=m=>({[m[0]]:2,...Object.fromEntries(m.slice(1).map(g=>[g,1]))});
 /* a 3D body slot: the flat figure shows until the 3D model is ready, then the shared canvas moves in */
 const slot3d=(key,lit,o={})=>`<div data-b3d="${key}" data-o='${esc(JSON.stringify({lit,tap:!!o.tap,view:o.view||''}))}'></div>`;
@@ -1064,12 +1098,16 @@ function impView(){const P=parsePlan(V.imp),ok=P.days.some(d=>d.ex.length||d.res
 /* ── sheets ── */
 function sheet(){
   const sh=V.sheet;let inner='';
-  if(sh.t==='ex'){const X=EX[sh.id],last=lastFor(sh.id),p=photo(sh.id);
-    inner=`${p?`<div class="shot" style="background-image:url('${p}')"></div>`:''}<div class="row"><div class="sp"><div class="lbl">Exercise</div><h2 style="font-size:24px;margin-top:4px">${esc(X.n)}</h2></div><button class="x" data-a="close">${ic('x')}</button></div>
-     <div class="stage" style="height:${p?200:280}px"><div class="pair" style="position:absolute;inset:0;padding:14px 0 20px">${fig('front',litMain(X.m))}${fig('back',litMain(X.m))}</div><div class="floor"></div></div>
+  if(sh.t==='ex'){
+    /* the numbers shown are the plan's for the day you're looking at (in a session: that day; otherwise today, then tomorrow) */
+    const dk=S.cur?S.cur.k:[todayKey(),weekMode()?nextKey():dayAt(S.idx+1)].find(k=>DAYS[k]&&exList(k).includes(sh.id))||'',
+      X=dk?xs(dk,sh.id):EX[sh.id],last=lastFor(sh.id,dk),p=photo(sh.id),how=howOf(sh.id);
+    inner=`${p?`<div class="shot" style="background-image:url('${p}')"><button class="x glass" data-a="close" aria-label="Close">${ic('x')}</button></div>`:''}<div class="row"><div class="sp"><div class="lbl">Exercise</div><h2 style="font-size:24px;margin-top:4px">${esc(X.n)}</h2></div>${p?'':`<button class="x" data-a="close" aria-label="Close">${ic('x')}</button>`}</div>
+     ${p?'':`<div class="stage" style="height:280px"><div class="pair" style="position:absolute;inset:0;padding:14px 0 20px">${fig('front',litMain(X.m))}${fig('back',litMain(X.m))}</div><div class="floor"></div></div>`}
      <div class="musc">${X.m.map((g,i)=>`<span style="${i?'opacity:.7':''}">${GN[g]}${i?'':' · main'}</span>`).join('')}</div>
-     <div class="stats"><div class="stat"><b>${X.s}</b><small>Sets</small></div><div class="stat"><b>${X.r}</b><small>${parseR(X.r).hold?'Hold':'Reps'}</small></div><div class="stat"><b>${X.rest>=60?(X.rest/60)+'m':X.rest+'s'}</b><small>Rest</small></div></div>
-     <div><h3 style="margin-bottom:10px">How to</h3><ol class="howto">${X.how.map(t=>`<li>${esc(t)}</li>`).join('')}</ol></div>
+     <div class="stats"><div class="stat"><b>${X.s}</b><small>Sets</small></div><div class="stat"><b>${X.r}</b><small>${parseR(X.r).hold?'Hold':'Reps'}</small></div><div class="stat"><b>${X.kg?X.kg+'<small> '+S.unit+'</small>':restTxt(X.rest).replace('rest ','')}</b><small>${X.kg?'Weight':'Rest'}</small></div></div>
+     ${X.kg?`<div class="mute" style="font-size:14px;margin-top:-4px">${esc(restTxt(X.rest).replace(/^rest/,'Rest'))} between sets</div>`:''}
+     <div><h3 style="margin-bottom:10px">How to</h3><ol class="howto">${how.map(t=>`<li>${esc(t)}</li>`).join('')}</ol></div>
      ${last?`<div class="card" style="background:var(--card2)"><div class="lbl">Last time</div><div style="margin-top:6px">${doneSets(last).map(s=>s.w?`${s.w} ${S.unit} × ${s.r}`:s.r).join(' · ')}</div></div>`:''}`;
   }else if(sh.t==='finish'){
     const c=S.cur,left=c.ex.reduce((a,e)=>a+e.sets.filter(s=>!s.ok).length,0);
