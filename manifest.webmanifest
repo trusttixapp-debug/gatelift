@@ -1,13 +1,13 @@
 {
-  "name": "GATELIFT",
-  "short_name": "GATELIFT",
+  "name": "GetFit",
+  "short_name": "GetFit",
   "description": "Stretch, cardio, lift. Every day, logged.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0A0B0D",
-  "theme_color": "#0A0B0D",
+  "background_color": "#0B0B0C",
+  "theme_color": "#0B0B0C",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }

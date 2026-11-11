@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="GATELIFT">
+<meta name="apple-mobile-web-app-title" content="GetFit">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
-<title>GATELIFT</title>
+<title>GetFit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap">
 <style>
@@ -91,7 +91,47 @@ h3{font-size:16px;font-weight:650;letter-spacing:-.01em}
 .tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:max(8px,calc(env(safe-area-inset-bottom,0px) - 6px));display:flex;gap:2px;padding:6px;background:rgba(30,30,33,.82);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-radius:99px;z-index:20;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.5)}
 .tabs button{height:46px;width:54px;border-radius:99px;display:grid;place-items:center;color:var(--mute)}
 .tabs button.on{background:rgba(255,255,255,.16);color:var(--text)}
-.tabs button span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.tabs button{transition:width .25s,background .2s}
+.tabs button span{display:none;font-size:14px;font-weight:600}
+.tabs button.on{width:auto;padding:0 18px 0 16px;display:flex;align-items:center;gap:8px}
+.tabs button.on span{display:inline}
+/* account page */
+.prof{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0 4px;text-align:center}
+.prof h1{font-size:28px}
+.pav{width:92px;height:92px;border-radius:34px;display:grid;place-items:center;font-size:38px;font-weight:700;background:radial-gradient(120% 120% at 30% 20%,#8d80ff,#3b2fb0 60%,#1b1640);box-shadow:0 10px 30px var(--gate-glow),inset 0 1px 0 rgba(255,255,255,.25)}
+.pstats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.pstats span{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:99px;background:var(--card);font-size:13px;color:var(--mute)}
+.pstats svg.i{width:16px;height:16px;color:var(--gate-2)}
+.ghead{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);padding:10px 6px 0}
+.lgroup{background:var(--card);border-radius:22px;overflow:hidden;display:flex;flex-direction:column}
+.lrow{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 16px;text-align:left;width:100%;font-size:16px;border-top:1px solid var(--line)}
+.lrow:first-child{border-top:0}
+.lrow.col{flex-direction:column;align-items:stretch;gap:10px;padding:12px 16px}
+.lrow .li{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--card2);color:var(--text);flex:none}
+.lrow .li svg.i{width:17px;height:17px}
+.lrow .lv{color:var(--mute);font-size:15px}
+.lrow.warn{color:var(--warn)}.lrow.warn .li{color:var(--warn)}
+.seg.mini{padding:3px;gap:2px}.seg.mini button{height:32px;padding:0 12px;font-size:13px}
+.tg{width:50px;height:30px;border-radius:99px;background:var(--card3);position:relative;flex:none;transition:background .2s}
+.tg i{position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.tg.on{background:var(--gate)}.tg.on i{transform:translateX(20px)}
+/* streak */
+.strk{position:fixed;inset:0;z-index:70;background:radial-gradient(80% 60% at 50% 30%,#1d1530,#0B0B0C 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:calc(env(safe-area-inset-top,0px) + 30px) 24px calc(env(safe-area-inset-bottom,0px) + 24px);text-align:center}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.strk .flame{width:170px;height:190px;filter:drop-shadow(0 0 28px rgba(160,90,255,.75)) drop-shadow(0 0 70px rgba(120,70,255,.45));animation:flick 2.4s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes flick{0%,100%{transform:scale(1) rotate(-1deg)}50%{transform:scale(1.04,1.07) rotate(1.5deg)}}
+.strk .spark{position:absolute;width:10px;height:10px;border-radius:50%;background:#b46cff;filter:blur(3px);opacity:.6;animation:rise 4s linear infinite}
+@keyframes rise{from{transform:translateY(40px);opacity:0}30%{opacity:.7}to{transform:translateY(-140px);opacity:0}}
+.strk .big{font-size:84px;font-weight:800;line-height:.9;letter-spacing:-.04em;background:linear-gradient(180deg,#e9b6ff,#b14dff 55%,#7a3dff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.strk .ttl{font-size:24px;font-weight:700;color:#d48bff}
+.strk .rule{display:flex;align-items:center;gap:14px;width:100%;max-width:340px}.strk .rule i{flex:1;height:1px;background:var(--line2)}
+.strk .week7{display:flex;gap:6px;padding:12px;border-radius:22px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px var(--line2);width:100%;max-width:360px;justify-content:space-between}
+.strk .week7 div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--dim);flex:1}
+.strk .week7 b{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px var(--card3)}
+.strk .week7 .y b{background:#fff;color:#0B0B0C;box-shadow:none}.strk .week7 .y{color:var(--text)}
+.strk .week7 svg{width:16px;height:16px;stroke-width:3}
+.strk .btn{max-width:360px;margin-top:10px}
+.logo{width:40px;height:40px;border-radius:12px;flex:none;background:#000 center/cover;box-shadow:inset 0 0 0 1px var(--line2)}
 
 /* ── today ── */
 .top{display:flex;align-items:center;gap:12px;padding:2px 0 4px}
@@ -647,6 +687,7 @@ const ICONS={
  home:'<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/>',
  body:'<circle cx="12" cy="4.6" r="2.1"/><path d="M5 8.6h14M12 8.6v5.6m0 0-3 6.8m3-6.8 3 6.8"/>',
  log:'<path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+ sound:'<path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',haptic:'<rect x="8" y="4" width="8" height="16" rx="2"/><path d="M4.5 9v6M19.5 9v6M2 11v2M22 11v2"/>',
  share:'<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M5 13v5.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V13"/>',
  copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/>',
  file:'<path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3.5V8h4.5M9 13h6M9 16.5h6"/>',
@@ -673,7 +714,7 @@ function streak(){
 function weekKeys(){const d=new Date(),day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return [...Array(7)].map((_,i)=>{const x=new Date(d);x.setDate(d.getDate()+i);return dkey(x)})}
 function weekLoad(){const wk=new Set(weekKeys()),c={};S.log.filter(s=>wk.has(s.d)).forEach(s=>(s.ex||[]).forEach(e=>{const n=doneSets(e).length;if(!n)return;EX[e.id].m.forEach((g,i)=>c[g]=(c[g]||0)+(i===0?n:n/2))}));return c}
 function toast(t){V.toast=t;render();clearTimeout(toast.h);toast.h=setTimeout(()=>{V.toast='';render()},1800)}
-const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+const buzz=p=>{if(S.haptic===false)return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 
 /* ══════════════ SESSION ══════════════ */
 function newSession(){
@@ -690,7 +731,7 @@ function finish(){
   c.t1=Date.now();
   c.ex=c.ex.map(e=>({id:e.id,...(e.note?{note:e.note}:{}),sets:e.sets.filter(s=>s.ok||s.w||s.r)})).filter(e=>e.sets.length);
   c.pr=prsOf(c);
-  S.log.push(c);if(setsOf(c))S.idx++;S.cur=null;V.rest=null;V.str=null;V.view='done';V.doneId=c.id;save();render();
+  S.log.push(c);if(setsOf(c))S.idx++;S.cur=null;V.rest=null;V.str=null;V.view='done';V.doneId=c.id;save();streakCheck();render();
 }
 function prsOf(c){const out=[];c.ex.forEach(e=>{const best=Math.max(0,...doneSets(e).map(s=>+s.w||0));if(!best)return;
   const prev=Math.max(0,...S.log.flatMap(x=>(x.ex||[]).filter(y=>y.id===e.id).flatMap(y=>doneSets(y).map(s=>+s.w||0))));
@@ -717,13 +758,14 @@ function render(){
   lockScroll(!!V.sheet);
 
   if(V.rest&&V.view!=='run')h+=`<button class="restpill glass" data-a="resume">${ic('clock')}Rest <b class="clock" id="rst">${mmss((V.rest.end-Date.now())/1000)}</b></button>`;
+  if(V.streakPop)h+=streakPop();
   if(V.toast)h+=`<div class="toast">${esc(V.toast)}</div>`;
   a.innerHTML=h;
   mount3d();
   tick();
 }
 function tabs(){
-  const T=[['today','home','Today'],['body','body','Body'],['log','log','Log'],['you','you','You']];
+  const T=[['today','home','Today'],['body','body','Body'],['log','log','Log'],['you','you','Account']];
   return `<nav class="tabs">${T.map(([k,i,l])=>`<button class="${V.tab===k?'on':''}" data-a="tab" data-v="${k}" aria-label="${l}">${ic(i)}<span>${l}</span></button>`).join('')}</nav>`;
 }
 
@@ -731,7 +773,7 @@ function tabs(){
 function onb(){
   const st=V.ob;
   if(st===0)return `<div class="ob welcome">
-    <div class="row"><div class="wordmark">GATE<i>LIFT</i></div></div>
+    <div class="row"><span class="logo" style="background-image:url('img/logo.png')"></span><div class="wordmark">GET<i>FIT</i></div></div>
     <div class="stage">${fig('front',litOf(['chest','abs','quads','shoulders']))}<div class="floor"></div></div>
     <div><h1>Every day,<br>the same three moves.</h1><p class="mute" style="margin-top:10px">Stretch. Cardio. Lift. We hand you today’s workout and log every set you do.</p></div>
     <button class="btn" data-a="obn">Get started</button></div>`;
@@ -754,7 +796,7 @@ function onb(){
 }
 
 /* ── today ── */
-/* realistic exercise photos (AI-generated for GATELIFT). Key = built-in id, or a name rule for pasted exercises. */
+/* realistic exercise photos (AI-generated for GetFit). Key = built-in id, or a name rule for pasted exercises. */
 const PHOTOS=new Set(window.GL_PHOTOS||[]);
 const PHR=[[/shoulder press machine|machine (shoulder|overhead) press/i,'mshp'],[/cable lateral/i,'clat'],[/ez.?bar curl|sz.?bar curl/i,'ezcurl'],[/skull/i,'skull'],
  [/cable curl/i,'ccurl'],[/t-?bar/i,'tbar'],[/incline.*(fly|flye)/i,'incfly'],[/crossover|cable cross|cable fly/i,'xover'],[/incline.*curl/i,'inccurl'],
@@ -806,8 +848,9 @@ function pathCard(c,k,wk,ex,nSets,M,caType,stOk,caOk,liOk,pre){
    ${pre?`<div class="pathnext">${ic('clock')}<span class="sp">Up tomorrow: <b>~${M.all} min</b> · ${esc(sub)}</span></div>`:nx?`<div class="pathnext">${ic(nx.i)}<span class="sp">Next: <b>${nx.t}</b> · ${sub}</span></div>`:`<div class="pathnext">${ic('check')}<span class="sp"><b>All three done.</b> Finish to log it.</span></div>`}</section>`}
 function today(){
   const now=new Date(),hr=now.getHours(),greet=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
-  const c=S.cur,k=c?c.k:todayKey(),D=DAYS[k],sd=split().d,mus=dayMuscles(k);
-  const doneToday=!c&&S.log.find(s=>s.d===dkey()&&counted(s));
+  const c=S.cur,doneToday=!c&&[...S.log].reverse().find(s=>s.d===dkey()&&counted(s));
+  /* once today is done the hero keeps showing the day you did */
+  const k=c?c.k:doneToday&&DAYS[doneToday.k]?doneToday.k:todayKey(),D=DAYS[k],sd=split().d,mus=dayMuscles(k);
   const wk=warmOf(k),ex=exList(k),nSets=ex.reduce((a,id)=>a+xs(k,id).s,0),M=minsOf(k);
   const stDone=c?Object.values(c.st).filter(Boolean).length:0,stOk=c&&stDone===wk.length;
   const exDone=c?c.ex.filter(e=>e.sets.length&&e.sets.every(s=>s.ok)).length:0,liOk=c&&ex.length&&exDone===ex.length;
@@ -819,8 +862,8 @@ function today(){
   const pit=(v,t,s,ok)=>`<button class="pit" data-a="${c?'goStep':'start'}" data-v="${v}"><span class="o ${ok?'y':''}">${ok?ic('check'):''}</span><span class="sp"><b>${t}</b><small>${s}</small></span></button>`;
   const caType=c?c.ca.type:(D.cType||S.cardioType||CARDIO[S.place==='home'?'home':'gym'][0]);
   return `<div class="v">
-   <header class="top"><span class="av">${esc((S.name||'G').charAt(0).toUpperCase())}</span><div class="sp"><small>${greet}</small><b>${esc(S.name||'Hunter')}</b></div>
-     <div class="streak glass" aria-label="Day streak">${ic('flame')}${streak()}</div></header>
+   <header class="top"><span class="logo" style="background-image:url('img/logo.png')" aria-label="GetFit"></span><div class="sp"><small>${greet}</small><b>${esc(S.name||'Hunter')}</b></div>
+     <button class="streak glass" data-a="streakOpen" aria-label="Day streak">${ic('flame')}${streak()}</button></header>
    <section class="hero">
      <div class="lbl">Today · ${DOW[now.getDay()]} ${now.getDate()} ${MON[now.getMonth()]}</div>
      <div class="dtitle"><h1>${esc(D.rest?'Rest day':D.n)}</h1>${gateRing(k)}</div>
@@ -933,14 +976,15 @@ function done(){
 /* ── body: one big figure, tap a muscle ── */
 function bodyTab(){
   /* only the muscle you pick glows; muscles trained this week get a faint tint */
-  const load=weekLoad(),lit={};for(const g in load)if(load[g]>0)lit[g]=1;if(V.sel)lit[V.sel]=2;
+  const load=weekLoad(),lit={};if(V.sel)lit[V.sel]=2;
   const sel=V.sel,side=V.side;
   const all=Object.keys(GN),list=side==='front'?FRONTG:BACKG;
   const exFor=g=>Object.keys(EX).filter(id=>EX[id].m[0]===g||(EX[id].m.includes(g)&&EX[id].m.indexOf(g)<2)).filter(id=>split().d.some(k=>DAYS[k][S.place==='home'?'home':'gym'].includes(id)));
   return `<div class="v bodyv">
    <div class="row"><div class="sp"><div class="lbl">This week</div><h1 style="margin-top:4px">Your body</h1></div></div>
    <div class="stage">
-    <div class="legend"><span><i style="background:var(--gate);box-shadow:0 0 8px var(--gate)"></i>Picked</span><span><i style="background:#4a4560"></i>Trained this week</span><span><i style="background:#2b2c30"></i>Not yet</span></div>
+    <div class="legend">${V.sel?`<span><i style="background:var(--gate);box-shadow:0 0 8px var(--gate)"></i>${GN[V.sel]}</span>`:'<span>Tap a muscle</span>'}</div>
+
     ${slot3d('body',lit,{tap:true,view:side})}${fig(side,lit,{tap:true,sel})}<div class="floor"></div>
     <div class="side"><span class="chip glass">${side==='front'?'Front':'Back'}</span></div>
     <button class="rot glass" data-a="rotate">${ic('rotate')}Rotate</button></div>
@@ -991,38 +1035,67 @@ function dayView(){
 
 /* ── you ── */
 function youTab(){
-  const sd=split().d;
+  if(V.you==='plan')return youPlan();
+  if(V.you==='backup')return youBackup();
+  const row=(i,t,right,a,v,cls='')=>`<button class="lrow ${cls}" ${a?`data-a="${a}"${v!=null?` data-v="${v}"`:''}`:'tabindex="-1"'}><span class="li">${ic(i)}</span><span class="sp">${t}</span>${right||''}</button>`;
+  const chev=val=>`<span class="lv">${val||''}</span>${ic('chev','dim')}`;
+  const tog=on=>`<span class="tg ${on?'on':''}"><i></i></span>`;
+  const tr=S.plan?S.plan.keys.filter(k=>!DAYS[k].rest).length:S.days;
   return `<div class="v">
-   <div><div class="lbl">Settings</div><h1 style="margin-top:4px">${S.name?esc(S.name):'You'}</h1></div>
+   <div class="prof">
+     <div class="pav">${esc((S.name||'G').charAt(0).toUpperCase())}</div>
+     ${V.editName?`<div class="field" style="width:100%"><input id="nmIn" value="${esc(S.name)}" maxlength="24" data-in="name" placeholder="Your name" autocomplete="off"></div><button class="chip on" data-a="nameDone">Done</button>`
+       :`<h1>${esc(S.name||'Your name')}</h1><button class="chip" data-a="nameEdit">Edit name</button>`}
+     <div class="pstats"><span>${ic('flame')}${streak()} day streak</span><span>${ic('lift')}${S.log.filter(s=>setsOf(s)).length} workouts</span></div>
+   </div>
+   <span class="ghead">Personalize</span>
+   <div class="lgroup">
+     <div class="lrow"><span class="li">${ic('body')}</span><span class="sp">Body</span><div class="seg mini"><button class="${S.sex==='male'?'on':''}" data-a="set" data-k="sex" data-v="male">Man</button><button class="${S.sex==='female'?'on':''}" data-a="set" data-k="sex" data-v="female">Woman</button></div></div>
+     <div class="lrow"><span class="li">${ic('lift')}</span><span class="sp">Weights in</span><div class="seg mini"><button class="${S.unit==='kg'?'on':''}" data-a="set" data-k="unit" data-v="kg">kg</button><button class="${S.unit==='lb'?'on':''}" data-a="set" data-k="unit" data-v="lb">lb</button></div></div>
+   </div>
+   <span class="ghead">Training</span>
+   <div class="lgroup">
+     ${row('log','Your plan',chev(S.plan?`${tr} days`:split().n),'youGo','plan')}
+     <div class="lrow col"><div class="row"><span class="li">${ic('cardio')}</span><span class="sp">Cardio length</span><span class="lv">${S.cardio} min</span></div>
+       <div class="seg">${[5,10,15,20,30].map(m=>`<button class="${S.cardio===m?'on':''}" data-a="set" data-k="cardio" data-v="${m}">${m}m</button>`).join('')}</div></div>
+   </div>
+   <span class="ghead">Sound and haptic</span>
+   <div class="lgroup">
+     ${row('sound','Timer sound',tog(S.sound!==false),'sound',S.sound!==false?'0':'1')}
+     ${row('haptic','Vibration',tog(S.haptic!==false),'haptic')}
+     ${row('play','Test the alarm',chev(''),'soundTest')}
+   </div>
+   <span class="ghead">Your data</span>
+   <div class="lgroup">
+     ${row('share','Export for your coach or AI',chev(''),'exportOpen')}
+     ${row('copy','Backup and restore',chev(''),'youGo','backup')}
+     ${row('x','Erase everything','','resetAsk','','warn')}
+   </div>
+   ${V.resetAsk?`<div class="card"><p style="font-size:14px">Erase all sessions and settings on this phone? It can’t be undone.</p><div class="row" style="margin-top:12px"><button class="btn ghost" data-a="resetNo" style="height:46px">Cancel</button><button class="btn" style="height:46px;background:var(--warn);color:#fff" data-a="reset">Erase</button></div></div>`:''}
+   <p class="dim" style="font-size:11.5px;text-align:center;line-height:1.5;margin-top:6px">GetFit · 3D body based on the MakeHuman base mesh and targets (CC0); muscle regions adapted from Z-Anatomy (CC BY-SA 4.0), based on BodyParts3D, © The Database Center for Life Science (CC BY 4.0). Modified. Flat figures adapted from muscle_mapper by Surya Mouly (MIT). Exercise photos are AI-generated for GetFit.</p>
+  </div>`;
+}
+function youHead(t){return `<div class="row"><button class="x" data-a="youGo" data-v="" aria-label="Back">${ic('back')}</button><div class="sp"><div class="lbl">Account</div><h2 style="font-size:24px;font-weight:700">${t}</h2></div></div>`}
+function youPlan(){
+  const sd=split().d;
+  return `<div class="v">${youHead('Your plan')}
    <div class="card" style="display:flex;flex-direction:column;gap:12px">
-    <div class="field"><span class="lbl">Name</span><input value="${esc(S.name)}" maxlength="24" data-in="name" placeholder="Your name"></div>
-    <span class="lbl">Body to show</span>
-    <div class="seg"><button class="${S.sex==='male'?'on':''}" data-a="set" data-k="sex" data-v="male">Man</button><button class="${S.sex==='female'?'on':''}" data-a="set" data-k="sex" data-v="female">Woman</button></div></div>
-   <div class="card" style="display:flex;flex-direction:column;gap:12px">
-    <div class="row"><h3 class="sp">Your plan</h3><span class="tag">${S.plan?(weekMode()?'Your week':'Your days, in order'):split().n}</span></div>
+    <div class="row"><h3 class="sp">${S.plan?(weekMode()?'Your week':'Your days, in order'):esc(split().n)}</h3></div>
     ${S.plan?'':`<div class="seg">${[3,4,5,6].map(n=>`<button class="${S.days===n?'on':''}" data-a="set" data-k="days" data-v="${n}">${n}/wk</button>`).join('')}</div>`}
     <div class="mlist">${sd.map((k,i)=>{const D=DAYS[k],cur=weekMode()?k===todayKey():i===S.idx%sd.length;
-      return `<div class="it"><span class="ic ${cur?'on':''}" style="font-family:var(--disp);font-weight:800;font-size:${weekMode()?12:16}px">${weekMode()?DOW[D.dow]:i+1}</span><span class="sp"><b>${esc(D.rest?'Rest day':D.n)}</b><div class="mute" style="font-size:13px">${D.rest?esc(D.note||'Walk and stretch'):exList(k).map(id=>esc(EX[id].n)).join(' · ')}</div></span>${cur?`<span class="tag">${weekMode()?'Today':'Up next'}</span>`:''}${S.plan?`<button class="chip" data-a="dayEdit" data-v="${k}" aria-label="Update ${esc(D.n)}">Edit</button>`:''}</div>`}).join('')}</div>
+      return `<div class="it"><span class="ic ${cur?'on':''}" style="font-weight:800;font-size:${weekMode()?12:16}px">${weekMode()?DOW[D.dow]:i+1}</span><span class="sp"><b>${esc(D.rest?'Rest day':D.n)}</b><div class="mute" style="font-size:13px">${D.rest?esc(D.note||'Walk and stretch'):exList(k).map(id=>esc(EX[id].n)).join(' · ')}</div></span>${cur?`<span class="tag">${weekMode()?'Today':'Up next'}</span>`:''}${S.plan?`<button class="chip" data-a="dayEdit" data-v="${k}" aria-label="Update ${esc(D.n)}">Edit</button>`:''}</div>`}).join('')}</div>
     <button class="btn ${S.plan?'ghost':''}" data-a="impOpen" style="height:46px">${S.plan?'Update days or the whole week':'Paste my own plan'}</button>
-
     ${S.plan?`<button class="addset" data-a="planOff" style="justify-content:center">Go back to the built-in plan</button>`:`<span class="lbl">Where</span>
     <div class="seg"><button class="${S.place==='gym'?'on':''}" data-a="set" data-k="place" data-v="gym">Gym</button><button class="${S.place==='home'?'on':''}" data-a="set" data-k="place" data-v="home">Home</button></div>`}
-    <span class="lbl">Cardio length</span>
-    <div class="seg">${[5,10,15,20,30].map(m=>`<button class="${S.cardio===m?'on':''}" data-a="set" data-k="cardio" data-v="${m}">${m}m</button>`).join('')}</div>
-    <span class="lbl">Timer sound</span>
-    <div class="seg"><button class="${S.sound!==false?'on':''}" data-a="sound" data-v="1">On</button><button class="${S.sound===false?'on':''}" data-a="sound" data-v="0">Off</button><button data-a="soundTest">Test</button></div>
-    <span class="lbl">Weights in</span>
-    <div class="seg"><button class="${S.unit==='kg'?'on':''}" data-a="set" data-k="unit" data-v="kg">kg</button><button class="${S.unit==='lb'?'on':''}" data-a="set" data-k="unit" data-v="lb">lb</button></div></div>
+   </div></div>`;
+}
+function youBackup(){
+  return `<div class="v">${youHead('Backup and restore')}
    <div class="card" style="display:flex;flex-direction:column;gap:10px">
-    <h3>Backup</h3><p class="mute" style="font-size:13px">Everything stays on this phone. Copy a backup now and then, and paste it here to restore.</p>
+    <p class="mute" style="font-size:14px">Your data lives on this phone. Copy a backup now and then, and paste it here to restore it on this or another phone.</p>
     <div class="row"><button class="btn ghost" data-a="copy" style="height:46px">Copy backup</button><button class="btn ghost" data-a="restoreOpen" style="height:46px">Restore</button></div>
     ${V.restore?`<div class="field"><input id="rs" placeholder="Paste backup text"></div><button class="btn" data-a="restore" style="height:46px">Restore from text</button>`:''}
-    <button class="addset" data-a="resetAsk" style="color:var(--warn);justify-content:center">Erase everything</button>
-    ${V.resetAsk?`<p style="font-size:14px">Erase all sessions and settings on this phone? It can’t be undone.</p><div class="row"><button class="btn ghost" data-a="resetNo" style="height:46px">Cancel</button><button class="btn" style="height:46px;background:var(--warn);color:#fff" data-a="reset">Erase</button></div>`:''}
-   </div>
-   <p class="dim" style="font-size:12px;text-align:center;line-height:1.5">3D body based on the MakeHuman base mesh and targets (CC0); muscle regions adapted from Z-Anatomy (CC BY-SA 4.0), based on BodyParts3D, © The Database Center for Life Science (CC BY 4.0). Modified.<br>Flat figures adapted from muscle_mapper by Surya Mouly (MIT). Exercise photos are AI-generated for GATELIFT.</p>
-
-  </div>`;
+   </div></div>`;
 }
 
 /* ── log a past day (prefilled from the plan, every set editable) ── */
@@ -1069,7 +1142,7 @@ function pastSave(){
     ca:{type:D.cType||S.cardioType||CARDIO[S.place==='home'?'home':'gym'][0],goal:P.caMin,sec:P.ca?P.caMin*60:0,run:0,done:P.ca,dist:''},
     ex:P.ex.map(e=>({id:e.id,sets:e.sets.filter(s=>s.ok&&(s.w||s.r)).map(s=>({w:s.w,r:s.r,ok:true}))})).filter(e=>e.sets.length)};
   c.pr=prsOf(c);
-  S.log.push(c);S.log.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.t0-b.t0);
+  S.log.push(c);S.log.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.t0-b.t0);streakCheck();
   if(!weekMode()&&setsOf(c))S.idx++;
   save();V.past=null;
   const left=missedDays();
@@ -1097,7 +1170,7 @@ const exName=id=>(EX[id]&&EX[id].n)||id;
 function exportText(days){
   const L=sessIn(days),u=S.unit,first=L[0],lastS=L[L.length-1];
   const fmtD=k=>{const d=fromKey(k);return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`};
-  let t=`GATELIFT training log${L.length?` · ${fmtD(first.d)} – ${fmtD(lastS.d)} ${fromKey(lastS.d).getFullYear()}`:''} · weights in ${u}\n`;
+  let t=`GetFit training log${L.length?` · ${fmtD(first.d)} – ${fmtD(lastS.d)} ${fromKey(lastS.d).getFullYear()}`:''} · weights in ${u}\n`;
   t+=`Feel per set: easy / good / hard / to failure. Session rating: 1 easy – 5 brutal.\n`;
   if(!L.length)t+='\nNo sessions logged in this period.\n';
   L.forEach(s=>{const D=DAYS[s.k],f=s.fb||{},m=Math.max(1,Math.round((s.t1-s.t0)/60000)),st=Object.values(s.st||{}),stD=st.filter(Boolean).length;
@@ -1109,7 +1182,7 @@ function exportText(days){
     const P=(f.pain||[]).filter(p=>p!=='none');if(P.length||(f.pain||[]).includes('none'))t+=`  Pain: ${P.length?P.map(p=>(PAINSPOTS.find(x=>x[0]===p)||[0,p])[1]).join(', '):'none'}\n`;
     if(f.note)t+=`  Notes: ${f.note.replace(/\s+/g,' ')}\n`;
     if(s.pr&&s.pr.length)t+=`  New bests: ${s.pr.map(p=>`${exName(p.id)} ${p.w}${u}`).join(', ')}\n`});
-  if(S.plan){t+=`\nCurrent plan (reply with an adjusted version in exactly this format and I'll paste it into GATELIFT → You → Update days or the whole week):\n\n${planToText()}\n`}
+  if(S.plan){t+=`\nCurrent plan (reply with an adjusted version in exactly this format and I'll paste it into GetFit → Account → Your plan → Update days or the whole week):\n\n${planToText()}\n`}
   return t;
 }
 function exportCsv(days){const q=v=>{v=v==null?'':String(v);return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v};
@@ -1119,11 +1192,11 @@ function exportCsv(days){const q=v=>{v=v==null?'':String(v);return /[",\n]/.test
     if(!(s.ex||[]).length)rows.push([s.d,D?D.n:s.kn,'(no lifting)','','','','','','','','','','','',...base]);
     (s.ex||[]).forEach(e=>{const X=(D&&D.spec&&D.spec[e.id])||{};e.sets.forEach((x,j)=>rows.push([s.d,D?D.n:s.kn,exName(e.id),j+1,x.w,S.unit,x.r,x.ok?1:0,x.f?FEELX[x.f]:'',x.p?1:0,j?'':(e.note||''),X.s||'',X.r||'',X.kg||'',...base]))})});
   return rows.map(r=>r.map(q).join(',')).join('\n')+'\n'}
-function exportJson(days){return JSON.stringify({app:'GATELIFT',exported:new Date().toISOString(),unit:S.unit,plan:S.plan?{text:planToText(),days:S.plan.keys.map(k=>({key:k,...DAYS[k]}))}:null,
+function exportJson(days){return JSON.stringify({app:'GetFit',exported:new Date().toISOString(),unit:S.unit,plan:S.plan?{text:planToText(),days:S.plan.keys.map(k=>({key:k,...DAYS[k]}))}:null,
   exercises:Object.fromEntries(Object.entries(EX).filter(([id])=>sessIn(days).some(s=>(s.ex||[]).some(e=>e.id===id))).map(([id,x])=>[id,{name:x.n,muscles:x.m}])),sessions:sessIn(days)},null,2)}
 const exStamp=()=>dkey();
 async function exportShare(){const t=exportText(V.exRange);
-  try{if(navigator.share){await navigator.share({title:'GATELIFT training log',text:t});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{if(navigator.share){await navigator.share({title:'GetFit training log',text:t});return}}catch(e){if(e&&e.name==='AbortError')return}
   exportCopy()}
 function exportCopy(){const t=exportText(V.exRange);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copied. Paste it into Claude'),()=>{V.exShow=true;render();const a=document.getElementById('extxt');if(a){a.focus();a.select()}toast('Select all and copy')})}
 async function exportFile(kind){const name=`gatelift-${kind==='csv'?'sets':'log'}-${exStamp()}.${kind}`,type=kind==='csv'?'text/csv':'application/json',body=kind==='csv'?exportCsv(V.exRange):exportJson(V.exRange);
@@ -1142,6 +1215,25 @@ function exportView(){const r=V.exRange||7,L=sessIn(r),fb=L.filter(s=>s.fb&&(s.f
    <p class="dim" style="font-size:12px">CSV: one row per set, for spreadsheets. JSON: everything, for apps.</p>
    <span class="lbl">Preview</span><textarea class="ta" id="extxt" readonly style="min-height:260px;font-size:13px">${esc(exportText(r))}</textarea>
   </div>`}
+
+/* ── streak: a flame screen each time it grows (ranks will grow out of this later) ── */
+const FLAME=`<svg class="flame" viewBox="0 0 120 140" aria-hidden="true"><defs>
+ <radialGradient id="fl1" cx=".5" cy=".75" r=".7"><stop offset="0" stop-color="#fff2ff"/><stop offset=".35" stop-color="#e59bff"/><stop offset=".75" stop-color="#a24bff"/><stop offset="1" stop-color="#5b23d9"/></radialGradient>
+ <radialGradient id="fl2" cx=".5" cy=".8" r=".6"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#c78bff"/><stop offset="1" stop-color="#7d3cff"/></radialGradient></defs>
+ <path d="M60 6c8 22 34 34 34 70a34 34 0 0 1-68 0c0-17 8-28 17-36-1 12 4 20 11 22-3-20 2-38 6-56z" fill="url(#fl1)"/>
+ <path d="M60 62c5 10 18 16 18 32a18 18 0 0 1-36 0c0-8 4-14 9-18 0 7 3 11 7 12-2-10 0-19 2-26z" fill="url(#fl2)" opacity=".95"/>
+ <ellipse cx="48" cy="58" rx="6" ry="14" fill="#fff" opacity=".35" transform="rotate(-18 48 58)"/></svg>`;
+function streakPop(){const n=V.streakPop.n,wk=weekKeys(),days=new Set(S.log.filter(counted).map(s=>s.d));
+  const msg=n<=1?'Day one. Come back tomorrow to start a streak.':n<5?`Keep it going. ${5-n} more ${5-n===1?'day':'days'} to reach five.`:n<7?'Two more and you have a full week.':'A full week or more. This is how ranks are earned.';
+  return `<div class="strk" data-a="streakClose">${[18,36,60,78,52].map((x,i)=>`<span class="spark" style="left:${x}%;top:${30+i*4}%;animation-delay:${i*.7}s"></span>`).join('')}
+   ${FLAME}
+   <div class="rule"><i></i><div class="big">${n}</div><i></i></div>
+   <div class="ttl">${n===1?'Day':'Days'} streak</div>
+   <p class="mute" style="font-size:15px;max-width:300px">${msg}</p>
+   <div class="week7">${wk.map(k=>{const d=fromKey(k),y=days.has(k);return `<div class="${y?'y':''}"><b>${y?ic('check'):''}</b>${'MTWTFSS'[(d.getDay()+6)%7]}</div>`}).join('')}</div>
+   <button class="btn" data-a="streakClose">Continue</button></div>`}
+/* call after a session is saved: pop the flame when the streak grew */
+function streakCheck(){const n=streak();if(n>(S.streakSeen||0)){S.streakSeen=n;save();if(n>=2)V.streakPop={n}}else if(n<(S.streakSeen||0)){S.streakSeen=n;save()}}
 
 /* ── paste your own plan ── */
 const SAMPLE='DAY 1 (Mon) PUSH\n1. Bench press 4x8-10 60kg rest 2min\n2. Lateral raise 3x12-15 10kg rest 60s\n\nDAY 2 (Tue) PULL\n1. Lat pulldown 4x10-12 55kg rest 90s\n\nSUN: REST (30 min walk, 10 min stretch)';
@@ -1265,7 +1357,13 @@ let wake=null;async function keepAwake(){try{if('wakeLock' in navigator&&!wake)w
 
 /* ══════════════ ACTIONS ══════════════ */
 const A={
- tab:v=>{V.tab=v;V.view='tab';V.restore=false;V.resetAsk=false;scrollTo(0,0)},
+ tab:v=>{V.tab=v;V.view='tab';V.restore=false;V.resetAsk=false;if(v!=='you')V.you='';scrollTo(0,0)},
+ youGo:v=>{V.you=v||'';V.restore=false;scrollTo(0,0)},
+ nameEdit:()=>{V.editName=true;setTimeout(()=>{const i=document.getElementById('nmIn');if(i)i.focus()},50)},
+ nameDone:()=>{V.editName=false;save()},
+ haptic:()=>{S.haptic=S.haptic===false;save();if(S.haptic!==false)buzz(40)},
+ streakOpen:()=>{V.streakPop={n:streak(),manual:true}},
+ streakClose:()=>{V.streakPop=null},
  obn:()=>{V.ob++},obb:()=>{V.ob=Math.max(0,V.ob-1)},
  obgo:()=>{S.onb=true;V.view='tab';V.tab='today';save()},
  obPlan:()=>{S.onb=true;V.tab='today';save();A.impOpen()},
@@ -1350,6 +1448,7 @@ document.addEventListener('input',e=>{
   save();
 });
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){audioUnlock();if(V.view==='run'){keepAwake()}if(S.cur)render()}});
+if(S.streakSeen==null){S.streakSeen=streak();save()}
 render();
 cloudInit();
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
