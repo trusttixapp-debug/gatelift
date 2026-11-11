@@ -27,7 +27,7 @@
   <h1>Body3D demo <small>- tap a muscle, drag sideways to rotate. Picked: <span id="picked">none</span></small></h1>
   <div id="stage" class="stage"></div>
   <div class="chips">
-    <button id="front">Front</button><button id="back">Back</button><button id="spin">Auto-rotate: on</button><button id="clear">Clear</button>
+    <button id="front">Front</button><button id="back">Back</button><button id="spin">Auto-rotate: on</button><button id="clear">Clear</button><button id="sex">Body: male</button>
   </div>
   <div class="chips" id="chips"></div>
   <div class="row">
@@ -40,14 +40,15 @@
 </main>
 <script src="body3d.js"></script>
 <script>
-  // URL params for testing: ?lit=chest:2,abs:1&view=back&rotate=0&sel=chest&minis=0
+  // URL params for testing: ?lit=chest:2,abs:1&view=back&rotate=0&sel=chest&minis=0&sex=female
   var q = new URLSearchParams(location.search);
   var lit = { chest: 2, shoulders: 1, triceps: 1, abs: 2 };
   if (q.has('lit')) { lit = {}; q.get('lit').split(',').filter(Boolean).forEach(function (p) { var a = p.split(':'); lit[a[0]] = +(a[1] || 2); }); }
   var autoRotate = q.get('rotate') !== '0';
+  var sex = q.get('sex') === 'female' ? 'female' : 'male';
   var picked = document.getElementById('picked');
   var main = Body3D.mount(document.getElementById('stage'), {
-    lit: lit, autoRotate: autoRotate, interactive: true,
+    lit: lit, autoRotate: autoRotate, interactive: true, sex: sex,
     onPick: function (g) { picked.textContent = g || 'none'; }
   });
   window.demoHandle = main;
@@ -64,14 +65,17 @@
   document.getElementById('front').onclick = function () { main.setView('front'); };
   document.getElementById('back').onclick = function () { main.setView('back'); };
   document.getElementById('clear').onclick = function () { lit = {}; main.setLit(lit); main.setSelected(null); chips.querySelectorAll('button').forEach(function (b) { b.dataset.lvl = 0; }); };
+  var sexBtn = document.getElementById('sex');
+  sexBtn.textContent = 'Body: ' + sex;
+  sexBtn.onclick = function () { sex = sex === 'male' ? 'female' : 'male'; sexBtn.textContent = 'Body: ' + sex; main.setSex(sex); };
   var spin = document.getElementById('spin');
   spin.textContent = 'Auto-rotate: ' + (autoRotate ? 'on' : 'off');
   spin.onclick = function () { autoRotate = !autoRotate; main.setAutoRotate(autoRotate); spin.textContent = 'Auto-rotate: ' + (autoRotate ? 'on' : 'off'); };
 
   if (q.get('minis') !== '0') {
-    Body3D.mount(document.getElementById('m1'), { lit: { chest: 2, shoulders: 2, triceps: 1 }, interactive: true });
-    Body3D.mount(document.getElementById('m2'), { lit: { lats: 2, traps: 1, biceps: 2, forearms: 1 } }).setView('back');
-    Body3D.mount(document.getElementById('m3'), { lit: { quads: 2, hams: 1, glutes: 1, calves: 2, adductors: 1 }, autoRotate: false });
+    Body3D.mount(document.getElementById('m1'), { sex: sex, lit: { chest: 2, shoulders: 2, triceps: 1 }, interactive: true });
+    Body3D.mount(document.getElementById('m2'), { sex: sex, lit: { lats: 2, traps: 1, biceps: 2, forearms: 1 } }).setView('back');
+    Body3D.mount(document.getElementById('m3'), { sex: sex, lit: { quads: 2, hams: 1, glutes: 1, calves: 2, adductors: 1 }, autoRotate: false });
   } else {
     document.querySelector('.row').style.display = 'none';
   }

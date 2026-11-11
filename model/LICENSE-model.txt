@@ -1,7 +1,7 @@
-body.glb - 3D human body model (skin-covered athletic figure with muscle groups)
-=====================================
+body.glb / body-female.glb - 3D human body models (skin-covered athletic male and female figures with muscle groups)
+==========================================================================================================
 
-body.glb is an adapted work (a smooth skin surface generated from the muscle and bone meshes,
+body.glb (male) and body-female.glb (female) are adapted works (a smooth skin surface generated from the muscle and bone meshes,
 split into 16 named groups, simplified, re-normalised and quantised) of the following openly
 licensed datasets:
 
@@ -21,25 +21,29 @@ licensed datasets:
    (BodyParts3D was formerly distributed under CC BY-SA 2.1 JP; the current license
    page, checked 2026-11-11, states CC Attribution 4.0 International.)
 
-Changes made: skeletal muscles and bones (no organs, vessels, nerves or fasciae) were
-voxelised and wrapped in a continuous skin surface (morphological closing with a soft-tissue
-offset, Gaussian smoothing, iso-surface extraction, Taubin smoothing), so the individual
-muscles are no longer separate meshes. The skull and face were replaced by a smooth,
-bald, faceless sculpted head (generated, not taken from the datasets) and the head was
-scaled down slightly. The surface was simplified (meshoptimizer) to about 108k triangles
-and split into the regions chest, shoulders, biceps, triceps, forearms, abs, obliques,
-traps, lats, lowerback, glutes, quads, adductors, hams, calves, plus "body", by projecting
-each skin area onto the nearest Z-Anatomy muscle (with the oblique aponeuroses over the
-rectus abdominis and the lumbar latissimus aponeurosis cut away for that projection).
-The model was rescaled to 2 units tall.
+Changes made: skeletal muscles and bones (no organs, vessels, nerves or fasciae) were re-posed
+(arms abducted about the shoulder, forearms pronated, wrists straightened, legs slightly apart),
+voxelised and wrapped in a continuous skin surface (morphological closing with a soft-tissue offset,
+Gaussian smoothing, iso-surface extraction, Taubin smoothing). Shallow channels were carved along the
+boundaries between neighbouring source muscles so the muscle separations stay readable. The
+individual muscles are no longer separate meshes. The skull and face were replaced by a smooth, bald,
+faceless sculpted head (generated, not taken from the datasets).
+body-female.glb was made from the same source with smooth spatial warps (narrower shoulders and
+ribcage, waist taper, wider pelvis, slimmer arms and neck), generated breast, hip and glute volumes,
+a softer head and softer muscle channels. No genital or nipple detail is modelled on either figure.
+Each surface was simplified (meshoptimizer) to about 120k triangles and split into the regions chest,
+shoulders, biceps, triceps, forearms, abs, obliques, traps, lats, lowerback, glutes, quads, adductors,
+hams, calves, plus "body", by projecting each skin area onto the nearest Z-Anatomy muscle (with the
+oblique aponeuroses over the rectus abdominis and the lumbar latissimus aponeurosis cut away for that
+projection). The models were rescaled to 2 units tall.
 
-License of body.glb: CC BY-SA 4.0 (ShareAlike, inherited from Z-Anatomy).
-The ShareAlike terms apply to the model file and modified versions of it. They do not
+License of body.glb and body-female.glb: CC BY-SA 4.0 (ShareAlike, inherited from Z-Anatomy).
+The ShareAlike terms apply to the model files and modified versions of them. They do not
 apply to the separate viewer code (body3d.js) or the rest of the app.
 
 Required attribution (show it in the app, e.g. on an About/Credits screen):
 
   3D anatomy model adapted from Z-Anatomy (https://github.com/Z-Anatomy), CC BY-SA 4.0,
   based on BodyParts3D, (c) The Database Center for Life Science, licensed under
-  CC Attribution 4.0 International. Modified (skin surface generated from the
-  muscles and bones, head replaced, simplified).
+  CC Attribution 4.0 International. Modified (re-posed, skin surface generated from
+  the muscles and bones, head replaced, female variant reshaped, simplified).
