@@ -52,11 +52,13 @@
   // matte black cloth (shorts, sports top)
   var FABRIC = { color: 0x0d0d0f, emissive: 0x000000, ei: 0, rough: 0.82, metal: 0.0, rim: 0, bloom: 0 };
   // cloth over a lit group (shorts seat / sports-bra cups) glows softly through
-  var FABRIC_LIT1 = FABRIC, FABRIC_LIT = FABRIC, FABRIC_SOFT = FABRIC, FABRIC_BAND = FABRIC; // BAND: female bra back/racerback over lats/traps // SOFT: bra cups when chest is lit
+  var FABRIC_LIT1 = FABRIC, FABRIC_LIT = FABRIC, FABRIC_SOFT = FABRIC, FABRIC_SOFT_SEL = FABRIC, FABRIC_BAND = FABRIC; // BAND: female bra back/racerback over lats/traps // SOFT: bra cups when chest is lit
   function makeFabricLit() {
     FABRIC_LIT1 = { color: mixHex(FABRIC.color, GLOW, 0.12), emissive: GLOW, ei: 0.03, rough: 0.82, metal: 0, rim: 0.05, bloom: 0 };
     FABRIC_LIT = { color: mixHex(FABRIC.color, GLOW, 0.5), emissive: GLOW, ei: 0.42, rough: 0.78, metal: 0, rim: 0.45, bloom: 0.7 };
-    FABRIC_SOFT = { color: mixHex(FABRIC.color, GLOW, 0.08), emissive: GLOW, ei: 0.015, rough: 0.82, metal: 0, rim: 0.04, bloom: 0 }; // bra stays fabric; only the chest skin glows
+    // bra cups when chest is lit: about 60% of the chest skin's glow, feathered to the pec shape (masked in the model)
+    FABRIC_SOFT = { color: mixHex(FABRIC.color, GLOW, 0.45), emissive: GLOW, ei: 0.3, rough: 0.8, metal: 0, rim: 0.33, bloom: 0.48 };
+    FABRIC_SOFT_SEL = { color: mixHex(FABRIC.color, GLOW, 0.5), emissive: GLOW, ei: 0.37, rough: 0.8, metal: 0, rim: 0.42, bloom: 0.63 };
     FABRIC_BAND = { color: mixHex(FABRIC.color, GLOW, 0.22), emissive: GLOW, ei: 0.1, rough: 0.8, metal: 0, rim: 0.2, bloom: 0.18 };
   }
     
@@ -255,7 +257,7 @@
         ? new THREE.MeshStandardMaterial({ color: FABRIC.color, roughness: FABRIC.rough, metalness: 0 })
         : new THREE.MeshPhysicalMaterial({ color: LOOK.base.color, roughness: LOOK.base.rough, metalness: LOOK.base.metal, clearcoat: 0.3, clearcoatRoughness: 0.45 });
       m.userData = { group: g, isBody: isBody, fabric: pn.fabric, tColor: new THREE.Color(), tEm: new THREE.Color(), tEi: 0, tRough: 0.5, tMetal: 0.1, tRim: 0, rim: 0, tBloom: 0, bloom: 0 };
-      addSurface(m, !pn.fabric && !!(o.geometry && o.geometry.getAttribute('_edge')), pn.fabric ? FABRIC.color : BODY_COLOR);
+      addSurface(m, !!(o.geometry && o.geometry.getAttribute('_edge')), pn.fabric ? FABRIC.color : BODY_COLOR);
       o.material = m;
       o.userData.group = g;
       mats.push(m);
@@ -273,7 +275,7 @@
         var u = m.userData;
         var lvl = +state.lit[u.group] || 0;
         var L = u.isBody ? LOOK.body : lookFor(lvl, state.selected === u.group, false);
-        if (u.fabric) L = (L === LOOK.base || L === LOOK.body) ? FABRIC : (L === LOOK.lit1 ? FABRIC_LIT1 : (u.group === 'chest' ? FABRIC_SOFT : (u.group === 'lats' || u.group === 'traps' ? FABRIC_BAND : FABRIC_LIT)));
+        if (u.fabric) L = (L === LOOK.base || L === LOOK.body) ? FABRIC : (L === LOOK.lit1 ? FABRIC_LIT1 : (u.group === 'chest' ? (L === LOOK.sel ? FABRIC_SOFT_SEL : FABRIC_SOFT) : (u.group === 'lats' || u.group === 'traps' ? FABRIC_BAND : FABRIC_LIT)));
         u.tColor.setHex(L.color); u.tEm.setHex(L.emissive); u.tEi = L.ei; u.tRough = L.rough; u.tMetal = L.metal; u.tRim = L.rim; u.tBloom = L.bloom;
         if (snap) { m.color.copy(u.tColor); m.emissive.copy(u.tEm); m.emissiveIntensity = u.tEi; m.roughness = u.tRough; m.metalness = u.tMetal; u.rim = u.tRim; u.bloom = u.tBloom; }
       });
