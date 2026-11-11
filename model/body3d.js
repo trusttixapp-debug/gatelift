@@ -49,7 +49,13 @@
     if (!modelPromise) {
       modelPromise = loadLib().then(function (lib) {
         return new Promise(function (resolve, reject) {
-          new lib.GLTFLoader().load(MODEL_URL, function (gltf) { resolve(gltf.scene); }, undefined, reject);
+          var loader = new lib.GLTFLoader();
+          /* hosts that can't serve .glb get the same bytes as base64 in model/body-glb.js (window.GL_BODY_GLB) */
+          if (window.GL_BODY_GLB) {
+            var bin = atob(window.GL_BODY_GLB), buf = new Uint8Array(bin.length);
+            for (var i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+            loader.parse(buf.buffer, '', function (gltf) { resolve(gltf.scene); }, reject);
+          } else loader.load(MODEL_URL, function (gltf) { resolve(gltf.scene); }, undefined, reject);
         });
       });
       modelPromise.catch(function () { modelPromise = null; });
