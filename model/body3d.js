@@ -27,10 +27,10 @@
   // Look. Colours are sRGB hex.
   var LOOK = {
     base: { color: 0x4a4d53, emissive: 0x000000, ei: 0, rough: 0.55, metal: 0.18 },
-    body: { color: 0x3f4247, emissive: 0x000000, ei: 0, rough: 0.6, metal: 0.15 },
+    body: { color: 0x4a4d53, emissive: 0x000000, ei: 0, rough: 0.55, metal: 0.18 },
     lit1: { color: 0xa4a6ab, emissive: 0x9a9ca0, ei: 0.1, rough: 0.5, metal: 0.1 },
-    lit2: { color: 0xffffff, emissive: 0xffffff, ei: 0.36, rough: 0.42, metal: 0.05 },
-    sel:  { color: 0xffffff, emissive: 0xffffff, ei: 0.55, rough: 0.38, metal: 0.05 }
+    lit2: { color: 0xe6e7ea, emissive: 0xffffff, ei: 0.14, rough: 0.42, metal: 0.05 },
+    sel:  { color: 0xffffff, emissive: 0xffffff, ei: 0.3, rough: 0.38, metal: 0.05 }
   };
 
   var libPromise = null, modelPromise = null;
