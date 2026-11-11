@@ -643,6 +643,7 @@ function render(){
   else if(V.view==='done')h=done();
   else if(V.view==='day')h=dayView();
   else if(V.view==='imp')h=impView();
+  else if(V.view==='past'&&V.past)h=pastView();
 
   else h=({today,body:bodyTab,log:logTab,you:youTab}[V.tab]||today)()+tabs();
   if(V.sheet)h+=sheet();
@@ -736,6 +737,8 @@ function today(){
      ${doneToday?`<button class="btn" data-a="openDay" data-v="${doneToday.id}">${ic('check')}Done today · view log</button><button class="btn ghost" data-a="start" data-v="0">Train again</button>`:
        `<button class="btn" data-a="${c?'resume':'start'}" data-v="0"><span class="pl">${ic('play')}</span>${c?'Continue workout':D.rest?'Start rest day':'Start workout'}</button>`}
    </section>
+   ${(()=>{const md=missedDays();return md.length?`<section class="path"><div class="row"><h2 class="sp">Missed a log?</h2><span class="lbl">this week</span></div>
+     <div class="steps">${md.map(m=>`<button class="st" data-a="pastOpen" data-v="${m.d}|${m.k}"><span class="ic">${ic('log')}</span><span class="sp"><b>${DOW[fromKey(m.d).getDay()]} · ${esc(DAYS[m.k].n)}</b><small>Nothing logged. Tap to fill it in from your plan.</small></span>${ic('chev','dim')}</button>`).join('')}</div></section>`:''})()}
    ${pathCard(c,k,wk,ex,nSets,M,caType,stOk,caOk,liOk)}
    ${D.f.length?`<div class="sect"><h2>Muscles today</h2><span class="lbl">sets this week</span></div>
    <div class="mscroll">${D.f.map(g=>{const n=Math.round(load[g]||0),f=Math.min(18,n);
@@ -856,6 +859,7 @@ function logTab(){
   return `<div class="v">
    <div><div class="lbl">History</div><h1 style="margin-top:4px">Log</h1></div>
    <div class="stats"><div class="stat">${ic('lift')}<b>${total}</b><small>workouts</small></div><div class="stat">${ic('log')}<b>${sets}</b><small>sets</small></div><div class="stat">${ic('trophy')}<b>${(()=>{const v=S.log.reduce((a,s)=>a+volOf(s),0);return v>=1e4?(v/1000).toFixed(1)+'k':Math.round(v)})()}</b><small>${S.unit}</small></div></div>
+   <button class="btn ghost" data-a="pastOpen" style="height:50px">${ic('plus')}Log a past day</button>
    <div class="card"><div class="row" style="margin-bottom:12px"><span class="lbl sp">Last 30 days</span><span class="lbl">${[...Array(30)].filter((_,j)=>{const d=new Date();d.setDate(d.getDate()-29+j);return days.has(dkey(d))}).length} · goal ${S.plan?split().d.filter(k=>!DAYS[k].rest).length:S.days}/wk</span></div>
     <div class="grid30">${[...Array(30)].map((_,j)=>{const d=new Date();d.setDate(d.getDate()-29+j);const kk=dkey(d);return `<i class="${days.has(kk)?'y':''} ${kk===t?'t':''}"></i>`}).join('')}</div></div>
    <div class="card"><div class="row" style="margin-bottom:12px"><h3 class="sp">This week</h3><span class="mute" style="font-size:14px"><b style="color:var(--text)">${thisWeek}</b> / ${S.plan?split().d.filter(k=>!DAYS[k].rest).length:S.days} sessions</span></div>
@@ -913,6 +917,57 @@ function youTab(){
    <p class="dim" style="font-size:12px;text-align:center;line-height:1.5">3D anatomy model adapted from Z-Anatomy (CC BY-SA 4.0), based on BodyParts3D, © The Database Center for Life Science (CC BY 4.0). Modified (skin surface generated from the muscles and bones, head replaced, simplified).<br>Flat figures adapted from muscle_mapper by Surya Mouly (MIT). Exercise photos are AI-generated for GATELIFT.</p>
 
   </div>`;
+}
+
+/* ── log a past day (prefilled from the plan, every set editable) ── */
+function missedDays(){
+  if(!weekMode())return [];
+  const out=[],t=dkey();
+  for(const kk of weekKeys()){if(kk>=t)break;const k=keyForDate(fromKey(kk));if(!DAYS[k]||DAYS[k].rest||S.log.some(s=>s.d===kk))continue;out.push({d:kk,k})}
+  return out;
+}
+function pastEx(k){return exList(k).map(id=>{const X=xs(k,id),R=parseR(X.r);return {id,sets:[...Array(X.s)].map(()=>({w:X.kg?String(X.kg):'',r:String(R.lo),ok:true}))}})}
+function pastNew(d,k){
+  if(!d){const y=new Date();y.setDate(y.getDate()-1);d=dkey(y)}
+  if(!k){const w=weekMode()&&keyForDate(fromKey(d));k=w&&DAYS[w]&&!DAYS[w].rest?w:split().d.filter(x=>!DAYS[x].rest)[0]}
+  const D=DAYS[k];V.past={d,k,st:true,ca:true,caMin:D.rest&&D.cardio?D.cardio:S.cardio,ex:pastEx(k)};V.view='past';scrollTo(0,0);
+}
+function pastView(){
+  const P=V.past,D=DAYS[P.k],opts=split().d.filter(k=>!DAYS[k].rest),days=[];
+  for(let i=1;i<=13;i++){const x=new Date();x.setDate(x.getDate()-i);days.push(x)}
+  const tg=(a,on,t,s)=>`<button class="st" data-a="${a}"><span class="sp"><b>${t}</b><small>${s}</small></span><span class="ok ${on?'y':''}">${on?ic('check'):''}</span></button>`;
+  return `<div class="v" style="padding-bottom:120px">
+   <div class="row"><button class="x" data-a="pastBack" aria-label="Back">${ic('back')}</button><div class="sp"><div class="lbl">Log a past day</div><h2 style="font-size:24px;font-weight:700">${esc(D.n)}</h2></div></div>
+   <p class="mute" style="font-size:14px">Filled in from your plan. Change any weight or reps to what you actually did, untick sets you skipped, then save.</p>
+   <span class="lbl">Day</span>
+   <div class="chips" style="flex-wrap:nowrap;overflow-x:auto;margin:0 -16px;padding:0 16px">${days.map(x=>{const kk=dkey(x),has=S.log.some(s=>s.d===kk);
+     return `<button class="chip ${P.d===kk?'on':''}" data-a="pastDay" data-v="${kk}">${DOW[x.getDay()]} ${x.getDate()}${has?' ✓':''}</button>`}).join('')}</div>
+   ${S.log.some(s=>s.d===P.d)?`<div class="pathnext">${ic('info')}<span class="sp">Something is already logged on this day. Saving adds another session.</span></div>`:''}
+   <span class="lbl">Workout</span>
+   <div class="chips">${opts.map(k=>`<button class="chip ${P.k===k?'on':''}" data-a="pastK" data-v="${k}">${esc(DAYS[k].n)}</button>`).join('')}</div>
+   <div class="steps">${tg('pastSt',P.st,'Stretched',`${warmOf(P.k).length} moves`)}${tg('pastCa',P.ca,'Cardio',`${P.caMin} min`)}</div>
+   ${P.ex.map((e,i)=>{const X=xs(P.k,e.id),R=parseR(X.r),p=photo(e.id);
+    return `<div class="card" style="display:flex;flex-direction:column;gap:12px"><div class="row">${p?`<span class="ph" style="width:44px;height:44px;border-radius:50%;background:#000 center/cover;background-image:url('${p}');flex:none"></span>`:''}<div class="sp"><b>${esc(X.n)}</b><div class="mute" style="font-size:13px">${X.s} × ${X.r}${X.kg?` · plan ${X.kg} ${S.unit}`:''}</div></div></div>
+     <div class="sets">${e.sets.map((s,j)=>`<span class="no">${j+1}</span>
+      <span class="cell ${s.ok?'':'okc'}"><input inputmode="decimal" aria-label="Set ${j+1} weight" placeholder="${X.bw?'BW':'–'}" value="${esc(s.w)}" data-in="pw" data-e="${i}" data-s="${j}"><span class="u">${R.hold?'+':S.unit}</span></span>
+      <span class="cell ${s.ok?'':'okc'}"><input inputmode="numeric" aria-label="Set ${j+1} reps" value="${esc(s.r)}" data-in="pr" data-e="${i}" data-s="${j}"><span class="u">${R.hold?'s':'×'}</span></span>
+      <button class="tk ${s.ok?'y':''}" data-a="pastTick" data-e="${i}" data-s="${j}" aria-label="Set ${j+1} done">${ic('check')}</button>`).join('')}</div>
+     <button class="addset" data-a="pastAdd" data-e="${i}">${ic('plus')}Add set</button></div>`}).join('')}
+  </div>
+  <div class="foot"><div><button class="btn" data-a="pastSave">Save ${DOW[fromKey(P.d).getDay()]} ${fromKey(P.d).getDate()} ${MON[fromKey(P.d).getMonth()]}</button></div></div>`;
+}
+function pastSave(){
+  const P=V.past,D=DAYS[P.k],t0=fromKey(P.d).setHours(18,0,0,0),M=minsOf(P.k);
+  const c={id:Date.now().toString(36),d:P.d,k:P.k,kn:D.n,t0,t1:t0+M.all*60000,step:2,past:true,
+    st:Object.fromEntries(warmOf(P.k).map(id=>[id,P.st])),
+    ca:{type:D.cType||S.cardioType||CARDIO[S.place==='home'?'home':'gym'][0],goal:P.caMin,sec:P.ca?P.caMin*60:0,run:0,done:P.ca,dist:''},
+    ex:P.ex.map(e=>({id:e.id,sets:e.sets.filter(s=>s.ok&&(s.w||s.r)).map(s=>({w:s.w,r:s.r,ok:true}))})).filter(e=>e.sets.length)};
+  c.pr=prsOf(c);
+  S.log.push(c);S.log.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.t0-b.t0);
+  if(!weekMode()&&setsOf(c))S.idx++;
+  save();V.past=null;
+  const left=missedDays();
+  if(left.length){pastNew(left[0].d,left[0].k);toast(`Saved. Next: ${DOW[fromKey(left[0].d).getDay()]}`)}else{V.view='tab';V.tab='log';scrollTo(0,0);toast('Saved to your log')}
 }
 
 /* ── paste your own plan ── */
@@ -1023,6 +1078,14 @@ const A={
  tick:(v,el)=>{const e=S.cur.ex[+el.dataset.e],s=e.sets[+el.dataset.s],X=xs(S.cur.k,e.id),R=parseR(X.r),last=lastFor(e.id,S.cur.k),ls=last&&doneSets(last)[+el.dataset.s];
    if(!s.ok){if(!s.r)s.r=String(ls?ls.r:R.hi);if(!s.w)s.w=ls&&ls.w?String(ls.w):X.kg?String(X.kg):'';s.ok=true;V.rest=X.rest>0?{end:Date.now()+X.rest*1000}:null;buzz(30)}else{s.ok=false}save()},
  addSet:(v,el)=>{const e=S.cur.ex[+el.dataset.e],p=e.sets[e.sets.length-1];e.sets.push({w:p?p.w:'',r:'',ok:false});save()},
+ pastOpen:v=>{const [d,k]=String(v||'').split('|');pastNew(d||'',k||'')},
+ pastBack:()=>{V.past=null;V.view='tab'},
+ pastDay:v=>{const P=V.past;P.d=v;if(weekMode()){const w=keyForDate(fromKey(v));if(DAYS[w]&&!DAYS[w].rest&&w!==P.k){P.k=w;P.ex=pastEx(w)}}},
+ pastK:v=>{const P=V.past;P.k=v;P.ex=pastEx(v)},
+ pastSt:()=>{V.past.st=!V.past.st},pastCa:()=>{V.past.ca=!V.past.ca},
+ pastTick:(v,el)=>{const s=V.past.ex[+el.dataset.e].sets[+el.dataset.s];s.ok=!s.ok},
+ pastAdd:(v,el)=>{const e=V.past.ex[+el.dataset.e],p=e.sets[e.sets.length-1];e.sets.push({w:p?p.w:'',r:p?p.r:'',ok:true})},
+ pastSave:()=>pastSave(),
  exGo:v=>{S.cur.exi=+v;save();scrollTo(0,0)},
  pickBody:v=>{V.tab='body';V.view='tab';V.sel=v;V.side=BACKG.includes(v)&&!FRONTG.includes(v)?'back':'front';scrollTo(0,0)},
  restAdd:v=>{if(V.rest)V.rest.end+=(+v)*1000},restSkip:()=>{V.rest=null},
@@ -1052,7 +1115,9 @@ document.addEventListener('input',e=>{
   const el=e.target,k=el.dataset.in;if(!k)return;
   if(k==='imp'){V.imp=el.value;clearTimeout(A.impT);A.impT=setTimeout(()=>{const P=parsePlan(V.imp),pv=document.getElementById('impPrev'),b=document.getElementById('impGo');
     if(pv)pv.innerHTML=impPrev(P);if(b)b.disabled=!P.days.some(d=>d.ex.length)},250);return}
+  if(k==='pw'||k==='pr'){if(V.past)V.past.ex[+el.dataset.e].sets[+el.dataset.s][k==='pw'?'w':'r']=el.value.replace(/[^\d.]/g,'');return}
   if(k==='name')S.name=el.value.trim();
+
   else if(k==='dist')S.cur.ca.dist=el.value;
   else if(k==='w'||k==='r'){S.cur.ex[+el.dataset.e].sets[+el.dataset.s][k]=el.value.replace(/[^\d.]/g,'')}
   save();
