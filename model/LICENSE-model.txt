@@ -28,7 +28,7 @@ voxelised and wrapped in a continuous skin surface (morphological closing with a
 Gaussian smoothing, iso-surface extraction, Taubin smoothing). Shallow channels were carved along the
 boundaries between neighbouring source muscles so the muscle separations stay readable. The
 individual muscles are no longer separate meshes. The skull and face were replaced by a smooth, bald,
-faceless sculpted head, and the hands by sculpted mannequin hands (both generated, not taken from
+faceless egg-shaped head, and the hands by sculpted mannequin hands (both generated, not taken from
 the datasets).
 body-female.glb was made from the same source with smooth spatial warps (narrower shoulders and
 ribcage, waist taper, wider pelvis, slimmer arms and neck), generated breast, hip and glute volumes,

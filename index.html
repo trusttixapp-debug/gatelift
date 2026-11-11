@@ -76,7 +76,7 @@ h3{font-size:16px;font-weight:650;letter-spacing:-.01em}
 .fig .gw{filter:url(#fGlow);opacity:.55}
 .fig .gw path{fill:#fff}.fig .gw [fill="none"],.fig .gw line{display:none}
 .fig.tap .ms g[data-m]{cursor:pointer}
-.stage{position:relative;border-radius:28px;overflow:hidden;background:radial-gradient(90% 70% at 50% 30%,#232326 0%,#141416 55%,#0E0E10 100%)}
+.stage{position:relative;border-radius:28px;overflow:hidden;background:radial-gradient(80% 65% at 50% 32%,#47484c 0%,#2a2b2e 45%,#151517 100%)}
 .stage .floor{position:absolute;left:22%;right:22%;bottom:12px;height:20px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.7),transparent)}
 .pair{display:flex;justify-content:center;align-items:flex-end;gap:2px;padding:18px 0 22px;position:relative}
 .pair .fig{height:250px;width:auto}
@@ -883,14 +883,15 @@ function done(){
 
 /* ── body: one big figure, tap a muscle ── */
 function bodyTab(){
-  const load=weekLoad(),lit={};for(const g in load)lit[g]=load[g]>=6?2:1;
+  /* only the muscle you pick glows; muscles trained this week get a faint tint */
+  const load=weekLoad(),lit={};for(const g in load)if(load[g]>0)lit[g]=1;if(V.sel)lit[V.sel]=2;
   const sel=V.sel,side=V.side;
   const all=Object.keys(GN),list=side==='front'?FRONTG:BACKG;
   const exFor=g=>Object.keys(EX).filter(id=>EX[id].m[0]===g||(EX[id].m.includes(g)&&EX[id].m.indexOf(g)<2)).filter(id=>split().d.some(k=>DAYS[k][S.place==='home'?'home':'gym'].includes(id)));
   return `<div class="v bodyv">
    <div class="row"><div class="sp"><div class="lbl">This week</div><h1 style="margin-top:4px">Your body</h1></div></div>
    <div class="stage">
-    <div class="legend"><span><i style="background:#fff"></i>6+ sets</span><span><i style="background:#8D9095"></i>Some work</span><span><i style="background:#3a3b3f"></i>Not yet</span></div>
+    <div class="legend"><span><i style="background:var(--gate);box-shadow:0 0 8px var(--gate)"></i>Picked</span><span><i style="background:#4a4560"></i>Trained this week</span><span><i style="background:#2b2c30"></i>Not yet</span></div>
     ${slot3d('body',lit,{tap:true,view:side})}${fig(side,lit,{tap:true,sel})}<div class="floor"></div>
     <div class="side"><span class="chip glass">${side==='front'?'Front':'Back'}</span></div>
     <button class="rot glass" data-a="rotate">${ic('rotate')}Rotate</button></div>

@@ -27,15 +27,27 @@
   var MODEL_B64 = { male: 'GL_BODY_GLB', female: 'GL_BODY_GLB_F' };
   function normSex(v) { return v === 'female' ? 'female' : 'male'; }
 
-  // Look. Colours are sRGB hex.
-  var LOOK = {
-    // glow = strength of the soft white fresnel rim on the group's own surface (no extra geometry)
-    base: { color: 0x2a2c30, emissive: 0x000000, ei: 0, rough: 0.38, metal: 0.3, glow: 0 },
-    body: { color: 0x2a2c30, emissive: 0x000000, ei: 0, rough: 0.38, metal: 0.3, glow: 0 },
-    lit1: { color: 0x45484e, emissive: 0xffffff, ei: 0.012, rough: 0.4, metal: 0.25, glow: 0.09 },
-    lit2: { color: 0xe4e5e8, emissive: 0xffffff, ei: 0.3, rough: 0.34, metal: 0.05, glow: 0.55 },
-    sel:  { color: 0xf2f2f3, emissive: 0xffffff, ei: 0.46, rough: 0.3, metal: 0.05, glow: 0.8 }
-  };
+  // Glow colour of lit muscles (sRGB hex). Swap here or at runtime with Body3D.setGlowColor(hex).
+  var GLOW = 0x8c7cff;
+  var BODY_COLOR = 0x2b2d31;
+
+  // Look. Colours are sRGB hex. rim = on-surface fresnel glow, bloom = strength of the soft halo.
+  var LOOK = null;
+  function mixHex(a, b, t) {
+    var r = ((a >> 16) & 255) * (1 - t) + ((b >> 16) & 255) * t, g = ((a >> 8) & 255) * (1 - t) + ((b >> 8) & 255) * t, bl = (a & 255) * (1 - t) + (b & 255) * t;
+    return (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(bl);
+  }
+  function makeLook() {
+    LOOK = {
+      base: { color: BODY_COLOR, emissive: 0x000000, ei: 0, rough: 0.5, metal: 0.15, rim: 0, bloom: 0 },
+      body: { color: BODY_COLOR, emissive: 0x000000, ei: 0, rough: 0.5, metal: 0.15, rim: 0, bloom: 0 },
+      lit1: { color: mixHex(BODY_COLOR, GLOW, 0.09), emissive: GLOW, ei: 0.02, rough: 0.48, metal: 0.12, rim: 0.12, bloom: 0 },
+      lit2: { color: mixHex(GLOW, 0xffffff, 0.12), emissive: GLOW, ei: 0.5, rough: 0.4, metal: 0.05, rim: 0.55, bloom: 0.8 },
+      sel:  { color: mixHex(GLOW, 0xffffff, 0.2), emissive: GLOW, ei: 0.62, rough: 0.38, metal: 0.05, rim: 0.7, bloom: 1.05 }
+    };
+  }
+  makeLook();
+  var live = [];   // running viewers, so setGlowColor can recolour them
 
   var libPromise = null, modelPromises = {};
 
@@ -149,14 +161,14 @@
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50);
 
-    // Lights: soft grey studio. Key from above-front, low fill, strong rim lights from behind
-    // so the silhouette and the muscle edges catch light on the dark glossy body.
-    scene.add(new THREE.HemisphereLight(0xc4c9d0, 0x121315, 0.7));
-    var key = new THREE.DirectionalLight(0xffffff, 2.4); key.position.set(0.8, 4, 2.4); scene.add(key);
-    var fill = new THREE.DirectionalLight(0xdfe4ea, 0.55); fill.position.set(-2.5, 0.3, 2.5); scene.add(fill);
-    var rimL = new THREE.DirectionalLight(0xffffff, 4.2); rimL.position.set(-2.6, 1.6, -2.4); scene.add(rimL);
-    var rimR = new THREE.DirectionalLight(0xffffff, 3.6); rimR.position.set(2.6, 1.0, -2.4); scene.add(rimR);
-    var top = new THREE.DirectionalLight(0xffffff, 1.4); top.position.set(0, 4, -1.5); scene.add(top);
+    // Lights: soft grey studio. Soft key from above-front, low fill, rim lights from behind so the
+    // silhouette and muscle edges catch light on the satin charcoal body.
+    scene.add(new THREE.HemisphereLight(0xc9ced6, 0x141517, 0.85));
+    var key = new THREE.DirectionalLight(0xffffff, 2.1); key.position.set(0.6, 4, 2.6); scene.add(key);
+    var fill = new THREE.DirectionalLight(0xdfe4ea, 0.6); fill.position.set(-2.5, 0.3, 2.5); scene.add(fill);
+    var rimL = new THREE.DirectionalLight(0xffffff, 3.0); rimL.position.set(-2.6, 1.6, -2.4); scene.add(rimL);
+    var rimR = new THREE.DirectionalLight(0xffffff, 2.6); rimR.position.set(2.6, 1.0, -2.4); scene.add(rimR);
+    var top = new THREE.DirectionalLight(0xffffff, 1.0); top.position.set(0, 4, -1.5); scene.add(top);
 
     var pivot = new THREE.Group();
     scene.add(pivot);
@@ -185,19 +197,42 @@
       side: THREE.BackSide, transparent: true, depthWrite: false
     });
 
-    // Lit glow: a fresnel rim added to the emissive term of the group's own material, so the lit
-    // muscle brightens towards its silhouette without any separate (offset) surface.
-    function addRim(m) {
-      m.userData.rim = { value: 0 };
+    // Surface shader additions (cheap, per fragment):
+    //  - fine muscle-fibre striations: a thin sine pattern across a per-group fibre direction, applied
+    //    as a small normal tilt and faded out by fwidth() before it can alias;
+    //  - the lit glow: emissive fresnel rim on the group's own surface (no separate geometry).
+    var FIBRE = {
+      chest: [1, 0.35, 0], shoulders: [0.15, 1, 0], biceps: [0.35, -0.94, 0], triceps: [0.35, -0.94, 0],
+      forearms: [0.3, -0.95, 0.1], abs: [0, 1, 0], obliques: [0.55, -0.8, 0.25], traps: [1, -0.7, 0],
+      lats: [0.75, 0.65, 0], lowerback: [0, 1, 0], glutes: [1, -0.5, 0], quads: [0.05, 1, 0],
+      adductors: [0.35, -1, 0], hams: [0, 1, 0], calves: [0, 1, 0], body: [0, 1, 0]
+    };
+    function addSurface(m, g) {
+      var f = FIBRE[g] || FIBRE.body;
+      m.userData.uni = {
+        uRim: { value: 0 }, uFib: { value: new THREE.Vector3(f[0], f[1], f[2]).normalize() },
+        uFibAmp: { value: g === 'body' ? 0.07 : 0.13 }, uFreq: { value: 1000.0 }
+      };
       m.onBeforeCompile = function (sh) {
-        sh.uniforms.uRim = m.userData.rim;
+        var u = m.userData.uni; for (var k in u) sh.uniforms[k] = u[k];
+        sh.vertexShader = sh.vertexShader
+          .replace('#include <common>', '#include <common>\nuniform vec3 uFib; varying vec3 vObjP; varying vec3 vFibBo; varying vec3 vFibBv;')
+          .replace('#include <begin_vertex>', '#include <begin_vertex>\n' +
+            'vec3 fd = normalize(vec3(uFib.x * (position.x < 0.0 ? -1.0 : 1.0), uFib.y, uFib.z));\n' +
+            'vec3 on = normalize(objectNormal); vec3 ft = fd - dot(fd, on) * on; ft = normalize(ft + vec3(1e-4));\n' +
+            'vec3 fb = cross(on, ft); vObjP = position; vFibBo = fb; vFibBv = normalMatrix * fb;');
         sh.fragmentShader = sh.fragmentShader
-          .replace('#include <common>', '#include <common>\nuniform float uRim;')
+          .replace('#include <common>', '#include <common>\nuniform float uRim; uniform float uFibAmp; uniform float uFreq; varying vec3 vObjP; varying vec3 vFibBo; varying vec3 vFibBv;')
+          .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n' +
+            'float ph = dot(vObjP, vFibBo) * uFreq + 1.8 * sin(dot(vObjP, vec3(41.0, 27.0, 33.0)));\n' +
+            'float aa = 1.0 - smoothstep(0.7, 1.8, fwidth(ph));\n' +
+            'float fa = uFibAmp * aa * (1.0 - smoothstep(0.6, 0.68, vObjP.y)) * (0.6 + 0.4 * sin(dot(vObjP, vec3(9.0, 13.0, 7.0))));\n' +
+            'normal = normalize(normal + normalize(vFibBv) * (fa * sin(ph)));')
           .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' +
             'float rimF = 1.0 - saturate(dot(normal, normalize(vViewPosition)));\n' +
-            'totalEmissiveRadiance += vec3(uRim) * (0.25 + 0.75 * pow(rimF, 2.5));');
+            'totalEmissiveRadiance += emissive * uRim * (0.15 + 0.85 * pow(rimF, 2.2));');
       };
-      m.customProgramCacheKey = function () { return 'body3d-rim'; };
+      m.customProgramCacheKey = function () { return 'body3d-v12'; };
     }
 
     var meshes = {};       // group -> mesh
@@ -211,9 +246,9 @@
       var name = o.name || (o.parent && o.parent.name) || '';
       var g = GROUPS.indexOf(name) >= 0 ? name : (GROUPS.indexOf(o.parent && o.parent.name) >= 0 ? o.parent.name : 'body');
       var isBody = g === 'body';
-      var m = new THREE.MeshPhysicalMaterial({ color: LOOK.base.color, roughness: LOOK.base.rough, metalness: LOOK.base.metal, clearcoat: 0.55, clearcoatRoughness: 0.3 });
-      m.userData = { group: g, isBody: isBody, tColor: new THREE.Color(), tEm: new THREE.Color(), tEi: 0, tRough: 0.5, tMetal: 0.1, tGlow: 0, glow: 0 };
-      if (!isBody) addRim(m);
+      var m = new THREE.MeshPhysicalMaterial({ color: LOOK.base.color, roughness: LOOK.base.rough, metalness: LOOK.base.metal, clearcoat: 0.22, clearcoatRoughness: 0.5 });
+      m.userData = { group: g, isBody: isBody, tColor: new THREE.Color(), tEm: new THREE.Color(), tEi: 0, tRough: 0.5, tMetal: 0.1, tRim: 0, rim: 0, tBloom: 0, bloom: 0 };
+      addSurface(m, g);
       o.material = m;
       o.userData.group = g;
       mats.push(m);
@@ -231,14 +266,15 @@
         var u = m.userData;
         var lvl = +state.lit[u.group] || 0;
         var L = u.isBody ? LOOK.body : lookFor(lvl, state.selected === u.group, false);
-        u.tColor.setHex(L.color); u.tEm.setHex(L.emissive); u.tEi = L.ei; u.tRough = L.rough; u.tMetal = L.metal; u.tGlow = L.glow || 0;
-        if (snap) { m.color.copy(u.tColor); m.emissive.copy(u.tEm); m.emissiveIntensity = u.tEi; m.roughness = u.tRough; m.metalness = u.tMetal; u.glow = u.tGlow; }
+        u.tColor.setHex(L.color); u.tEm.setHex(L.emissive); u.tEi = L.ei; u.tRough = L.rough; u.tMetal = L.metal; u.tRim = L.rim; u.tBloom = L.bloom;
+        if (snap) { m.color.copy(u.tColor); m.emissive.copy(u.tEm); m.emissiveIntensity = u.tEi; m.roughness = u.tRough; m.metalness = u.tMetal; u.rim = u.tRim; u.bloom = u.tBloom; }
       });
       if (snap) syncGlow();
-      Object.keys(outlines).forEach(function (g) { outlines[g].visible = state.selected === g; });
+      // the old back-face outline is no longer shown (it read as a floating shell); selection = stronger glow
+      Object.keys(outlines).forEach(function (g) { outlines[g].visible = false; });
     }
     function syncGlow() {
-      mats.forEach(function (m) { if (m.userData.rim) m.userData.rim.value = m.userData.glow || 0; });
+      mats.forEach(function (m) { m.userData.uni.uRim.value = m.userData.rim; });
     }
     var fading = 0;
     function applyLook() { setTargets(false); fading = 1; kick(); }
@@ -251,18 +287,75 @@
         m.color.lerp(u.tColor, k); m.emissive.lerp(u.tEm, k);
         m.emissiveIntensity += (u.tEi - m.emissiveIntensity) * k;
         m.roughness += (u.tRough - m.roughness) * k; m.metalness += (u.tMetal - m.metalness) * k;
-        u.glow += (u.tGlow - u.glow) * k;
-        if (Math.abs(u.tEi - m.emissiveIntensity) > 0.002 || Math.abs(m.color.r - u.tColor.r) > 0.002 || Math.abs(u.tGlow - u.glow) > 0.003) moving = true;
+        u.rim += (u.tRim - u.rim) * k; u.bloom += (u.tBloom - u.bloom) * k;
+        if (Math.abs(u.tEi - m.emissiveIntensity) > 0.002 || Math.abs(m.color.r - u.tColor.r) > 0.002 || Math.abs(u.tBloom - u.bloom) > 0.003 || Math.abs(u.tRim - u.rim) > 0.003) moving = true;
       });
       syncGlow();
-      var tgt = state.selected ? 0.55 : 0;
+      var tgt = 0;
       outlineMat.uniforms.uOpacity.value += (tgt - outlineMat.uniforms.uOpacity.value) * k;
       if (Math.abs(tgt - outlineMat.uniforms.uOpacity.value) > 0.005) moving = true;
       if (!moving) fading = 0;
       return moving;
     }
     setTargets(true);
-    outlineMat.uniforms.uOpacity.value = state.selected ? 0.55 : 0;
+    outlineMat.uniforms.uOpacity.value = 0;
+
+    // ---- selective bloom: lit groups only, rendered small, blurred, added over the frame ----
+    // The mask pass draws every mesh (unlit ones black, so they still occlude) at 1/4 resolution.
+    var glowCol = new THREE.Color(GLOW);
+    var black = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    var maskMats = srcMeshes.map(function () { return new THREE.MeshBasicMaterial({ color: 0x000000 }); });
+    var rtOpts = { type: THREE.HalfFloatType, depthBuffer: true };
+    var rtA = new THREE.WebGLRenderTarget(4, 4, rtOpts), rtB = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, depthBuffer: false });
+    var fsCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1), fsScene = new THREE.Scene();
+    var fsVS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
+    var blurMat = new THREE.ShaderMaterial({
+      uniforms: { tSrc: { value: null }, uDir: { value: new THREE.Vector2() } },
+      vertexShader: fsVS, depthTest: false, depthWrite: false,
+      fragmentShader: 'uniform sampler2D tSrc; uniform vec2 uDir; varying vec2 vUv;' +
+        'void main(){ vec3 c = texture2D(tSrc, vUv).rgb * 0.2270;' +
+        ' c += (texture2D(tSrc, vUv + uDir * 1.3846).rgb + texture2D(tSrc, vUv - uDir * 1.3846).rgb) * 0.3162;' +
+        ' c += (texture2D(tSrc, vUv + uDir * 3.2308).rgb + texture2D(tSrc, vUv - uDir * 3.2308).rgb) * 0.0703;' +
+        ' gl_FragColor = vec4(c, 1.0); }'
+    });
+    var compMat = new THREE.ShaderMaterial({
+      uniforms: { tSrc: { value: null }, uStr: { value: 1.0 } },
+      vertexShader: fsVS, depthTest: false, depthWrite: false, transparent: true,
+      blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor,
+      blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneFactor,
+      fragmentShader: 'uniform sampler2D tSrc; uniform float uStr; varying vec2 vUv;' +
+        'void main(){ vec3 c = texture2D(tSrc, vUv).rgb * uStr; float a = clamp(max(c.r, max(c.g, c.b)), 0.0, 1.0); gl_FragColor = vec4(c, a); }'
+    });
+    var fsQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), blurMat); fsQuad.frustumCulled = false; fsScene.add(fsQuad);
+    function sizeBloom(w, h) {
+      var pr = renderer.getPixelRatio();
+      var bw = Math.max(32, Math.round(w * pr / 4)), bh = Math.max(32, Math.round(h * pr / 4));
+      rtA.setSize(bw, bh); rtB.setSize(bw, bh);
+    }
+    function anyBloom() { for (var i = 0; i < mats.length; i++) if (mats[i].userData.bloom > 0.01) return true; return false; }
+    function renderFrame() {
+      renderer.render(scene, camera);
+      if (!anyBloom()) return;
+      glowCol.setHex(GLOW);
+      var saved = srcMeshes.map(function (o) { return o.material; });
+      srcMeshes.forEach(function (o, i) {
+        var b = o.material.userData.bloom || 0;
+        if (b > 0.01) { maskMats[i].color.copy(glowCol).multiplyScalar(b); o.material = maskMats[i]; } else o.material = black;
+      });
+      var shadowVis = shadow.visible; shadow.visible = false;
+      renderer.setRenderTarget(rtA); renderer.setClearColor(0x000000, 1); renderer.clear(); renderer.render(scene, camera);
+      srcMeshes.forEach(function (o, i) { o.material = saved[i]; });
+      shadow.visible = shadowVis;
+      fsQuad.material = blurMat;
+      [[1, 0, 1], [0, 1, 1], [1, 0, 2.2], [0, 1, 2.2]].forEach(function (p, i) {
+        var src = i % 2 ? rtB : rtA, dst = i % 2 ? rtA : rtB;
+        blurMat.uniforms.tSrc.value = src.texture; blurMat.uniforms.uDir.value.set(p[0] * p[2] / rtA.width, p[1] * p[2] / rtA.height);
+        renderer.setRenderTarget(dst); renderer.render(fsScene, fsCam);
+      });
+      renderer.setRenderTarget(null); renderer.setClearColor(0x000000, 0);
+      fsQuad.material = compMat; compMat.uniforms.tSrc.value = rtA.texture; compMat.uniforms.uStr.value = 1.0;
+      var ac = renderer.autoClear; renderer.autoClear = false; renderer.render(fsScene, fsCam); renderer.autoClear = ac;
+    }
 
     // ---- sizing ----
     var width = 1, height = 1;
@@ -270,6 +363,7 @@
       var r = container.getBoundingClientRect();
       width = Math.max(1, Math.round(r.width)); height = Math.max(1, Math.round(r.height));
       renderer.setSize(width, height, false);
+      sizeBloom(width, height);
       camera.aspect = width / height;
       var half = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
       var dist = Math.max(1.12 / half, 0.6 / (half * camera.aspect));
@@ -378,7 +472,7 @@
       if (stepLook(dt)) animating = true;
       if (dirty || animating) {
         pivot.rotation.y = yaw; state.yaw = yaw;
-        renderer.render(scene, camera);
+        renderFrame();
         dirty = false;
       }
       if (animating) raf = requestAnimationFrame(frame);
@@ -393,7 +487,8 @@
 
     resize();
 
-    return {
+    var runtime = {
+      recolor: function () { setTargets(false); fading = 1; kick(); },
       applyLook: applyLook,
       setView: setView,
       kick: kick,
@@ -407,6 +502,8 @@
         canvas.removeEventListener('pointerup', onUp);
         canvas.removeEventListener('pointercancel', onUp);
         mats.forEach(function (m) { m.dispose(); });
+        rtA.dispose(); rtB.dispose(); blurMat.dispose(); compMat.dispose(); black.dispose(); maskMats.forEach(function (x) { x.dispose(); });
+        var li = live.indexOf(runtime); if (li >= 0) live.splice(li, 1);
         outlineMat.dispose(); shadowMat.dispose(); shadowTex.dispose(); shadow.geometry.dispose();
         // geometry is shared with the cached template: do not dispose it here
         renderer.dispose();
@@ -414,9 +511,16 @@
         if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
       }
     };
+    live.push(runtime);
+    return runtime;
   }
 
   window.Body3D = {
+    // Change the glow colour of lit muscles in every viewer (sRGB hex, e.g. 0x8c7cff or '#8c7cff').
+    setGlowColor: function (hex) {
+      GLOW = typeof hex === 'string' ? parseInt(hex.replace('#', ''), 16) : (+hex | 0);
+      makeLook(); live.forEach(function (r) { r.recolor(); });
+    },
     mount: mount,
     preload: function () { return loadModel().then(function () {}); },
     groups: GROUPS.slice(),
