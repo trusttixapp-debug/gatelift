@@ -22,12 +22,14 @@ licensed datasets:
    page, checked 2026-11-11, states CC Attribution 4.0 International.)
 
 Changes made: skeletal muscles and bones (no organs, vessels, nerves or fasciae) were re-posed
-(arms abducted about the shoulder, forearms pronated, wrists straightened, legs slightly apart),
+(arms abducted about the shoulder, forearms pronated, legs slightly apart) and re-proportioned to a
+fit, non-bodybuilder build (smaller shoulders, traps, arms and legs, slimmer neck),
 voxelised and wrapped in a continuous skin surface (morphological closing with a soft-tissue offset,
 Gaussian smoothing, iso-surface extraction, Taubin smoothing). Shallow channels were carved along the
 boundaries between neighbouring source muscles so the muscle separations stay readable. The
 individual muscles are no longer separate meshes. The skull and face were replaced by a smooth, bald,
-faceless sculpted head (generated, not taken from the datasets).
+faceless sculpted head, and the hands by sculpted mannequin hands (both generated, not taken from
+the datasets).
 body-female.glb was made from the same source with smooth spatial warps (narrower shoulders and
 ribcage, waist taper, wider pelvis, slimmer arms and neck), generated breast, hip and glute volumes,
 a softer head and softer muscle channels. No genital or nipple detail is modelled on either figure.

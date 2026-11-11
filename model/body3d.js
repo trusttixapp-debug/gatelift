@@ -29,12 +29,12 @@
 
   // Look. Colours are sRGB hex.
   var LOOK = {
-    // glow = intensity of the additive halo shell around a lit group
+    // glow = strength of the soft white fresnel rim on the group's own surface (no extra geometry)
     base: { color: 0x2a2c30, emissive: 0x000000, ei: 0, rough: 0.38, metal: 0.3, glow: 0 },
     body: { color: 0x2a2c30, emissive: 0x000000, ei: 0, rough: 0.38, metal: 0.3, glow: 0 },
-    lit1: { color: 0x85888e, emissive: 0xffffff, ei: 0.07, rough: 0.4, metal: 0.1, glow: 0.4 },
-    lit2: { color: 0xc9cbcf, emissive: 0xffffff, ei: 0.24, rough: 0.35, metal: 0.05, glow: 0.85 },
-    sel:  { color: 0xdedfe2, emissive: 0xffffff, ei: 0.4, rough: 0.32, metal: 0.05, glow: 1.0 }
+    lit1: { color: 0x45484e, emissive: 0xffffff, ei: 0.012, rough: 0.4, metal: 0.25, glow: 0.09 },
+    lit2: { color: 0xe4e5e8, emissive: 0xffffff, ei: 0.3, rough: 0.34, metal: 0.05, glow: 0.55 },
+    sel:  { color: 0xf2f2f3, emissive: 0xffffff, ei: 0.46, rough: 0.3, metal: 0.05, glow: 0.8 }
   };
 
   var libPromise = null, modelPromises = {};
@@ -185,51 +185,20 @@
       side: THREE.BackSide, transparent: true, depthWrite: false
     });
 
-    // Glow shells for lit groups: the group's surface pushed out along the normal, drawn additively
-    // with a fresnel falloff (bright at grazing angles -> soft halo at the silhouette) and faded out
-    // towards the group's border so the shell edge never shows as a line.
-    var glowVS = 'attribute float aFade; uniform float uWidth; varying vec3 vN; varying vec3 vP; varying float vF;' +
-      'void main(){ vec3 p = position + normal * uWidth * (0.35 + 0.65 * aFade); vec4 mv = modelViewMatrix * vec4(p, 1.0);' +
-      ' vN = normalize(normalMatrix * normal); vP = mv.xyz; vF = aFade; gl_Position = projectionMatrix * mv; }';
-    var glowFS = 'uniform float uI; uniform float uPow; uniform float uBase; varying vec3 vN; varying vec3 vP; varying float vF;' +
-      'void main(){ float f = 1.0 - abs(dot(normalize(vN), normalize(-vP))); float a = uI * vF * (uBase + (1.0 - uBase) * pow(f, uPow));' +
-      ' gl_FragColor = vec4(1.0, 1.0, 1.0, clamp(a, 0.0, 1.0)); }';
-    function glowMat(width, pow, base) {
-      return new THREE.ShaderMaterial({
-        uniforms: { uI: { value: 0 }, uWidth: { value: width }, uPow: { value: pow }, uBase: { value: base } },
-        vertexShader: glowVS, fragmentShader: glowFS,
-        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-      });
+    // Lit glow: a fresnel rim added to the emissive term of the group's own material, so the lit
+    // muscle brightens towards its silhouette without any separate (offset) surface.
+    function addRim(m) {
+      m.userData.rim = { value: 0 };
+      m.onBeforeCompile = function (sh) {
+        sh.uniforms.uRim = m.userData.rim;
+        sh.fragmentShader = sh.fragmentShader
+          .replace('#include <common>', '#include <common>\nuniform float uRim;')
+          .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' +
+            'float rimF = 1.0 - saturate(dot(normal, normalize(vViewPosition)));\n' +
+            'totalEmissiveRadiance += vec3(uRim) * (0.25 + 0.75 * pow(rimF, 2.5));');
+      };
+      m.customProgramCacheKey = function () { return 'body3d-rim'; };
     }
-    // per-vertex fade (0 at the group's open border -> 1 a few edge rings inside), cached on the shared geometry
-    function ensureFade(geo) {
-      if (geo.getAttribute('aFade')) return;
-      var n = geo.attributes.position.count, idx = geo.index ? geo.index.array : null;
-      var fade = new Float32Array(n);
-      if (idx) {
-        var edges = new Map(), adj = [];
-        for (var i = 0; i < n; i++) adj.push([]);
-        for (var t = 0; t < idx.length; t += 3) for (var j = 0; j < 3; j++) {
-          var a = idx[t + j], b = idx[t + (j + 1) % 3], key = a < b ? a * n + b : b * n + a;
-          edges.set(key, (edges.get(key) || 0) + 1); adj[a].push(b);
-        }
-        var ring = new Int32Array(n).fill(-1), q = [];
-        edges.forEach(function (c, key) {
-          if (c !== 1) return;
-          var a = Math.floor(key / n), b = key % n;
-          if (ring[a] < 0) { ring[a] = 0; q.push(a); }
-          if (ring[b] < 0) { ring[b] = 0; q.push(b); }
-        });
-        var RINGS = 6;
-        for (var h = 0; h < q.length; h++) {
-          var v = q[h]; if (ring[v] >= RINGS) continue;
-          for (var e = 0; e < adj[v].length; e++) { var u = adj[v][e]; if (ring[u] < 0) { ring[u] = ring[v] + 1; q.push(u); } }
-        }
-        for (var k = 0; k < n; k++) { var r = ring[k] < 0 ? RINGS : ring[k]; var x = Math.min(1, r / RINGS); fade[k] = x * x * (3 - 2 * x); }
-      } else fade.fill(1);
-      geo.setAttribute('aFade', new THREE.BufferAttribute(fade, 1));
-    }
-    var glows = [];        // per group: its material and the two shells (inner glow, wider halo)
 
     var meshes = {};       // group -> mesh
     var outlines = {};     // group -> outline mesh
@@ -244,6 +213,7 @@
       var isBody = g === 'body';
       var m = new THREE.MeshPhysicalMaterial({ color: LOOK.base.color, roughness: LOOK.base.rough, metalness: LOOK.base.metal, clearcoat: 0.55, clearcoatRoughness: 0.3 });
       m.userData = { group: g, isBody: isBody, tColor: new THREE.Color(), tEm: new THREE.Color(), tEi: 0, tRough: 0.5, tMetal: 0.1, tGlow: 0, glow: 0 };
+      if (!isBody) addRim(m);
       o.material = m;
       o.userData.group = g;
       mats.push(m);
@@ -253,11 +223,6 @@
         var ol = new THREE.Mesh(o.geometry, outlineMat);
         ol.visible = false; ol.renderOrder = 2; ol.raycast = function () {};
         o.add(ol); outlines[g] = ol;
-        ensureFade(o.geometry);
-        var gi = glowMat(0.006, 2.0, 0.12), gh = glowMat(0.035, 1.8, 0.0);
-        var mi = new THREE.Mesh(o.geometry, gi), mh = new THREE.Mesh(o.geometry, gh);
-        [mi, mh].forEach(function (x, i) { x.visible = false; x.renderOrder = 3 + i; x.raycast = function () {}; o.add(x); });
-        glows.push({ group: g, mat: m, inner: gi, halo: gh, mi: mi, mh: mh });
       }
     });
 
@@ -273,11 +238,7 @@
       Object.keys(outlines).forEach(function (g) { outlines[g].visible = state.selected === g; });
     }
     function syncGlow() {
-      glows.forEach(function (gl) {
-        var v = gl.mat.userData.glow || 0;
-        gl.inner.uniforms.uI.value = v * 0.5; gl.halo.uniforms.uI.value = v * 1.0;
-        gl.mi.visible = gl.mh.visible = v > 0.003;
-      });
+      mats.forEach(function (m) { if (m.userData.rim) m.userData.rim.value = m.userData.glow || 0; });
     }
     var fading = 0;
     function applyLook() { setTargets(false); fading = 1; kick(); }
@@ -446,7 +407,6 @@
         canvas.removeEventListener('pointerup', onUp);
         canvas.removeEventListener('pointercancel', onUp);
         mats.forEach(function (m) { m.dispose(); });
-        glows.forEach(function (gl) { gl.inner.dispose(); gl.halo.dispose(); });
         outlineMat.dispose(); shadowMat.dispose(); shadowTex.dispose(); shadow.geometry.dispose();
         // geometry is shared with the cached template: do not dispose it here
         renderer.dispose();
