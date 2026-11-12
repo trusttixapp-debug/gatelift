@@ -812,7 +812,9 @@ const PHR=[[/shoulder press machine|machine (shoulder|overhead) press/i,'mshp'],
  [/front squat/i,'fsquat'],[/hanging leg raise|toes to bar/i,'hlr'],[/knee raise/i,'kneeraise'],[/goblet/i,'gobletsq'],[/bulgarian|split squat/i,'bss'],[/reverse lunge/i,'revlunge'],
  [/(dumbbell|db).*(romanian|rdl)/i,'dbrdl'],[/face ?pull/i,'facepull'],[/(one|single).?arm.*row|dumbbell row/i,'dbrow'],[/pike/i,'pike'],[/close.?grip push|diamond/i,'diamond'],[/push-?up/i,'pushup'],[/\bdips?\b/i,'dip'],[/side plank/i,'sideplank'],[/plank/i,'plank'],[/glute bridge|^bridge/i,'bridge']];
 function phKey(id){if(PHOTOS.has(id))return id;const X=EX[id];if(!X)return '';for(const [re,k] of PHR)if(re.test(X.n)&&PHOTOS.has(k))return k;const g=guessM(X.n);return g.b&&PHOTOS.has(g.b)?g.b:''}
-const photo=id=>{const k=phKey(id);return k?`img/ex/${k}.jpg`:''};
+/* the woman's photo set is used when the Woman body is picked; any missing one falls back to the man's */
+const PHOTOS_F=new Set(window.GL_PHOTOS_F||[]);
+const photo=id=>{const k=phKey(id);if(!k)return '';return S.sex==='female'&&PHOTOS_F.has(k)?`img/exf/${k}.jpg`:`img/ex/${k}.jpg`};
 /* how-to steps for pasted exercises that the built-in list doesn't cover exactly (matched like the photos) */
 const HOWX={
  mshp:['Set the seat so the handles start at shoulder height.','Press up until your arms are almost straight, back on the pad.','Lower slowly to shoulder height.'],
